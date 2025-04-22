@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TFT-Gym-App</string>
+    <string name="my_data">My Data</string>
+    <string name="favoriote_videos">Favourite Videos</string>
+    <string name="routines">Routines</string>
+    <string name="record">Record</string>
+</resources>

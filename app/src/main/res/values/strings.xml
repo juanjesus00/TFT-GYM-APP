@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">TFT-Gym-App</string>
+    <string name="my_data">Mis Datos</string>
+    <string name="favoriote_videos">Videos Favoritos</string>
+    <string name="routines">Rutinas</string>
+    <string name="record">Historial</string>
 </resources>
