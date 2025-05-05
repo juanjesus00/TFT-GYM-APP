@@ -17,6 +17,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -29,10 +31,14 @@ import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import com.example.tft_gym_app.R
 import routes.NavigationActions
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
+import components.menu.getMenuVideo
 
 
 @Composable
 fun GetNavigatorBar(navigationActions: NavigationActions, navController: NavController){
+    var isVideoPress by remember { mutableStateOf(false) }
     Box (
         modifier = Modifier.fillMaxWidth()
             .padding(bottom = 60.dp),
@@ -49,7 +55,7 @@ fun GetNavigatorBar(navigationActions: NavigationActions, navController: NavCont
                 onClick = {},
                 modifier = Modifier.size(60.dp)
             ) {
-                Image(modifier = Modifier.size(50.dp),painter = painterResource(R.drawable.house_icon), contentDescription = "house")
+                Image(modifier = Modifier.size(50.dp),painter = painterResource(R.drawable.ci_house), contentDescription = "house")
             }
 
             Box(
@@ -59,7 +65,7 @@ fun GetNavigatorBar(navigationActions: NavigationActions, navController: NavCont
                     .offset(y=(-35).dp, x=(-5).dp)
                     .clip(RoundedCornerShape(50.dp))
                     .clickable(
-                        onClick = {}
+                        onClick = {isVideoPress = !isVideoPress}
                     ),
                 contentAlignment = Alignment.Center,
             ){
@@ -72,6 +78,9 @@ fun GetNavigatorBar(navigationActions: NavigationActions, navController: NavCont
             }
 
         }
+    }
+    Box (){
+        getMenuVideo(navigationActions, navController, isVideoPress, onDismiss = {isVideoPress = false})
     }
 
 }

@@ -4,4 +4,7 @@
     <string name="favoriote_videos">Videos Favoritos</string>
     <string name="routines">Rutinas</string>
     <string name="record">Historial</string>
+    <string name="language">Español</string>
+    <string name="analyze_new_video">Analizar nuevo video</string>
+    <string name="new_routine">Nueva rutina</string>
 </resources>

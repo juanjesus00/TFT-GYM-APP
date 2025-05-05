@@ -25,6 +25,10 @@ import pages.GetPrincipalMidSection
 import routes.NavigationActions
 import routes.Routes
 
+object LanguageManager {
+    var languageCode by mutableStateOf("")
+}
+
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable

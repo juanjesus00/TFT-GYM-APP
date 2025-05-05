@@ -4,5 +4,8 @@
     <string name="my_data">My Data</string>
     <string name="favoriote_videos">Favourite Videos</string>
     <string name="routines">Routines</string>
-    <string name="record">Record</string>
+    <string name="record">Activity History</string>
+    <string name="language">English</string>
+    <string name="analyze_new_video">Analyze new video</string>
+    <string name="new_routine">New routine</string>
 </resources>

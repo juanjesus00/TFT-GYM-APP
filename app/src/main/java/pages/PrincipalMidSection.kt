@@ -30,6 +30,8 @@ import androidx.navigation.NavController
 import com.example.tft_gym_app.R
 import routes.NavigationActions
 import androidx.compose.ui.layout.ContentScale.Companion.Crop
+import components.menu.CascadingPopup
+import components.newbox.GetBox
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -56,34 +58,8 @@ fun GetPrincipalMidSection(
 
         ){
             GetBox()
-            GetBox()
-            GetBox()
-            GetBox()
-
-
         }
-
     }
 }
 
-@Composable
-fun GetBox() {
-    Column (
-        modifier = Modifier
-            .width(150.dp)
-            .height(220.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .background(Color(0xFF161818)),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
 
-    ){
-        Image(
-            modifier = Modifier.size(88.dp),
-            painter = painterResource(id = R.drawable.more_boxs),
-            contentDescription = "more Boxes",
-            //contentScale = Crop
-        )
-
-    }
-}
