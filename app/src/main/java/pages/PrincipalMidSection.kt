@@ -20,6 +20,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,15 +33,18 @@ import androidx.navigation.NavController
 import com.example.tft_gym_app.R
 import routes.NavigationActions
 import androidx.compose.ui.layout.ContentScale.Companion.Crop
+import androidx.lifecycle.viewmodel.compose.viewModel
 import components.menu.CascadingPopup
 import components.newbox.GetBox
+import components.newbox.ViewModelBox
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun GetPrincipalMidSection(
     scrollState: ScrollState,
     navigationActions: NavigationActions,
-    navController: NavController
+    navController: NavController,
+    viewModel: ViewModelBox = viewModel()
 ){
     Column (
         modifier = Modifier
@@ -57,6 +63,7 @@ fun GetPrincipalMidSection(
             verticalArrangement = Arrangement.spacedBy(40.dp)
 
         ){
+            for (i in 0 until viewModel.boxCount) components.box.Box()
             GetBox()
         }
     }

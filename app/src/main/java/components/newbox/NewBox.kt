@@ -29,11 +29,13 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.tft_gym_app.R
 import components.menu.CascadingPopup
 
 @Composable
-fun GetBox() {
+fun GetBox(viewModel: ViewModelBox = viewModel()) {
     var isVisible by remember { mutableStateOf(false) }
     var anchorBounds by remember { mutableStateOf<Rect?>(null) }
     val configuration = LocalConfiguration.current

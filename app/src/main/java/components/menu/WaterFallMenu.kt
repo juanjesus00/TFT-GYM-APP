@@ -8,16 +8,14 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -38,13 +36,16 @@ import androidx.compose.ui.unit.IntOffset
 import kotlinx.coroutines.delay
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
+import androidx.lifecycle.viewmodel.compose.viewModel
+import components.newbox.ViewModelBox
 
 @Composable
 fun CascadingPopup(
     isVisible: Boolean,
     anchorBounds: Rect?,
     screenWidthPx: Float,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    viewModel: ViewModelBox = viewModel()
 ) {
     if (!isVisible || anchorBounds == null) return
 
@@ -83,7 +84,7 @@ fun CascadingPopup(
         ) {
             val icons = listOf(R.drawable.chart, R.drawable.schedule, R.drawable.video, R.drawable.pr)
             icons.forEachIndexed { index, iconRes ->
-                AnimatedIconWithCascade(iconRes, index)
+                AnimatedIconWithCascade(iconRes, index, viewModel)
             }
         }
     }
@@ -92,7 +93,7 @@ fun CascadingPopup(
 
 
 @Composable
-fun AnimatedIconWithCascade(iconRes: Int, index: Int) {
+fun AnimatedIconWithCascade(iconRes: Int, index: Int, viewModel: ViewModelBox) {
     var visible by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
@@ -122,7 +123,11 @@ fun AnimatedIconWithCascade(iconRes: Int, index: Int) {
                 this.scaleY = scale
             }
             .clip(CircleShape)
-            .background(Color(0xFF161818)),
+            .background(Color(0xFF161818))
+            .clickable {
+                viewModel.addBox()
+
+                       },
         contentAlignment = Alignment.Center,
     ) {
         Image(
