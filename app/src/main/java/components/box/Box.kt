@@ -1,6 +1,7 @@
 package components.box
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -12,6 +13,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import components.newbox.ViewModelBox
 
+
 @Composable
 fun Box(viewModel: ViewModelBox = viewModel()){
     Column (
@@ -21,4 +23,5 @@ fun Box(viewModel: ViewModelBox = viewModel()){
     ){
         Text(text = "${viewModel.boxCount}")
     }
+
 }

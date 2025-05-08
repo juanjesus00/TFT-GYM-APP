@@ -24,18 +24,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.example.tft_gym_app.R
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale.Companion.Crop
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntRect
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.LayoutDirection
 import kotlinx.coroutines.delay
 import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
+import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 import components.newbox.ViewModelBox
 
@@ -45,46 +50,69 @@ fun CascadingPopup(
     anchorBounds: Rect?,
     screenWidthPx: Float,
     onDismiss: () -> Unit,
+    listIcons: List<Int>,
     viewModel: ViewModelBox = viewModel()
 ) {
     if (!isVisible || anchorBounds == null) return
 
+    val configuration = LocalConfiguration.current
     val density = LocalDensity.current
-    val popupWidthDp = 100.dp
-    val popupWidthPx = with(density) { popupWidthDp.toPx() }
 
     val iconHeightDp = 60.dp
-    val popupTotalHeightDp = iconHeightDp * 3 + 24.dp // 3 íconos + padding
+    val popupTotalHeightDp = iconHeightDp * 3  // 3 íconos + padding
     val popupTotalHeightPx = with(density) { popupTotalHeightDp.toPx() }
 
-    val spaceToRight = screenWidthPx - (anchorBounds.right + popupWidthPx)
-    val spaceToLeft = screenWidthPx - (anchorBounds.left - popupWidthPx)
+    val spaceToRight = screenWidthPx - (anchorBounds.right)
+    val spaceToLeft = anchorBounds.left
 
     val offsetXPx = when {
-        spaceToRight > 0 -> anchorBounds.left + 120.0// suficiente espacio a la derecha
-        spaceToLeft > 0 -> anchorBounds.left - popupWidthPx // si no, a la izquierda
-        else -> anchorBounds.left // fallback centrado encima
+        spaceToRight > 0 -> anchorBounds.left// suficiente espacio a la derecha
+        spaceToLeft > 0 -> (anchorBounds.right).coerceAtLeast(0f) // si no, a la izquierda
+        else -> (screenWidthPx) / 2 // fallback centrado encima
+    }
+    // Centrado vertical del popup respecto al componente ancla
+    val screenHeightPx = with(density) { configuration.screenHeightDp.dp.toPx() }
+
+    val spaceBelow = screenHeightPx - anchorBounds.bottom
+    val spaceAbove = anchorBounds.top
+
+    val verticalMarginPxBelow = with(density) { 8.dp.toPx() }
+    val verticalMarginPxAbove = with(density) { 150.dp.toPx() }
+    val offsetYPx = when {
+        spaceBelow > popupTotalHeightPx -> anchorBounds.bottom + verticalMarginPxBelow
+        spaceAbove > popupTotalHeightPx -> anchorBounds.top - popupTotalHeightPx - verticalMarginPxAbove
+        spaceBelow >= spaceAbove -> anchorBounds.bottom + verticalMarginPxBelow
+        else -> anchorBounds.top - popupTotalHeightPx - verticalMarginPxAbove
+    }
+    class CustomOffsetPositionProvider(
+        private val x: Int,
+        private val y: Int
+    ) : PopupPositionProvider {
+        override fun calculatePosition(
+            anchorBounds: IntRect,
+            windowSize: IntSize,
+            layoutDirection: LayoutDirection,
+            popupContentSize: IntSize
+        ): IntOffset {
+            return IntOffset(x, y)
+        }
     }
 
-    // Centrado vertical del popup respecto al componente ancla
-    val offsetYPx = anchorBounds.top + (anchorBounds.height / 2) - (popupTotalHeightPx / 2)
-
     Popup(
-        offset = IntOffset(offsetXPx.toInt(), offsetYPx.toInt()),
         onDismissRequest = onDismiss,
-        properties = PopupProperties(focusable = true, clippingEnabled = false)
+        properties = PopupProperties(focusable = true, clippingEnabled = true),
+        popupPositionProvider = CustomOffsetPositionProvider(offsetXPx.toInt(), offsetYPx.toInt())
     ) {
         // CONTENIDO DEL POPUP
         Column(
             modifier = Modifier
-                .width(popupWidthDp)
-                .padding(12.dp),
+                .width(100.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            val icons = listOf(R.drawable.chart, R.drawable.schedule, R.drawable.video, R.drawable.pr)
-            icons.forEachIndexed { index, iconRes ->
-                AnimatedIconWithCascade(iconRes, index, viewModel)
+
+            listIcons.forEachIndexed { index, iconRes ->
+                AnimatedIconWithCascade(iconRes, index, onDismiss,viewModel)
             }
         }
     }
@@ -93,7 +121,12 @@ fun CascadingPopup(
 
 
 @Composable
-fun AnimatedIconWithCascade(iconRes: Int, index: Int, viewModel: ViewModelBox) {
+fun AnimatedIconWithCascade(
+    iconRes: Int,
+    index: Int,
+    onDismiss: () -> Unit,
+    viewModel: ViewModelBox
+) {
     var visible by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
@@ -126,7 +159,7 @@ fun AnimatedIconWithCascade(iconRes: Int, index: Int, viewModel: ViewModelBox) {
             .background(Color(0xFF161818))
             .clickable {
                 viewModel.addBox()
-
+                onDismiss()
                        },
         contentAlignment = Alignment.Center,
     ) {

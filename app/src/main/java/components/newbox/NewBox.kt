@@ -42,30 +42,35 @@ fun GetBox(viewModel: ViewModelBox = viewModel()) {
     val screenWidthPx = with(LocalDensity.current) {
         configuration.screenWidthDp.dp.toPx()
     }
-
-    Column (
+    Box(
         modifier = Modifier
-            .width(100.dp)
-            .height(100.dp)
-            .clip(RoundedCornerShape(50.dp))
-            .background(Color(0xFF161818))
-            .onGloballyPositioned { layoutCoordinates ->
-                val bounds = layoutCoordinates.boundsInWindow()
-                anchorBounds = Rect(bounds.topLeft, bounds.size)
-            }
-            .clickable{
-                isVisible = !isVisible },
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+    ) {
+        Column (
+            modifier = Modifier
+                .width(100.dp)
+                .height(100.dp)
+                .clip(RoundedCornerShape(50.dp))
+                .background(Color(0xFF161818))
+                .onGloballyPositioned { layoutCoordinates ->
+                    val bounds = layoutCoordinates.boundsInWindow()
+                    anchorBounds = Rect(bounds.topLeft, bounds.size)
+                }
+                .clickable{
+                    isVisible = !isVisible },
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
 
-    ){
-        Image(
-            modifier = Modifier.size(40.dp),
-            painter = painterResource(id = R.drawable.add),
-            contentDescription = "more Boxes",
-            contentScale = Crop
-        )
+        ){
+            println("anchorBounds: $anchorBounds")
+            Image(
+                modifier = Modifier.size(40.dp),
+                painter = painterResource(id = R.drawable.add),
+                contentDescription = "more Boxes",
+                contentScale = Crop
+            )
 
+        }
+        CascadingPopup(isVisible = isVisible, anchorBounds = anchorBounds, screenWidthPx = screenWidthPx, onDismiss = {isVisible = false}, listIcons = listOf(R.drawable.chart, R.drawable.schedule, R.drawable.video, R.drawable.pr))
     }
-    CascadingPopup(isVisible = isVisible, anchorBounds = anchorBounds, screenWidthPx = screenWidthPx, onDismiss = {isVisible = false})
+
 }
