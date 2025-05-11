@@ -8,4 +8,9 @@
     <string name="language">English</string>
     <string name="analyze_new_video">Analyze new video</string>
     <string name="new_routine">New routine</string>
+    <string name="login_welcome_text" translatable="false">Welcome back</string>
+    <string name="login_button">Login</string>
+    <string name="separator"> or </string>
+    <string name="register_suggest">Don`t have an account yet?</string>
+    <string name="register_link" translatable="false">Register</string>
 </resources>

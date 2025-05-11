@@ -7,4 +7,9 @@
     <string name="language">Español</string>
     <string name="analyze_new_video">Analizar nuevo video</string>
     <string name="new_routine">Nueva rutina</string>
+    <string name="login_welcome_text" translatable="false">Bienvenido de nuevo</string>
+    <string name="login_button">Iniciar Sesión</string>
+    <string name="separator"> o </string>
+    <string name="register_suggest" translatable="false">¿Todavía no tienes una cuenta?</string>
+    <string name="register_link" translatable="false">Registrarse</string>
 </resources>

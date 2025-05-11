@@ -47,6 +47,8 @@ fun HamburgerMenu(
                 .border(width = 1.dp, color = Color(0xFFD78323), shape = RoundedCornerShape(20.dp)),
             shape = RoundedCornerShape(20.dp)
         ){
+
+            GetItem("login_button", 0, navigationActions, LocalContext, onClick = {navigationActions.navigateToLogin()})
             GetItem("my_data", 0, navigationActions, LocalContext, onClick = {})
             GetItem("favoriote_videos", 0, navigationActions, LocalContext, onClick = {})
             GetItem("routines", 0, navigationActions, LocalContext, onClick = {})
