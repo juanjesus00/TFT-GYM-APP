@@ -8,12 +8,12 @@ import androidx.compose.ui.platform.LocalContext
 import components.langSwitcher.getStringByName
 
 @Composable
-fun GetLoginButton(email: String, password: String, onLogin: () -> Unit){
+fun GetLoginButton(email: String, password: String, buttonText: String, onLogin: () -> Unit){
     Button(
         modifier = Modifier,
         onClick = { onLogin.invoke()}
     ) {
-        getStringByName(LocalContext.current, "login_button")?.let {
+        getStringByName(LocalContext.current, buttonText)?.let {
             Text( text = it )
         }
     }

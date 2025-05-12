@@ -15,17 +15,17 @@ import androidx.compose.ui.unit.dp
 import components.langSwitcher.getStringByName
 
 @Composable
-fun GetRegisterSuggest() {
+fun GetRegisterSuggest(questionText: String, linkText: String) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        getStringByName(LocalContext.current, "register_suggest")?.let {
+        getStringByName(LocalContext.current, questionText)?.let {
             Text(text = it, color = Color.Black)
         }
-        getStringByName(LocalContext.current, "register_link")?.let {
-            Text(text = it, color = Color.Blue, fontWeight = FontWeight.Bold)
+        getStringByName(LocalContext.current, linkText)?.let {
+            Text(text = it, color = Color(0xFFAF52DE), fontWeight = FontWeight.Bold)
         }
     }
 

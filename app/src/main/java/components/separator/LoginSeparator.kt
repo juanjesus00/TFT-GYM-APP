@@ -24,9 +24,9 @@ fun GetLoginSeparator(){
             thickness = 1.dp,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
         )
-        getStringByName(LocalContext.current, "separator")?.let{
+        getStringByName(LocalContext.current, "separator" )?.let{
             Text(
-                text = it,
+                text = " $it ",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
             )

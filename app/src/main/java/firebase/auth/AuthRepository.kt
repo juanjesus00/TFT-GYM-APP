@@ -10,6 +10,12 @@ import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 import routes.NavigationActions
 import android.widget.Toast
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import org.json.JSONObject
+import java.net.HttpURLConnection
+import java.net.URL
 
 class AuthRepository : ViewModel(){
     private val auth = FirebaseAuth.getInstance()
@@ -45,8 +51,7 @@ class AuthRepository : ViewModel(){
                             onSuccess()
 
                         } else {
-                            val errorMessage =
-                                task.exception?.localizedMessage ?: "Error desconocido"
+                            val errorMessage = task.exception?.localizedMessage ?: "Error desconocido"
                             Log.d("LoginBackend", "Error al iniciar sesión: $errorMessage")
                             onErrorAction()
                             Toast.makeText(
@@ -97,14 +102,115 @@ class AuthRepository : ViewModel(){
             _isEmailVerified.value = false
         }
     }
-    fun register(email: String, password: String, onResult: (Boolean, String?) -> Unit) {
-        auth.createUserWithEmailAndPassword(email, password)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    onResult(true, null)
-                } else {
-                    onResult(false, task.exception?.message)
+    suspend fun verifyEmailWithAPI(email: String): Boolean = withContext(Dispatchers.IO) {
+        val apiKey = "15a852747b6b249e078725c6985da185"
+        try {
+            val url = URL("https://apilayer.net/api/check?access_key=$apiKey&email=$email")
+            val connection = url.openConnection() as HttpURLConnection
+            connection.requestMethod = "GET"
+            connection.connectTimeout = 5000
+            connection.readTimeout = 5000
+            connection.connect()
+
+            val responseCode = connection.responseCode
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                val inputStream = connection.inputStream
+                val response = inputStream.bufferedReader().use { it.readText() }
+                connection.disconnect()
+                // Parseamos la respuesta JSON
+                val jsonObject = JSONObject(response)
+                val smtpCheck = jsonObject.optBoolean("smtp_check", false) // True si el correo es válido
+                smtpCheck
+            } else {
+                connection.disconnect()
+                false
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+    fun register(
+        email: String,
+        password: String,
+        context: Context,
+        name: String,
+        onSuccess: () -> Unit,
+        navigationActions: NavigationActions
+    ) = viewModelScope.launch {
+        var isCorrectEmail = true//verifyEmailWithAPI(email)
+        var passwordValid = isPasswordValid(password)
+        //println(isCorrectEmail)
+        if(true){
+            if (_loading.value == false) { //no se esta creando usuarios actualmente
+                if (password.length < 6) {
+                    Toast.makeText(
+                        context,
+                        "La contraseña debe tener al menos 6 caracteres",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                } else if(passwordValid){
+
+                    //navigationActions.navigateToCarga()
+                    _loading.value = true
+
+                    auth.createUserWithEmailAndPassword(email, password)
+                        .addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                sendVerificationRegisterEmail()
+                                createUser(name, email, "", password)
+                                onSuccess()
+                            } else {
+                                Log.d(
+                                    "loginbackend",
+                                    "La creacion de usuarios falló: ${task.result.toString()}"
+                                )
+                            }
+                            _loading.value = false
+                        }
+                }else{
+                    Toast.makeText(
+                        context,
+                        "La contraseña debe tener al menos 1 letra 1 mayuscula 1 número y 1 caracter especial !%*?&.#",
+                        Toast.LENGTH_LONG
+                    ).show()
                 }
+
+            }
+        }else{
+            Toast.makeText(context, "El correo introducido No es Real", Toast.LENGTH_SHORT).show()
+        }
+
+
+    }
+    private fun isPasswordValid(password: String): Boolean {
+        // Expresión regular para la contraseña
+        val passwordPattern = Regex("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@\$!%*?&.#])[A-Za-z\\d@\$!%*?&.#]{6,}\$")
+        return passwordPattern.matches(password)
+    }
+
+    private fun createUser(
+        displayName: String,
+        email: String,
+        profileImage: String,
+        password: String
+    ) {
+        val userId = auth.currentUser?.uid
+        val user = model.User(
+            userId = userId.toString(),
+            userName = displayName,
+            profileImageUrl = profileImage,
+            email = email,
+            password = password
+        ).toMap()
+
+        FirebaseFirestore.getInstance().collection("Usuarios")
+            .document(userId.toString())
+            .set(user)
+            .addOnSuccessListener {
+                Log.d("loginbackend", "Creado ${it}")
+            }.addOnFailureListener {
+                Log.d("loginbackend", "Error ${it}")
             }
     }
 }

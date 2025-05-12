@@ -41,7 +41,7 @@ fun HamburgerMenu(
             expanded = isMenuVisible,
             onDismissRequest = onDismiss,
             modifier = Modifier
-                .size(width = 150.dp, height = 250.dp)
+                .size(width = 150.dp, height = 400.dp)
                 .clip(RoundedCornerShape(20.dp))
                 .background(Color(0xFF161818), shape = RoundedCornerShape(20.dp))
                 .border(width = 1.dp, color = Color(0xFFD78323), shape = RoundedCornerShape(20.dp)),
@@ -49,6 +49,7 @@ fun HamburgerMenu(
         ){
 
             GetItem("login_button", 0, navigationActions, LocalContext, onClick = {navigationActions.navigateToLogin()})
+            GetItem("register_button", 0, navigationActions, LocalContext, onClick = {navigationActions.navigateToRegister()})
             GetItem("my_data", 0, navigationActions, LocalContext, onClick = {})
             GetItem("favoriote_videos", 0, navigationActions, LocalContext, onClick = {})
             GetItem("routines", 0, navigationActions, LocalContext, onClick = {})

@@ -12,6 +12,7 @@ import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.auth
 import pages.GetLoginScreen
+import pages.GetRegisterScreen
 import routes.NavigationActions
 import routes.Routes
 import uiPrincipal.MyComposeApp
@@ -28,6 +29,7 @@ class MainActivity : ComponentActivity() {
                 NavHost(navController = navController, startDestination = Routes.HOME){
                     composable(Routes.HOME){ MyComposeApp(navigationActions, navController) }
                     composable(Routes.LOGIN){ GetLoginScreen(navigationActions, navController) }
+                    composable(Routes.REGISTER){ GetRegisterScreen(navigationActions, navController) }
                 }
 
             }

@@ -12,4 +12,8 @@ class NavigationActions (private val navController: NavController) {
     fun navigateToLogin(){
         navController.navigate(Routes.LOGIN)
     }
+    fun navigateToRegister(){
+        navController.navigate(Routes.REGISTER)
+    }
+
 }

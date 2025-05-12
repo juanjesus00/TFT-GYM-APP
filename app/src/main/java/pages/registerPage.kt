@@ -1,5 +1,3 @@
-@file:Suppress("INFERRED_TYPE_VARIABLE_INTO_EMPTY_INTERSECTION_WARNING")
-
 package pages
 
 import androidx.compose.foundation.background
@@ -14,26 +12,30 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavHostController
-import components.inputs.GetInputLogin
-import routes.NavigationActions
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import components.buttons.GetGoogleButton
 import components.buttons.GetLoginButton
+import components.checkBoxs.GetRegisterCheckBox
+import components.inputs.GetInputLogin
 import components.langSwitcher.getStringByName
 import components.registerSuggest.GetRegisterSuggest
 import components.separator.GetLoginSeparator
+import routes.NavigationActions
 import viewModel.auth.AuthViewModel
 
 @Composable
-fun GetLoginScreen(navigationActions: NavigationActions, navController: NavHostController, viewModel: AuthViewModel = viewModel()) {
+fun GetRegisterScreen(navigationActions: NavigationActions, navController: NavHostController, viewModel: AuthViewModel = viewModel()){
+    var nickName by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var repeatPassword by remember { mutableStateOf("") }
+    var isChecked by remember { mutableStateOf(false) }
     val context = LocalContext.current
     Column (
         modifier = Modifier
@@ -42,10 +44,16 @@ fun GetLoginScreen(navigationActions: NavigationActions, navController: NavHostC
             .padding(top = 100.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        getStringByName(context, "login_welcome_text")?.let {
+        getStringByName(context, "register_welcome_text")?.let {
             Text(text = it , color = Color(0xFFD78323))
         }
 
+        GetInputLogin(
+            text = nickName,
+            onValueChange = { nickName = it },
+            label = "test label",
+            placeholder = "texto de prueba"
+        )
         GetInputLogin(
             text = email,
             onValueChange = { email = it },
@@ -58,13 +66,23 @@ fun GetLoginScreen(navigationActions: NavigationActions, navController: NavHostC
             label = "test label",
             placeholder = "texto de prueba"
         )
-
+        GetInputLogin(
+            text = repeatPassword,
+            onValueChange = { repeatPassword = it },
+            label = "test label",
+            placeholder = "texto de prueba"
+        )
+        GetRegisterCheckBox(
+            isChecked = isChecked,
+            onValueChange = { isChecked = it }
+        )
         GetLoginButton(
             email = email,
             password = password,
-            buttonText = "login_button",
-            onLogin = { viewModel.login(email = email, password = password, context = context, navigationActions = navigationActions, onSuccess = {navigationActions.navigateToHome()}, onErrorAction = {/*TODO*/}) }
+            buttonText = "register_button",
+            onLogin = { viewModel.register(email = email, password = password, name = nickName, context = context, onSuccess = {navigationActions.navigateToHome()}, navigationActions = navigationActions) }
         )
+
         if (Firebase.auth.currentUser != null){
             Text(text = "tenemos login = ${Firebase.auth.currentUser!!.email ?:"Sin correo"}")
         }
@@ -73,8 +91,8 @@ fun GetLoginScreen(navigationActions: NavigationActions, navController: NavHostC
         GetGoogleButton()
 
         GetRegisterSuggest(
-            questionText = "register_suggest",
-            linkText = "register_link"
+            questionText = "login_suggest",
+            linkText = "login_link"
         )
     }
 }
