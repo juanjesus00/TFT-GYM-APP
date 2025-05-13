@@ -9,11 +9,20 @@ class NavigationActions (private val navController: NavController) {
             launchSingleTop = true
         }
     }
+
     fun navigateToLogin(){
         navController.navigate(Routes.LOGIN)
     }
+
     fun navigateToRegister(){
         navController.navigate(Routes.REGISTER)
     }
 
+    fun navigateToUserData(){
+        navController.navigate(Routes.USERDATA)
+    }
+
+    fun navigateToUserProfile(){
+        navController.navigate(Routes.USERPROFILE)
+    }
 }

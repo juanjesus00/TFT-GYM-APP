@@ -52,7 +52,7 @@ fun GetNavigatorBar(navigationActions: NavigationActions, navController: NavCont
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(
-                onClick = {},
+                onClick = {navigationActions.navigateToHome()},
                 modifier = Modifier.size(60.dp)
             ) {
                 Image(modifier = Modifier.size(50.dp),painter = painterResource(R.drawable.ci_house), contentDescription = "house")

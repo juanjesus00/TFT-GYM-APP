@@ -10,7 +10,9 @@ import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 import routes.NavigationActions
 import android.widget.Toast
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
@@ -21,6 +23,7 @@ class AuthRepository : ViewModel(){
     private val auth = FirebaseAuth.getInstance()
 
     private var _loading = MutableLiveData(false)
+    private val currentUser = FirebaseAuth.getInstance().currentUser
 
     private val _isEmailVerified = MutableLiveData<Boolean>()
     val isEmailVerified: LiveData<Boolean> = _isEmailVerified
@@ -81,6 +84,12 @@ class AuthRepository : ViewModel(){
             }
         }
     }
+
+    fun logOut(onSuccess: () -> Unit) {
+        Firebase.auth.signOut()
+        onSuccess.invoke()
+    }
+
     private fun sendVerificationRegisterEmail() {
         val user = FirebaseAuth.getInstance().currentUser
         user?.sendEmailVerification()?.addOnCompleteListener { task ->
@@ -201,7 +210,11 @@ class AuthRepository : ViewModel(){
             userName = displayName,
             profileImageUrl = profileImage,
             email = email,
-            password = password
+            password = password,
+            gender = "",
+            birthDate = "",
+            weight = 0,
+            height = 0
         ).toMap()
 
         FirebaseFirestore.getInstance().collection("Usuarios")
@@ -212,5 +225,28 @@ class AuthRepository : ViewModel(){
             }.addOnFailureListener {
                 Log.d("loginbackend", "Error ${it}")
             }
+    }
+
+    fun editUser(gender: String, birthDate: String, weight: Int, height: Int, onSuccess: () -> Unit)=viewModelScope.launch{
+        currentUser?.let{ user ->
+            val uid = user.uid
+            val db = FirebaseFirestore.getInstance()
+
+            val userUpdates = mapOf(
+                "gender" to gender,
+                "birthDate" to birthDate,
+                "weight" to weight,
+                "height" to height
+            )
+
+            db.collection("Usuarios").document(uid).update(userUpdates)
+                .addOnSuccessListener {
+                    Log.d("Firestore", "$currentUser ha sido actualizado exitosamente")
+                    onSuccess()
+                }
+                .addOnFailureListener { e ->
+                    Log.w("Firestore", "Error al actualizar a $currentUser", e)
+                }
+        }
     }
 }

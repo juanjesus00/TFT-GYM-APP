@@ -17,4 +17,5 @@
     <string name="register_link" translatable="false">Register</string>
     <string name="login_suggest" translatable="false">Already have an account?</string>
     <string name="login_link" translatable="false">Login</string>
+    <string name="log_out" translatable="false">Log out</string>
 </resources>

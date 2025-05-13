@@ -24,13 +24,19 @@ import android.content.Context
 import androidx.compose.foundation.border
 import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.ui.draw.shadow
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.auth
+import viewModel.auth.AuthViewModel
 
 @Composable
 fun HamburgerMenu(
     navigationActions: NavigationActions,
     navController: NavController,
     isMenuVisible: Boolean,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    viewModel: AuthViewModel = viewModel()
 ){
     val languageMenuExpanded = remember { mutableStateOf(false) }
     Box (modifier = Modifier
@@ -47,10 +53,13 @@ fun HamburgerMenu(
                 .border(width = 1.dp, color = Color(0xFFD78323), shape = RoundedCornerShape(20.dp)),
             shape = RoundedCornerShape(20.dp)
         ){
-
-            GetItem("login_button", 0, navigationActions, LocalContext, onClick = {navigationActions.navigateToLogin()})
+            if(Firebase.auth.currentUser != null){
+                GetItem("log_out", 0, navigationActions, LocalContext, onClick = {viewModel.logOut(onSuccess = {navigationActions.navigateToHome()})})
+            }else{
+                GetItem("login_button", 0, navigationActions, LocalContext, onClick = {navigationActions.navigateToLogin()})
+            }
             GetItem("register_button", 0, navigationActions, LocalContext, onClick = {navigationActions.navigateToRegister()})
-            GetItem("my_data", 0, navigationActions, LocalContext, onClick = {})
+            GetItem("my_data", 0, navigationActions, LocalContext, onClick = {navigationActions.navigateToUserProfile()})
             GetItem("favoriote_videos", 0, navigationActions, LocalContext, onClick = {})
             GetItem("routines", 0, navigationActions, LocalContext, onClick = {})
             GetItem("record", 0, navigationActions, LocalContext, onClick = {})

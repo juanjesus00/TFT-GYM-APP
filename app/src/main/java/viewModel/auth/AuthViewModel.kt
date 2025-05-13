@@ -18,4 +18,12 @@ class  AuthViewModel(private val repository: AuthRepository = AuthRepository()) 
     fun register(email: String, password: String, context: Context, name: String, onSuccess: () -> Unit, navigationActions: NavigationActions){
         repository.register(email, password, context, name, onSuccess, navigationActions)
     }
+
+    fun editUser(gender: String, birthDate: String, weight: Int, height: Int, onSuccess: () -> Unit){
+        repository.editUser(gender, birthDate, weight, height, onSuccess)
+    }
+
+    fun logOut(onSuccess: () -> Unit){
+        repository.logOut(onSuccess)
+    }
 }

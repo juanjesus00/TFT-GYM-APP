@@ -2,7 +2,6 @@ package uiPrincipal
 
 import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -13,8 +12,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -22,6 +19,7 @@ import components.GetHeader
 import components.GetNavigatorBar
 import kotlinx.coroutines.launch
 import pages.GetPrincipalMidSection
+import pages.GetUserProfile
 import routes.NavigationActions
 import routes.Routes
 
@@ -69,6 +67,8 @@ fun MyComposeApp(navigationActions: NavigationActions, navController: NavControl
     ){
         if(currentRoute == Routes.HOME){
             GetPrincipalMidSection(scrollState, navigationActions, navController)
+        }else if(currentRoute == Routes.USERPROFILE){
+            GetUserProfile(scrollState, navigationActions, navController)
         }
     }
 }

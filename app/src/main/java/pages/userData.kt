@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -15,12 +16,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import components.buttons.GetGoogleButton
 import components.buttons.GetLoginButton
+import components.buttons.GetNextButton
 import components.checkBoxs.GetRegisterCheckBox
 import components.inputs.GetInputLogin
 import components.langSwitcher.getStringByName
@@ -30,12 +33,11 @@ import routes.NavigationActions
 import viewModel.auth.AuthViewModel
 
 @Composable
-fun GetRegisterScreen(navigationActions: NavigationActions, navController: NavHostController, viewModel: AuthViewModel = viewModel()){
-    var nickName by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var repeatPassword by remember { mutableStateOf("") }
-    var isChecked by remember { mutableStateOf(false) }
+fun GetUserDataScreen(navigationActions: NavigationActions, navController: NavHostController, viewModel: AuthViewModel = viewModel()){
+    var gender by remember { mutableStateOf("") }
+    var birthDate by remember { mutableStateOf("") }
+    var weight by remember { mutableStateOf("") }
+    var height by remember { mutableStateOf("") }
     val context = LocalContext.current
     Column (
         modifier = Modifier
@@ -49,47 +51,32 @@ fun GetRegisterScreen(navigationActions: NavigationActions, navController: NavHo
         }
 
         GetInputLogin(
-            text = nickName,
-            onValueChange = { nickName = it },
+            text = gender,
+            onValueChange = { gender = it },
             label = "test label",
             placeholder = "texto de prueba"
         )
         GetInputLogin(
-            text = email,
-            onValueChange = { email = it },
+            text = birthDate,
+            onValueChange = { birthDate = it },
             label = "test label",
             placeholder = "texto de prueba"
         )
         GetInputLogin(
-            text = password,
-            onValueChange = { password = it },
+            text = weight,
+            onValueChange = { weight = it },
             label = "test label",
             placeholder = "texto de prueba"
         )
         GetInputLogin(
-            text = repeatPassword,
-            onValueChange = { repeatPassword = it },
+            text = height,
+            onValueChange = { height = it },
             label = "test label",
             placeholder = "texto de prueba"
         )
-        GetRegisterCheckBox(
-            isChecked = isChecked,
-            onValueChange = { isChecked = it }
-        )
-        GetLoginButton(
-            email = email,
-            password = password,
+        GetNextButton (
             buttonText = "register_button",
-            onLogin = { viewModel.register(email = email, password = password, name = nickName, context = context, onSuccess = {navigationActions.navigateToUserData()}, navigationActions = navigationActions) }
-        )
-
-        GetLoginSeparator()
-
-        GetGoogleButton()
-
-        GetRegisterSuggest(
-            questionText = "login_suggest",
-            linkText = "login_link"
+            onNextButton = { viewModel.editUser(gender = gender, birthDate = birthDate, weight = weight.toInt(), height = height.toInt(), onSuccess = {navigationActions.navigateToHome()})}
         )
     }
 }
