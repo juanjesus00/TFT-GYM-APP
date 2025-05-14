@@ -88,4 +88,5 @@ dependencies {
     // Optional - Integration with RxJava
     implementation("androidx.compose.runtime:runtime-rxjava2")
     implementation(libs.androidx.navigation.compose)
+    implementation("com.google.accompanist:accompanist-systemuicontroller:0.31.1-alpha")
 }

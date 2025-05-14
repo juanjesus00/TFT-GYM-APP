@@ -22,6 +22,7 @@ import pages.GetPrincipalMidSection
 import pages.GetUserProfile
 import routes.NavigationActions
 import routes.Routes
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 object LanguageManager {
     var languageCode by mutableStateOf("")
@@ -37,6 +38,18 @@ fun MyComposeApp(navigationActions: NavigationActions, navController: NavControl
     var showBars by remember { mutableStateOf(true) }
     var previousScrollOffset by remember { mutableIntStateOf(0) }
     val coroutineScope = rememberCoroutineScope()
+    val systemUiController = rememberSystemUiController()
+
+    LaunchedEffect(Unit) {
+        systemUiController.setStatusBarColor(
+            color = color,
+            darkIcons = false // Cambia a true si usas íconos oscuros
+        )
+        systemUiController.setNavigationBarColor(
+            color = color,
+            darkIcons = false // Cambia a true si usas íconos oscuros
+        )
+    }
 
     LaunchedEffect(scrollState.value) {
         coroutineScope.launch {
