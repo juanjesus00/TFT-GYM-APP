@@ -6,5 +6,6 @@ object Routes {
     const val REGISTER = "register"
     const val USERDATA = "userdata"
     const val USERPROFILE = "userprofile"
+    const val VIDEO = "video"
 
 }

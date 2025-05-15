@@ -17,4 +17,6 @@
     <string name="login_suggest" translatable="false">¿Ya tienes una cuenta?</string>
     <string name="login_link" translatable="false">Iniciar sesión</string>
     <string name="log_out" translatable="false">Cerrar sesión</string>
+    <string name="delete_user" translatable="false">Eliminar usuario</string>
+    <string name="upload_video" translatable="false">Sube video</string>
 </resources>

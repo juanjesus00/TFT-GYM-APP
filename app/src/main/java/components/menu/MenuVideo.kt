@@ -46,7 +46,7 @@ fun getMenuVideo(
                 verticalArrangement = Arrangement.spacedBy(20.dp, Alignment.CenterVertically),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                GetMenuVideoButton(onClick = {}, text = "analyze_new_video")
+                GetMenuVideoButton(onClick = {navigationActions.navigateToVideoUploader()}, text = "analyze_new_video")
                 GetMenuVideoButton(onClick = {}, text = "new_routine")
             }
         }

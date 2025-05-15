@@ -44,7 +44,7 @@ fun GetProfileImage(){
             Icon(
                 painter = painterResource(id = R.drawable.editar),
                 contentDescription = "EditProfile",
-                tint = Color(0xFFB18F4F),
+                tint = Color(0xFFD78323),
                 modifier = Modifier
                     .size(48.dp)
                     .align(Alignment.BottomEnd)

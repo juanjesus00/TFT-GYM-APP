@@ -47,31 +47,11 @@ fun GetUserPersonalRecordBox(){
         start = Offset(25f, 25f),
         end = Offset(100f, 100f)
     )
-    /*val gradient = Brush.linearGradient(
-        colors = listOf(Color(0xFFD78323), Color(0xFF27DD03)),
-        start = Offset(25f, 25f),
-        end = Offset(100f, 100f)
-    )
-    Box (
-        modifier = Modifier
-            .size(100.dp)
-            .background(color = Color(0xFF161818), shape = CircleShape),
-        contentAlignment = Alignment.Center,
-    ){
-        Text(
-            buildAnnotatedString {
-                withStyle(style = SpanStyle(brush = gradient, fontSize = 15.sp, fontWeight = FontWeight.Bold)) {
-                    append("sentadilla")
-                }
-            }
-        )
-
-    }*/
     var expanded by remember { mutableStateOf(false) }
 
     val width by animateDpAsState(
         targetValue = if (expanded) 350.dp else 100.dp,
-        animationSpec = tween(durationMillis = 500),
+        animationSpec = tween(durationMillis = 350),
         label = "Width Animation"
     )
 
@@ -108,12 +88,12 @@ fun GetUserPersonalRecordBox(){
             // Contenido extra, visible solo si está expandido
             AnimatedVisibility(
                 visible = expanded,
-                enter = fadeIn(animationSpec = tween(300)) + expandHorizontally(),
-                exit = fadeOut(animationSpec = tween(300)) + shrinkHorizontally()
+                enter = fadeIn(animationSpec = tween(0)) + expandHorizontally(),
+                exit = fadeOut(animationSpec = tween(0)) + shrinkHorizontally()
             ) {
                 Row(
                     modifier = Modifier
-                        .padding(start = 16.dp)
+                        .padding(start = 10.dp, end = 10.dp)
                         .fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically

@@ -18,4 +18,6 @@
     <string name="login_suggest" translatable="false">Already have an account?</string>
     <string name="login_link" translatable="false">Login</string>
     <string name="log_out" translatable="false">Log out</string>
+    <string name="delete_user" translatable="false">Delete User</string>
+    <string name="upload_video" translatable="false">Upload Video</string>
 </resources>

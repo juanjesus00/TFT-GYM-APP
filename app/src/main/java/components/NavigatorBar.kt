@@ -41,12 +41,12 @@ fun GetNavigatorBar(navigationActions: NavigationActions, navController: NavCont
     var isVideoPress by remember { mutableStateOf(false) }
     Box (
         modifier = Modifier.fillMaxWidth()
-            .padding(bottom = 60.dp),
+            .padding(bottom = 30.dp),
         contentAlignment = Alignment.Center
     ){
         Row (
             modifier = Modifier
-                .size(width = 350.dp, height = 100.dp)
+                .size(width = 350.dp, height = 80.dp)
                 .background(Color(0xFF161818), shape = RoundedCornerShape(20.dp)),
             horizontalArrangement = Arrangement.SpaceAround,
             verticalAlignment = Alignment.CenterVertically
@@ -61,15 +61,15 @@ fun GetNavigatorBar(navigationActions: NavigationActions, navController: NavCont
             Box(
                 modifier = Modifier
                     .zIndex(1f)
-                    .size(90.dp)
+                    .size(80.dp)
                     .offset(y=(-35).dp, x=(-5).dp)
-                    .clip(RoundedCornerShape(50.dp))
+                    .clip(RoundedCornerShape(40.dp))
                     .clickable(
                         onClick = {isVideoPress = !isVideoPress}
                     ),
                 contentAlignment = Alignment.Center,
             ){
-                Image(modifier = Modifier.size(90.dp), painter = painterResource(R.drawable.video_analisis), contentDescription = "video")
+                Image(modifier = Modifier.size(80.dp), painter = painterResource(R.drawable.video_analisis), contentDescription = "video")
             }
             IconButton(
                 onClick = {}

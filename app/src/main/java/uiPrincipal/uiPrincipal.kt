@@ -2,6 +2,11 @@ package uiPrincipal
 
 import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -12,7 +17,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import components.GetHeader
@@ -23,6 +30,7 @@ import pages.GetUserProfile
 import routes.NavigationActions
 import routes.Routes
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import pages.GetVideoPage
 
 object LanguageManager {
     var languageCode by mutableStateOf("")
@@ -47,7 +55,8 @@ fun MyComposeApp(navigationActions: NavigationActions, navController: NavControl
         )
         systemUiController.setNavigationBarColor(
             color = color,
-            darkIcons = false // Cambia a true si usas íconos oscuros
+            darkIcons = false, // Cambia a true si usas íconos oscuros
+            navigationBarContrastEnforced = false
         )
     }
 
@@ -73,15 +82,26 @@ fun MyComposeApp(navigationActions: NavigationActions, navController: NavControl
         },
         bottomBar = {
             AnimatedVisibility(visible = showBars) {
-                GetNavigatorBar(navigationActions, navController)
+                Box(
+                    modifier = Modifier.offset(y = (-10).dp)
+                ) {
+                    GetNavigatorBar(navigationActions, navController)
+                }
+
             }
         }
 
     ){
-        if(currentRoute == Routes.HOME){
-            GetPrincipalMidSection(scrollState, navigationActions, navController)
-        }else if(currentRoute == Routes.USERPROFILE){
-            GetUserProfile(scrollState, navigationActions, navController)
+        Box(modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFF2A2C38))
+            .navigationBarsPadding() // ← ESTO
+        ) {
+            when(currentRoute) {
+                Routes.HOME -> GetPrincipalMidSection(scrollState, navigationActions, navController)
+                Routes.USERPROFILE -> GetUserProfile(scrollState, navigationActions, navController)
+                Routes.VIDEO -> GetVideoPage(scrollState, navigationActions, navController)
+            }
         }
     }
 }
