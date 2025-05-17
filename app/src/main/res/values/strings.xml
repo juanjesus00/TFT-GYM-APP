@@ -19,4 +19,7 @@
     <string name="log_out" translatable="false">Cerrar sesión</string>
     <string name="delete_user" translatable="false">Eliminar usuario</string>
     <string name="upload_video" translatable="false">Sube video</string>
+    <string name="dead_lift" translatable="false">Peso Muerto</string>
+    <string name="bench_press" translatable="false">Press de Banca</string>
+    <string name="squad" translatable="false">Sentadilla</string>
 </resources>
