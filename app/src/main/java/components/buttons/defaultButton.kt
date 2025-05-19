@@ -7,11 +7,12 @@ import androidx.compose.ui.platform.LocalContext
 import components.langSwitcher.getStringByName
 
 @Composable
-fun GetDefaultButton(text: String, onClick:() -> Unit){
+fun GetDefaultButton(text: String, onClick:() -> Unit, enabled: Boolean){
     Button(
         onClick = {
             onClick.invoke()
-        }
+        },
+        enabled = enabled
     ) {
         Text(text = text)
     }

@@ -18,4 +18,7 @@ interface GymApiService {
 
     @GET("results/{id}")
     suspend fun getResults(@Path("id") id: String): Response<ResultResponse>
+
+    @GET("progress/{id}")
+    suspend fun getProgress(@Path("id") id:String): Response<ProgressResponse>
 }

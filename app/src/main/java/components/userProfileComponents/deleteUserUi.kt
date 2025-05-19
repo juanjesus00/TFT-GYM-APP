@@ -17,7 +17,7 @@ fun GetDeleteUserUi(){
         contentAlignment = Alignment.Center
     ){
         getStringByName(LocalContext.current, "delete_user")?.let{
-            GetDefaultButton(text = it) { }
+            GetDefaultButton(text = it, onClick = {}, enabled = true)
         }
     }
 }
