@@ -179,7 +179,6 @@ fun GetVideoPage(
             Text(text = "Repeticiones: ${it.results.reps}")
             Text(text = "Duracion: ${it.results.reps_durations}")
             Text(text = "velocidad: ${it.results.mean_speed}")
-            Text(text = "video: ${it.results.output_url}")
         }
 
         GetInputWithDropdown(

@@ -1,10 +1,9 @@
 package api
 
 data class ResultsData(
-    val reps: Int,
-    val reps_durations: List<String>,
     val mean_speed: Float,
-    val output_url: String
+    val reps: Int,
+    val reps_durations: List<String>
 
 )
 data class ResultResponse(

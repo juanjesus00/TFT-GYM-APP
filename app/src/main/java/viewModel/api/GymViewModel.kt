@@ -52,6 +52,7 @@ class GymViewModel : ViewModel(){
                     Log.d("GymViewModel", "analysis_id = ${analyzeResponse.value}")
                 } else {
                     Log.e("GymViewModel", "Error: ${response.code()}")
+
                 }
             } catch (e: Exception) {
                 Log.e("GymViewModel", "Exception: ${e.localizedMessage}")
@@ -72,8 +73,7 @@ class GymViewModel : ViewModel(){
                     val results = body?.results
                     val duration = results?.reps_durations
                     val reps = results?.reps
-                    val outputUrl = results?.output_url
-                    Log.d("GymViewModel", "results = $results, $duration, $reps, $outputUrl")
+                    Log.d("GymViewModel", "results = $results, $duration, $reps")
                 }else{
                     Log.e("GymViewModel", "Error: ${response.code()}")
                 }

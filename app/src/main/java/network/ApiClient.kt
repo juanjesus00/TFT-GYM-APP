@@ -6,7 +6,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import kotlin.jvm.java
 
 object ApiClient {
-    private const val BASE_URL = "http://192.168.1.13:5000/"
+    private const val BASE_URL = "https://gymapi.org/"
 
     val retrofit: Retrofit by lazy {
         Retrofit.Builder()
