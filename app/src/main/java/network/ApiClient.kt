@@ -8,7 +8,7 @@ import kotlin.jvm.java
 object ApiClient {
     private const val BASE_URL = "https://gymapi.org/"
 
-    val retrofit: Retrofit by lazy {
+    private val retrofit: Retrofit by lazy {
         Retrofit.Builder()
             .baseUrl(BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())

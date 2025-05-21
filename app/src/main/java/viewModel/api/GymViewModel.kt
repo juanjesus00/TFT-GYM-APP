@@ -60,25 +60,27 @@ class GymViewModel : ViewModel(){
         }
     }
 
-    fun fetchResults(id: String) {
+    private fun fetchResults(id: String) {
         viewModelScope.launch {
             try {
-                _loading.value = false
                 val response: Response<ResultResponse> = ApiClient.apiService.getResults(id)
                 if (response.isSuccessful) {
                     val body = response.body()
 
-                    _resultResponse.value = body
-
-                    val results = body?.results
-                    val duration = results?.reps_durations
-                    val reps = results?.reps
-                    Log.d("GymViewModel", "results = $results, $duration, $reps")
-                }else{
+                    if (body?.status == "completed" && body.results != null) {
+                        _resultResponse.value = body
+                        Log.d("GymViewModel", "results = ${resultResponse.value?.results}")
+                        stopPolling()
+                    } else {
+                        Log.d("GymViewModel", "results = waiting for results")
+                    }
+                } else {
                     Log.e("GymViewModel", "Error: ${response.code()}")
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
+            } finally {
+                _loading.value = false
             }
         }
     }
@@ -89,22 +91,31 @@ class GymViewModel : ViewModel(){
         pollingJob = viewModelScope.launch {
             while (true) {
                 try {
-                    val response = ApiClient.apiService.getProgress(id)
-                    if (response.isSuccessful) {
-                        response.body()?.let {
-                            _progress.value = it.progress
+                    // Obtener progreso
+                    val progressResponse = ApiClient.apiService.getProgress(id)
+                    if (progressResponse.isSuccessful) {
+                        val progressValue = progressResponse.body()?.progress
+                        _progress.value = progressValue ?: "0"
 
-                            if (it.progress == "100") {
-                                stopPolling()
+                        if (progressValue == "100") {
+                            // Intentar obtener resultados
+                            val resultResponse = ApiClient.apiService.getResults(id)
+                            if (resultResponse.isSuccessful) {
+                                val resultBody = resultResponse.body()
+                                Log.d("GymViewModel", "Resultado crudo: $resultBody")
 
-                                fetchResults(id)
-                                return@launch
+                                if (resultBody?.status == "completed" && resultBody.results != null) {
+                                    _resultResponse.value = resultBody
+                                    _loading.value = false
+                                    stopPolling()
+                                    break
+                                }
                             }
                         }
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
-                    break // salir si falla la red
+                    break
                 }
 
                 delay(1000L) // espera 1 segundo
@@ -112,7 +123,7 @@ class GymViewModel : ViewModel(){
         }
     }
 
-    fun stopPolling() {
+    private fun stopPolling() {
         pollingJob?.cancel()
     }
 }

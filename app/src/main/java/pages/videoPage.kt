@@ -43,6 +43,7 @@ import components.buttons.GetDefaultButton
 import components.inputs.GetInputLogin
 import components.inputs.GetInputWithDropdown
 import components.langSwitcher.getStringByName
+import components.progressBar.GetRoundProgressBar
 import okhttp3.MultipartBody
 import routes.NavigationActions
 import viewModel.api.GymViewModel
@@ -127,12 +128,7 @@ fun GetVideoPage(
         ){
             Log.d("videoPage:", "$isLoading")
             if (isLoading){
-                CircularProgressIndicator(
-                    progress = { progressFloat },
-                    color = Color(0xFFD78323),
-                    strokeWidth = 4.dp,
-                    modifier = Modifier.size(64.dp)
-                )
+                GetRoundProgressBar()
             }else if (selectVideoUri != null){
                 AndroidView(
                     factory = { context ->
@@ -143,6 +139,8 @@ fun GetVideoPage(
                             setMediaController(mediaController)
                             setOnPreparedListener { mp ->
                                 mp.isLooping = false
+                                seekTo(1)
+                                pause()
                             }
                         }
                     },
@@ -174,11 +172,13 @@ fun GetVideoPage(
             )
         }
 
-        results?.let {
+        results?.results?.let {
             enabled = true
-            Text(text = "Repeticiones: ${it.results.reps}")
-            Text(text = "Duracion: ${it.results.reps_durations}")
-            Text(text = "velocidad: ${it.results.mean_speed}")
+            Text(text = "Repeticiones: ${it.reps}")
+            Text(text = "Duracion: ${it.reps_durations}")
+            Text(text = "velocidad: ${it.mean_speed}")
+        } ?: run {
+            Text(text = "todavia no hay resultados")
         }
 
         GetInputWithDropdown(
