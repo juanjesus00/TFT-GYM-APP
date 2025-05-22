@@ -26,9 +26,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.Popup
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.google.firebase.auth.FirebaseAuth
 import components.langSwitcher.getStringByName
 import routes.NavigationActions
+import viewModel.auth.AuthViewModel
 
 @Composable
 fun getMenuVideo(
@@ -37,6 +40,7 @@ fun getMenuVideo(
     isMenuVisible: Boolean,
     onDismiss: () -> Unit
 ){
+    val isCurrentUserLogged = FirebaseAuth.getInstance().currentUser?.let{ true } ?: false
     if(isMenuVisible){
         Dialog(onDismissRequest = onDismiss) {
             Column(
@@ -46,20 +50,21 @@ fun getMenuVideo(
                 verticalArrangement = Arrangement.spacedBy(20.dp, Alignment.CenterVertically),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                GetMenuVideoButton(onClick = {navigationActions.navigateToVideoUploader()}, text = "analyze_new_video")
-                GetMenuVideoButton(onClick = {}, text = "new_routine")
+                GetMenuVideoButton(onClick = {navigationActions.navigateToVideoUploader()}, text = "analyze_new_video", enable =  isCurrentUserLogged)
+                GetMenuVideoButton(onClick = {}, text = "new_routine", enable = isCurrentUserLogged)
             }
         }
     }
 }
 @Composable
-fun GetMenuVideoButton(onClick: (() -> Unit)? = null, text: String){
+fun GetMenuVideoButton(onClick: (() -> Unit)? = null, text: String, enable: Boolean){
     Button(
         modifier = Modifier
             .width(200.dp),
         onClick = {
             onClick?.invoke()
         },
+        enabled = enable,
         colors = ButtonDefaults.buttonColors(
             containerColor = Color(0xFF2A2C38),
             contentColor = Color(0xFFD78323)

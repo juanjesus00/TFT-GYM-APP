@@ -1,6 +1,7 @@
 package firebase.auth
 
 import android.content.Context
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -13,6 +14,7 @@ import android.widget.Toast
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
@@ -23,10 +25,14 @@ class AuthRepository : ViewModel(){
     private val auth = FirebaseAuth.getInstance()
 
     private var _loading = MutableLiveData(false)
-    private val currentUser = FirebaseAuth.getInstance().currentUser
+    val currentUser = FirebaseAuth.getInstance().currentUser
 
     private val _isEmailVerified = MutableLiveData<Boolean>()
     val isEmailVerified: LiveData<Boolean> = _isEmailVerified
+
+    private val storageRef= FirebaseStorage.getInstance().reference
+    private val dbRef = FirebaseFirestore.getInstance()
+
     fun signIn(
         email: String,
         password: String,
@@ -247,6 +253,36 @@ class AuthRepository : ViewModel(){
                 .addOnFailureListener { e ->
                     Log.w("Firestore", "Error al actualizar a $currentUser", e)
                 }
+        }
+    }
+
+
+    fun editUserImageStorage(uriImage: Uri?, onSuccess: () -> Unit){
+        currentUser?.let { user ->
+            val uid = user.uid
+            val imageStorage = storageRef.child("userImage/$uid.jpg")
+            uriImage?.let {
+                imageStorage.putFile(it)
+                    .addOnSuccessListener { taskSnapshot ->
+                        Log.d("Storage", "imagen de usuario Guardada en Storage correctamente")
+                        imageStorage.downloadUrl.addOnSuccessListener { uri ->
+                            val imageUri = uri.toString()
+
+                            dbRef.collection("Usuarios").document(uid).update(mapOf("profileImageUrl" to imageUri))
+                                .addOnSuccessListener {
+                                    Log.d("Firestore", "usuario actualizado correctamente")
+                                }
+                                .addOnFailureListener { e ->
+                                    Log.w("Firestore", "Error al actualizar imagen de usuario", e)
+                                }
+                        }.addOnFailureListener { e ->
+                            Log.w("Storage", "Error al obtener imagen de usuario del storage", e)
+                        }
+                    }
+                    .addOnFailureListener { e ->
+                        Log.w("Storage", "Error al subir al Storage la imagen de usuario", e)
+                    }
+            }
         }
     }
 }
