@@ -7,5 +7,6 @@ object Routes {
     const val USERDATA = "userdata"
     const val USERPROFILE = "userprofile"
     const val VIDEO = "video"
+    const val EDITUSERINFO = "editUserInfo"
 
 }

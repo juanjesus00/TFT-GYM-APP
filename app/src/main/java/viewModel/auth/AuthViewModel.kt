@@ -1,6 +1,7 @@
 package viewModel.auth
 
 import android.content.Context
+import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -26,4 +27,9 @@ class  AuthViewModel(private val repository: AuthRepository = AuthRepository()) 
     fun logOut(onSuccess: () -> Unit){
         repository.logOut(onSuccess)
     }
+
+    fun editUserImageStorage(uriImage: Uri?, onSuccess: () -> Unit){
+        repository.editUserImageStorage(uriImage = uriImage, onSuccess = onSuccess)
+    }
+
 }

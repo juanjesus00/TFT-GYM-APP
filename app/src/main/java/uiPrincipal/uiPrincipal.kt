@@ -30,6 +30,7 @@ import pages.GetUserProfile
 import routes.NavigationActions
 import routes.Routes
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import pages.GetEditUserInfo
 import pages.GetVideoPage
 
 object LanguageManager {
@@ -101,6 +102,7 @@ fun MyComposeApp(navigationActions: NavigationActions, navController: NavControl
                 Routes.HOME -> GetPrincipalMidSection(scrollState, navigationActions, navController)
                 Routes.USERPROFILE -> GetUserProfile(scrollState, navigationActions, navController)
                 Routes.VIDEO -> GetVideoPage(scrollState, navigationActions, navController)
+                Routes.EDITUSERINFO -> GetEditUserInfo(scrollState, navigationActions, navController)
             }
         }
     }

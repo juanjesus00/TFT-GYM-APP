@@ -37,28 +37,8 @@ import android.Manifest.permission.READ_MEDIA_IMAGES
 import android.Manifest.permission.READ_EXTERNAL_STORAGE
 
 @Composable
-fun GetProfileImage(){
+fun GetProfileImage(selectImageUri: Uri?, onEditClick: ()-> Unit, imageSize: Int, editIconSize: Int){
     val context = LocalContext.current
-    var selectImageUri by remember { mutableStateOf<Uri?>(null) }
-
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent(),
-        onResult = { uri : Uri? ->
-            selectImageUri = uri
-        }
-    )
-
-    val permissionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (isGranted){
-            launcher.launch("image/*")
-        }else{
-            Toast.makeText(context, "Permiso denegado", Toast.LENGTH_SHORT).show()
-        }
-
-    }
-
     Row (
         modifier = Modifier.fillMaxWidth().padding(top = 100.dp, start = 30.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -66,7 +46,7 @@ fun GetProfileImage(){
 
     ){
         Box(
-            modifier = Modifier.size(150.dp)
+            modifier = Modifier.size(imageSize.dp)
         ) {
             selectImageUri?.let {
                 Image(
@@ -78,8 +58,8 @@ fun GetProfileImage(){
                     contentDescription = "header menu",
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
-                        .size(150.dp)
-                        .clip(RoundedCornerShape(75.dp))
+                        .size(imageSize.dp)
+                        .clip(RoundedCornerShape((imageSize/2).dp))
                 )
             }
                 ?:
@@ -96,14 +76,10 @@ fun GetProfileImage(){
                 contentDescription = "EditProfile",
                 tint = Color(0xFFD78323),
                 modifier = Modifier
-                    .size(48.dp)
+                    .size(editIconSize.dp)
                     .align(Alignment.BottomEnd)
                     .clickable {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                            permissionLauncher.launch(READ_MEDIA_IMAGES)
-                        } else {
-                            permissionLauncher.launch(READ_EXTERNAL_STORAGE)
-                        }
+                        onEditClick.invoke()
                     }
             )
         }

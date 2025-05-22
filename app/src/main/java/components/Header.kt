@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 
 import androidx.compose.ui.Modifier
@@ -32,21 +33,41 @@ import routes.NavigationActions
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
 import components.menu.HamburgerMenu
+import firebase.auth.AuthRepository
+import viewModel.auth.AuthViewModel
 
 
 @Composable
-fun GetHeader(navigationActions: NavigationActions, navController: NavController){
+fun GetHeader(navigationActions: NavigationActions, navController: NavController, authViewModel: AuthRepository = viewModel()){
     var isMenuVisible by remember { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
+    val currentUser = authViewModel.currentUser
+    val isVerified by authViewModel.isEmailVerified.observeAsState(false)
+
+
+    var profileImageUrl by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(Unit) {
+        authViewModel.checkIfEmailVerified()
+
+    }
+    LaunchedEffect(currentUser, isVerified) {
+        if (currentUser != null && isVerified) {
+            authViewModel.getInfoUser { url ->
+                profileImageUrl = url?.get("profileImageUrl") as? String
+            }
+        }
+    }
+
     Row (
         modifier = Modifier
             .fillMaxWidth()
@@ -74,15 +95,26 @@ fun GetHeader(navigationActions: NavigationActions, navController: NavController
                 .clickable(onClick = {}),
             contentAlignment = Alignment.Center
         ) {
-            Image(
-                modifier = Modifier
-                    .size(50.dp)
-                    .clip(RoundedCornerShape(25.dp))
-                ,
-                painter = painterResource(id = profileimage),
-                contentDescription = "header menu",
-                contentScale = ContentScale.Crop
-            )
+            if (currentUser == null || !isVerified || profileImageUrl == null) {
+                Image(
+                    modifier = Modifier
+                        .size(50.dp)
+                        .clip(RoundedCornerShape(25.dp)),
+                    painter = painterResource(id = profileimage),
+                    contentDescription = "default profile",
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                AsyncImage(
+                    model = profileImageUrl,
+                    contentDescription = "user profile",
+                    modifier = Modifier
+                        .size(50.dp)
+                        .clip(RoundedCornerShape(25.dp)),
+                    contentScale = ContentScale.Crop,
+                    error = painterResource(id = profileimage)
+                )
+            }
         }
     }
     Box (

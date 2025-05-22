@@ -29,4 +29,8 @@ class NavigationActions (private val navController: NavController) {
     fun navigateToVideoUploader(){
         navController.navigate(Routes.VIDEO)
     }
+
+    fun navigateToEditUserInfo(){
+        navController.navigate(Routes.EDITUSERINFO)
+    }
 }

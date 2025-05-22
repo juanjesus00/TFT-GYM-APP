@@ -42,6 +42,7 @@ class MainActivity : ComponentActivity() {
                     composable(Routes.USERDATA){ GetUserDataScreen(navigationActions, navController) }
                     composable(Routes.USERPROFILE){ MyComposeApp(navigationActions, navController) }
                     composable(Routes.VIDEO){ MyComposeApp(navigationActions, navController) }
+                    composable(Routes.EDITUSERINFO){ MyComposeApp(navigationActions, navController) }
                 }
 
             }

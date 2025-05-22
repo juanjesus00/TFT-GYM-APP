@@ -34,7 +34,7 @@ fun GetUserProfile(
             .verticalScroll(state = scrollState),
         verticalArrangement = Arrangement.spacedBy(30.dp)
     ){
-        GetProfileImage()
+        GetProfileImage(selectImageUri = null, onEditClick = {navigationActions.navigateToEditUserInfo()}, imageSize = 150, editIconSize = 48)
         GetUserStats()
         GetUserPersonalRecords()
         GetDeleteUserUi()

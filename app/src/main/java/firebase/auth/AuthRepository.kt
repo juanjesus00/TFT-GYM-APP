@@ -271,6 +271,7 @@ class AuthRepository : ViewModel(){
                             dbRef.collection("Usuarios").document(uid).update(mapOf("profileImageUrl" to imageUri))
                                 .addOnSuccessListener {
                                     Log.d("Firestore", "usuario actualizado correctamente")
+                                    onSuccess.invoke()
                                 }
                                 .addOnFailureListener { e ->
                                     Log.w("Firestore", "Error al actualizar imagen de usuario", e)
@@ -283,6 +284,41 @@ class AuthRepository : ViewModel(){
                         Log.w("Storage", "Error al subir al Storage la imagen de usuario", e)
                     }
             }
+        }
+    }
+
+
+    fun getInfoUser(onResult: (Map<String, Any>?) -> Unit){
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        currentUser?.let { user ->
+            val uid = user.uid
+            val db = FirebaseFirestore.getInstance()
+
+            db.collection("Usuarios").document(uid).get()
+                .addOnSuccessListener { document ->
+                    if(document != null && document.exists()){
+                        val user = model.User(
+                            userId = document.getString("user_id").toString(),
+                            email = document.getString("email").toString(),
+                            userName = document.getString("userName").toString(),
+                            profileImageUrl = document.getString("profileImageUrl").toString(),
+                            birthDate = document.getString("birthDate").toString(),
+                            gender = document.getString("gender").toString(),
+                            height = (document.get("height") as Long).toInt(),
+                            weight = (document.getLong("weight") as Long).toInt(),
+                            password = document.getString("password").toString(),
+                        ).toMap()
+                        onResult(user)
+                    }else{
+                        onResult(null)
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    exception.printStackTrace()
+                    onResult(null)
+                }
+        } ?: run{
+            onResult(null)
         }
     }
 }
