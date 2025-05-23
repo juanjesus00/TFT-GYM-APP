@@ -35,12 +35,37 @@ import com.example.tft_gym_app.R
 import com.example.tft_gym_app.R.drawable.profileimage
 import android.Manifest.permission.READ_MEDIA_IMAGES
 import android.Manifest.permission.READ_EXTERNAL_STORAGE
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
+import firebase.auth.AuthRepository
 
 @Composable
-fun GetProfileImage(selectImageUri: Uri?, onEditClick: ()-> Unit, imageSize: Int, editIconSize: Int){
+fun GetProfileImage(selectImageUri: Uri?, onEditClick: ()-> Unit, imageSize: Int, editIconSize: Int, startPadding: Int, topPadding: Int, authViewModel: AuthRepository = viewModel()){
     val context = LocalContext.current
+    val currentUser = authViewModel.currentUser
+    val isVerified by authViewModel.isEmailVerified.observeAsState(false)
+
+
+    var profileImageUrl by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(Unit) {
+        authViewModel.checkIfEmailVerified()
+
+    }
+    LaunchedEffect(currentUser, isVerified) {
+        if (currentUser != null && isVerified) {
+            authViewModel.getInfoUser { url ->
+                profileImageUrl = url?.get("profileImageUrl") as? String
+            }
+        }
+    }
+
+
     Row (
-        modifier = Modifier.fillMaxWidth().padding(top = 100.dp, start = 30.dp),
+        modifier = Modifier.fillMaxWidth().padding(top = topPadding.dp, start = startPadding.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(30.dp)
 
@@ -61,16 +86,28 @@ fun GetProfileImage(selectImageUri: Uri?, onEditClick: ()-> Unit, imageSize: Int
                         .size(imageSize.dp)
                         .clip(RoundedCornerShape((imageSize/2).dp))
                 )
-            }
-                ?:
-                Image(
-                    painter = painterResource(id = profileimage),
-                    contentDescription = "header menu",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .size(150.dp)
-                        .clip(RoundedCornerShape(75.dp))
-                )
+            } ?:
+                if(currentUser == null || !isVerified || profileImageUrl == null){
+                    Image(
+                        painter = painterResource(id = profileimage),
+                        contentDescription = "header menu",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(imageSize.dp)
+                            .clip(RoundedCornerShape((imageSize/2).dp))
+                    )
+                }else{
+                    AsyncImage(
+                        model = profileImageUrl,
+                        contentDescription = "user profile",
+                        modifier = Modifier
+                            .size(imageSize.dp)
+                            .clip(RoundedCornerShape((imageSize/2).dp)),
+                        contentScale = ContentScale.Crop,
+                        error = painterResource(id = profileimage)
+                    )
+                }
+
             Icon(
                 painter = painterResource(id = R.drawable.editar),
                 contentDescription = "EditProfile",

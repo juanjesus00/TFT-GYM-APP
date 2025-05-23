@@ -17,6 +17,7 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import model.User
 import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
@@ -243,6 +244,33 @@ class AuthRepository : ViewModel(){
                 "birthDate" to birthDate,
                 "weight" to weight,
                 "height" to height
+            )
+
+            db.collection("Usuarios").document(uid).update(userUpdates)
+                .addOnSuccessListener {
+                    Log.d("Firestore", "$currentUser ha sido actualizado exitosamente")
+                    onSuccess()
+                }
+                .addOnFailureListener { e ->
+                    Log.w("Firestore", "Error al actualizar a $currentUser", e)
+                }
+        }
+    }
+
+    fun editUser2(userInfoToUpdate: User, onSuccess: () -> Unit)=viewModelScope.launch{
+        currentUser?.let{ user ->
+            val uid = user.uid
+            val db = FirebaseFirestore.getInstance()
+
+            val userUpdates = mapOf(
+                "gender" to userInfoToUpdate.gender,
+                "birthDate" to userInfoToUpdate.birthDate,
+                "weight" to userInfoToUpdate.weight,
+                "height" to userInfoToUpdate.height,
+                "email" to userInfoToUpdate.email,
+                "password" to userInfoToUpdate.password,
+                "userName" to userInfoToUpdate.userName,
+                "user_id" to userInfoToUpdate.userId
             )
 
             db.collection("Usuarios").document(uid).update(userUpdates)

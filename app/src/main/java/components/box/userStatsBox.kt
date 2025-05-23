@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun GetUserStatsBox(){
+fun GetUserStatsBox(text:String, stat: String){
     val gradient = Brush.linearGradient(
         colors = listOf(Color(0xFFD78323), Color(0xFF27DD03)),
         start = Offset(25f, 25f),
@@ -41,11 +41,11 @@ fun GetUserStatsBox(){
             verticalArrangement = Arrangement.SpaceAround,
             horizontalAlignment = Alignment.CenterHorizontally
         ){
-            Text(text = "test", fontWeight = FontWeight.Bold)
+            Text(text = text, fontWeight = FontWeight.Bold)
             Text(
                 buildAnnotatedString {
                     withStyle(style = SpanStyle(brush = gradient, fontSize = 20.sp, fontWeight = FontWeight.Bold)) {
-                        append("tacale")
+                        append(stat)
                     }
                 }
             )
