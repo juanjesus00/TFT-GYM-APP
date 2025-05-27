@@ -93,7 +93,7 @@ fun GetEditUserInfo(
             userName = user?.get("userName").toString()
             weight = user?.get("weight").toString()
             height = user?.get("height").toString()
-            birthdate = user?.get("birthdate").toString()
+            birthdate = user?.get("birthDate").toString()
             gender = user?.get("gender").toString()
         }
     }
@@ -176,13 +176,13 @@ fun GetEditUserInfo(
                             userId = infoUser["user_id"].toString(),
                             userName = userName,
                             profileImageUrl = infoUser["profileImageUrl"].toString(),
-                            gender = infoUser["gender"].toString(),
-                            birthDate = infoUser["birthDate"].toString(),
+                            gender = gender,
+                            birthDate = birthdate,
                             weight = weight.toInt(),
                             height = height.toInt()
                         ),
                         onSuccess = {
-                            authRepository.editUserImageStorage(uriImage = selectImageUri, onSuccess = {navigationActions.navigateToHome()})
+                            if(selectImageUri != null ) authRepository.editUserImageStorage(uriImage = selectImageUri, onSuccess = {navigationActions.navigateToHome()}) else navigationActions.navigateToHome()
                         }
                     )
                 })

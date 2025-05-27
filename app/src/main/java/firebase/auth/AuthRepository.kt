@@ -290,7 +290,7 @@ class AuthRepository : ViewModel(){
             db.collection("Usuarios").document(uid).update(userUpdates)
                 .addOnSuccessListener {
                     Log.d("Firestore", "$currentUser ha sido actualizado exitosamente")
-                    onSuccess()
+                    onSuccess.invoke()
                 }
                 .addOnFailureListener { e ->
                     Log.w("Firestore", "Error al actualizar a $currentUser", e)
