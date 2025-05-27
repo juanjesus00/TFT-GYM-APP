@@ -35,29 +35,21 @@ import androidx.compose.ui.window.Popup
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
+import components.buttons.GetOptionButton
 import components.langSwitcher.getStringByName
 import firebase.auth.AuthRepository
 import routes.NavigationActions
 import viewModel.auth.AuthViewModel
 
 @Composable
-fun GetMenuVideo(
+fun GetOptionMenu(
     navigationActions: NavigationActions,
     navController: NavController,
     isMenuVisible: Boolean,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    viewModelRepository: AuthRepository = viewModel()
 ){
-
-    val isCurrentUserLogged = FirebaseAuth.getInstance().currentUser?.let{ true } ?: false
     val context = LocalContext.current
-    var isEmailVerified by remember { mutableStateOf(false) }
-
-    LaunchedEffect(Unit) {
-        FirebaseAuth.getInstance().currentUser?.reload()?.addOnCompleteListener {
-            isEmailVerified = FirebaseAuth.getInstance().currentUser?.isEmailVerified == true
-        }
-    }
-
     if(isMenuVisible){
         Dialog(onDismissRequest = onDismiss) {
             Column(
@@ -67,38 +59,20 @@ fun GetMenuVideo(
                 verticalArrangement = Arrangement.spacedBy(20.dp, Alignment.CenterVertically),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                GetMenuVideoButton(
-                    onClick = {
-                        if(isCurrentUserLogged && isEmailVerified) navigationActions.navigateToVideoUploader() else  Toast.makeText(context, "Tienes que iniciar sesión y verificar la cuenta para usar esta función", Toast.LENGTH_LONG).show()
-                              },
-                    text = "analyze_new_video",
-                    enable = true)
-                GetMenuVideoButton(
-                    onClick = {
-                        if(isCurrentUserLogged && isEmailVerified) /*TODO*/ else  Toast.makeText(context, "Tienes que iniciar sesión y verificar la cuenta para usar esta función", Toast.LENGTH_LONG).show()
-                    },
-                    text = "new_routine",
-                    enable = true)
+                getStringByName(LocalContext.current, "accept")?.let{
+                    GetOptionButton(
+                        text = it,
+                        onClick = {viewModelRepository.deleteUser(context = context, onSuccess = {navigationActions.navigateToHome()})}
+                    )
+                }
+                getStringByName(LocalContext.current, "cancel")?.let{
+                    GetOptionButton(
+                        text = it,
+                        onClick = {onDismiss()}
+                    )
+                }
+
             }
-        }
-    }
-}
-@Composable
-fun GetMenuVideoButton(onClick: (() -> Unit)? = null, text: String, enable: Boolean){
-    Button(
-        modifier = Modifier
-            .width(200.dp),
-        onClick = {
-            onClick?.invoke()
-        },
-        enabled = enable,
-        colors = ButtonDefaults.buttonColors(
-            containerColor = Color(0xFF2A2C38),
-            contentColor = Color(0xFFD78323)
-        )
-    ) {
-        getStringByName(LocalContext.current, text)?.let {
-            Text(text = it)
         }
     }
 }

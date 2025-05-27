@@ -2,11 +2,14 @@ package components.newbox
 
 import android.widget.Toast
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -31,6 +35,7 @@ import androidx.compose.ui.layout.ContentScale.Companion.Crop
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -40,17 +45,15 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.tft_gym_app.R
 import com.google.firebase.auth.FirebaseAuth
 import components.menu.CascadingPopup
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
-fun GetBox(viewModel: ViewModelBox = viewModel()) {
-    var isVisible by remember { mutableStateOf(false) }
+fun UnloggedGetBox(viewModel: ViewModelBox = viewModel()) {
     var anchorBounds by remember { mutableStateOf<Rect?>(null) }
-    val configuration = LocalConfiguration.current
-    val screenWidthPx = with(LocalDensity.current) {
-        configuration.screenWidthDp.dp.toPx()
-    }
+
     val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
     val scale = remember { Animatable(1f) }
     Box(
         modifier = Modifier
@@ -84,7 +87,11 @@ fun GetBox(viewModel: ViewModelBox = viewModel()) {
                             animationSpec = tween(150)
                         )
                     }
-                    isVisible = !isVisible
+                    Toast.makeText(
+                        context,
+                        "Tienes que iniciar sesión para usar esta función",
+                        Toast.LENGTH_LONG
+                    ).show()
                 },
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
@@ -98,7 +105,6 @@ fun GetBox(viewModel: ViewModelBox = viewModel()) {
             )
 
         }
-        CascadingPopup(isVisible = isVisible, anchorBounds = anchorBounds, screenWidthPx = screenWidthPx, onDismiss = {isVisible = false}, listIcons = listOf(R.drawable.chart, R.drawable.schedule, R.drawable.video, R.drawable.pr))
     }
 
 }

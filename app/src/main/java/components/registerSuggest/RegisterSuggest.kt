@@ -1,5 +1,6 @@
 package components.registerSuggest
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,7 +16,7 @@ import androidx.compose.ui.unit.dp
 import components.langSwitcher.getStringByName
 
 @Composable
-fun GetRegisterSuggest(questionText: String, linkText: String) {
+fun GetRegisterSuggest(questionText: String, linkText: String, onLink: () -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally),
@@ -25,7 +26,15 @@ fun GetRegisterSuggest(questionText: String, linkText: String) {
             Text(text = it, color = Color.Black)
         }
         getStringByName(LocalContext.current, linkText)?.let {
-            Text(text = it, color = Color(0xFFAF52DE), fontWeight = FontWeight.Bold)
+            Text(
+                modifier = Modifier
+                    .clickable(
+                        onClick = {onLink.invoke()}
+                    ),
+                text = it,
+                color = Color(0xFFAF52DE),
+                fontWeight = FontWeight.Bold
+            )
         }
     }
 

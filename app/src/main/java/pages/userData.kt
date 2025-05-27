@@ -1,6 +1,7 @@
 package pages
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -17,6 +18,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import components.buttons.GetDefaultButton
 import components.buttons.GetNextButton
 import components.inputs.GetInputLogin
 import components.langSwitcher.getStringByName
@@ -35,7 +37,8 @@ fun GetUserDataScreen(navigationActions: NavigationActions, navController: NavHo
             .fillMaxSize()
             .background(Color(0xFF2A2C38))
             .padding(top = 100.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(30.dp)
     ) {
         getStringByName(context, "register_welcome_text")?.let {
             Text(text = it , color = Color(0xFFD78323))
@@ -47,27 +50,41 @@ fun GetUserDataScreen(navigationActions: NavigationActions, navController: NavHo
             label = "test label",
             placeholder = "texto de prueba"
         )
+
         GetInputLogin(
             text = birthDate,
             onValueChange = { birthDate = it },
             label = "test label",
             placeholder = "texto de prueba"
         )
+
         GetInputLogin(
             text = weight,
             onValueChange = { weight = it },
             label = "test label",
             placeholder = "texto de prueba"
         )
+
         GetInputLogin(
             text = height,
             onValueChange = { height = it },
             label = "test label",
             placeholder = "texto de prueba"
         )
+
         GetNextButton (
-            buttonText = "register_button",
-            onNextButton = { viewModel.editUser(gender = gender, birthDate = birthDate, weight = weight.toInt(), height = height.toInt(), onSuccess = {navigationActions.navigateToHome()})}
+            buttonText = "next",
+            onNextButton = { viewModel.editUser(gender = gender, birthDate = birthDate, weight = weight.toInt(), height = height.toInt(), onSuccess = {navigationActions.navigateToHome()})},
+            enable = gender.isNotEmpty() && birthDate.isNotEmpty() && weight.isNotEmpty() && height.isNotEmpty()
         )
+
+        getStringByName(context, "cancel")?.let {
+            GetDefaultButton(
+                onClick = {navigationActions.navigateToHome()},
+                text = it,
+                enabled = true
+            )
+        }
+
     }
 }

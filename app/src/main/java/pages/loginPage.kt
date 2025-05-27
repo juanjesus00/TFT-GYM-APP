@@ -3,6 +3,7 @@
 package pages
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -25,6 +26,7 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import components.buttons.GetGoogleButton
 import components.buttons.GetLoginButton
+import components.inputs.PasswordInputField
 import components.langSwitcher.getStringByName
 import components.registerSuggest.GetRegisterSuggest
 import components.separator.GetLoginSeparator
@@ -40,28 +42,29 @@ fun GetLoginScreen(navigationActions: NavigationActions, navController: NavHostC
             .fillMaxSize()
             .background(Color(0xFF2A2C38))
             .padding(top = 100.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
         getStringByName(context, "login_welcome_text")?.let {
             Text(text = it , color = Color(0xFFD78323))
         }
-
-        GetInputLogin(
-            text = email,
-            onValueChange = { email = it },
-            label = "test label",
-            placeholder = "texto de prueba"
-        )
-        GetInputLogin(
-            text = password,
-            onValueChange = { password = it },
-            label = "test label",
-            placeholder = "texto de prueba"
-        )
+        getStringByName(context, "email")?.let{ label ->
+            GetInputLogin(
+                text = email,
+                onValueChange = { email = it },
+                label = label,
+                placeholder = label
+            )
+        }
+        getStringByName(context, "password")?.let{label ->
+            PasswordInputField(
+                password = password,
+                text = label,
+                onPasswordChange = { password = it },
+            )
+        }
 
         GetLoginButton(
-            email = email,
-            password = password,
             buttonText = "login_button",
             onLogin = { viewModel.login(email = email, password = password, context = context, navigationActions = navigationActions, onSuccess = {navigationActions.navigateToHome()}, onErrorAction = {/*TODO*/}) }
         )
@@ -74,7 +77,8 @@ fun GetLoginScreen(navigationActions: NavigationActions, navController: NavHostC
 
         GetRegisterSuggest(
             questionText = "register_suggest",
-            linkText = "register_link"
+            linkText = "register_link",
+            onLink = {navigationActions.navigateToRegister()}
         )
     }
 }

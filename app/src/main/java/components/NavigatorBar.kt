@@ -1,9 +1,13 @@
 package components
 
+import android.widget.Toast
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -33,12 +37,18 @@ import com.example.tft_gym_app.R
 import routes.NavigationActions
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
-import components.menu.getMenuVideo
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.platform.LocalContext
+import components.menu.GetMenuVideo
+import kotlinx.coroutines.launch
 
 
 @Composable
 fun GetNavigatorBar(navigationActions: NavigationActions, navController: NavController){
     var isVideoPress by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
+    val scale = remember { Animatable(1f) }
     Box (
         modifier = Modifier.fillMaxWidth()
             .padding(bottom = 30.dp),
@@ -60,13 +70,29 @@ fun GetNavigatorBar(navigationActions: NavigationActions, navController: NavCont
 
             Box(
                 modifier = Modifier
+                    .scale(scale.value)
                     .zIndex(1f)
                     .size(80.dp)
                     .offset(y=(-35).dp, x=(-5).dp)
                     .clip(RoundedCornerShape(40.dp))
                     .clickable(
-                        onClick = {isVideoPress = !isVideoPress}
-                    ),
+                        indication = null, // sin ripple
+                        interactionSource = remember { MutableInteractionSource() }
+                    ){
+                        coroutineScope.launch {
+                            // Animación hacia "hundido"
+                            scale.animateTo(
+                                targetValue = 0.90f,
+                                animationSpec = tween(150)
+                            )
+                            // Animación de rebote
+                            scale.animateTo(
+                                targetValue = 1f,
+                                animationSpec = tween(150)
+                            )
+                        }
+                        isVideoPress = !isVideoPress
+                    },
                 contentAlignment = Alignment.Center,
             ){
                 Image(modifier = Modifier.size(80.dp), painter = painterResource(R.drawable.video_analisis), contentDescription = "video")
@@ -80,7 +106,7 @@ fun GetNavigatorBar(navigationActions: NavigationActions, navController: NavCont
         }
     }
     Box (){
-        getMenuVideo(navigationActions, navController, isVideoPress, onDismiss = {isVideoPress = false})
+        GetMenuVideo(navigationActions, navController, isVideoPress, onDismiss = {isVideoPress = false})
     }
 
 }

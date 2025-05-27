@@ -11,23 +11,38 @@ class NavigationActions (private val navController: NavController) {
     }
 
     fun navigateToLogin(){
-        navController.navigate(Routes.LOGIN)
+        navController.navigate(Routes.LOGIN){
+            popUpTo(Routes.LOGIN){ inclusive = true}
+            launchSingleTop = true
+        }
     }
 
     fun navigateToRegister(){
-        navController.navigate(Routes.REGISTER)
+        navController.navigate(Routes.REGISTER){
+            popUpTo(Routes.REGISTER){ inclusive = true}
+            launchSingleTop = true
+        }
     }
 
     fun navigateToUserData(){
-        navController.navigate(Routes.USERDATA)
+        navController.navigate(Routes.USERDATA){
+            popUpTo(Routes.USERDATA){ inclusive = true}
+            launchSingleTop = true
+        }
     }
 
     fun navigateToUserProfile(){
-        navController.navigate(Routes.USERPROFILE)
+        navController.navigate(Routes.USERPROFILE){
+            popUpTo(Routes.USERPROFILE){ inclusive = true}
+            launchSingleTop = true
+        }
     }
 
     fun navigateToVideoUploader(){
-        navController.navigate(Routes.VIDEO)
+        navController.navigate(Routes.VIDEO){
+            popUpTo(Routes.VIDEO){ inclusive = true}
+            launchSingleTop = true
+        }
     }
 
     fun navigateToEditUserInfo(){

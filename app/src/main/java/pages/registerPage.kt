@@ -1,6 +1,7 @@
 package pages
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -17,12 +18,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import com.google.firebase.Firebase
-import com.google.firebase.auth.auth
 import components.buttons.GetGoogleButton
 import components.buttons.GetLoginButton
 import components.checkBoxs.GetRegisterCheckBox
 import components.inputs.GetInputLogin
+import components.inputs.PasswordInputField
 import components.langSwitcher.getStringByName
 import components.registerSuggest.GetRegisterSuggest
 import components.separator.GetLoginSeparator
@@ -42,45 +42,50 @@ fun GetRegisterScreen(navigationActions: NavigationActions, navController: NavHo
             .fillMaxSize()
             .background(Color(0xFF2A2C38))
             .padding(top = 100.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
         getStringByName(context, "register_welcome_text")?.let {
             Text(text = it , color = Color(0xFFD78323))
         }
+        getStringByName(context, "user_name")?.let{label ->
+            GetInputLogin(
+                text = nickName,
+                onValueChange = { nickName = it },
+                label = label,
+                placeholder = label
+            )
+        }
+        getStringByName(context, "email")?.let{label ->
+            GetInputLogin(
+                text = email,
+                onValueChange = { email = it },
+                label = label,
+                placeholder = label
+            )
+        }
+        getStringByName(context, "password")?.let{label ->
+            PasswordInputField(
+                password = password,
+                text = label,
+                onPasswordChange = { password = it },
+            )
+        }
+        getStringByName(context, "repeat_password")?.let{label ->
+            PasswordInputField(
+                password = repeatPassword,
+                text = label,
+                onPasswordChange = { repeatPassword = it },
+            )
+        }
 
-        GetInputLogin(
-            text = nickName,
-            onValueChange = { nickName = it },
-            label = "test label",
-            placeholder = "texto de prueba"
-        )
-        GetInputLogin(
-            text = email,
-            onValueChange = { email = it },
-            label = "test label",
-            placeholder = "texto de prueba"
-        )
-        GetInputLogin(
-            text = password,
-            onValueChange = { password = it },
-            label = "test label",
-            placeholder = "texto de prueba"
-        )
-        GetInputLogin(
-            text = repeatPassword,
-            onValueChange = { repeatPassword = it },
-            label = "test label",
-            placeholder = "texto de prueba"
-        )
         GetRegisterCheckBox(
             isChecked = isChecked,
             onValueChange = { isChecked = it }
         )
         GetLoginButton(
-            email = email,
-            password = password,
             buttonText = "register_button",
-            onLogin = { viewModel.register(email = email, password = password, name = nickName, context = context, onSuccess = {navigationActions.navigateToUserData()}, navigationActions = navigationActions) }
+            onLogin = { viewModel.register(email = email, password = password, repeatPassword = repeatPassword, name = nickName, context = context, onSuccess = {navigationActions.navigateToUserData()}, navigationActions = navigationActions) }
         )
 
         GetLoginSeparator()
@@ -89,7 +94,8 @@ fun GetRegisterScreen(navigationActions: NavigationActions, navController: NavHo
 
         GetRegisterSuggest(
             questionText = "login_suggest",
-            linkText = "login_link"
+            linkText = "login_link",
+            onLink = {navigationActions.navigateToLogin()}
         )
     }
 }

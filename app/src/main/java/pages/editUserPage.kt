@@ -36,6 +36,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.tft_gym_app.ui.theme.backgroundColor
 import components.buttons.GetDefaultButton
 import components.inputs.GetInputLogin
+import components.langSwitcher.getStringByName
 import components.userProfileComponents.GetProfileImage
 import firebase.auth.AuthRepository
 import viewModel.auth.AuthViewModel
@@ -54,8 +55,8 @@ fun GetEditUserInfo(
     var userName by remember { mutableStateOf("") }
     var weight by remember { mutableStateOf("") }
     var height by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var repeatPassword by remember { mutableStateOf("") }
+    var birthdate by remember { mutableStateOf("") }
+    var gender by remember { mutableStateOf("") }
     var infoUser by remember { mutableStateOf(emptyMap<String, Any>()) }
 
 
@@ -90,9 +91,10 @@ fun GetEditUserInfo(
         authRepository.getInfoUser { user ->
             user?.let { infoUser = it }
             userName = user?.get("userName").toString()
-            password = user?.get("password").toString()
             weight = user?.get("weight").toString()
             height = user?.get("height").toString()
+            birthdate = user?.get("birthdate").toString()
+            gender = user?.get("gender").toString()
         }
     }
 
@@ -118,60 +120,74 @@ fun GetEditUserInfo(
             topPadding = 110
         )
 
+        getStringByName(context, "user_name")?.let { label ->
+            GetInputLogin(
+                text = userName,
+                onValueChange = { userName = it },
+                label = label,
+                placeholder = label
+            )
+        }
+        getStringByName(context, "weight")?.let { label ->
+            GetInputLogin(
+                text = weight,
+                onValueChange = { weight = it },
+                label = "${label}-kg",
+                placeholder = label
+            )
+        }
+        getStringByName(context, "height")?.let { label ->
+            GetInputLogin(
+                text = height,
+                onValueChange = { height = it },
+                label = "${label}-cm",
+                placeholder = label
+            )
+        }
 
-        GetInputLogin(
-            text = userName,
-            onValueChange = { userName = it },
-            label = "Nombre de usuario",
-            placeholder = "texto de prueba"
-        )
-        GetInputLogin(
-            text = weight,
-            onValueChange = { weight = it },
-            label = "Peso-kg",
-            placeholder = "indique su peso"
-        )
-        GetInputLogin(
-            text = height,
-            onValueChange = { height = it },
-            label = "Altura-cm",
-            placeholder = "indique su peso"
-        )
-        GetInputLogin(
-            text = password,
-            onValueChange = { password = it },
-            label = "Contraseña",
-            placeholder = "texto de prueba"
-        )
-        GetInputLogin(
-            text = repeatPassword,
-            onValueChange = { repeatPassword = it },
-            label = "Repetir contraseña",
-            placeholder = "texto de prueba"
-        )
+        getStringByName(context, "birthdate")?.let { label ->
+            GetInputLogin(
+                text = birthdate,
+                onValueChange = { birthdate = it },
+                label = label,
+                placeholder = label
+            )
+        }
+
+        getStringByName(context, "gender")?.let { label ->
+            GetInputLogin(
+                text = gender,
+                onValueChange = { gender = it },
+                label = label,
+                placeholder = label
+            )
+        }
+
         Box (
             modifier = Modifier.fillMaxWidth(),
             contentAlignment = Alignment.Center
 
         ){
-            GetDefaultButton(text = "Aceptar", enabled = true, onClick = {
-                authRepository.editUser2(
-                    userInfoToUpdate = model.User(
-                        email = infoUser["email"].toString(),
-                        userId = infoUser["user_id"].toString(),
-                        userName = userName,
-                        profileImageUrl = infoUser["profileImageUrl"].toString(),
-                        password = password,
-                        gender = infoUser["gender"].toString(),
-                        birthDate = infoUser["birthDate"].toString(),
-                        weight = weight.toInt(),
-                        height = height.toInt()
-                    ),
-                    onSuccess = {
-                        authRepository.editUserImageStorage(uriImage = selectImageUri, onSuccess = {navigationActions.navigateToHome()})
-                    }
-                )
-            })
+            getStringByName(context, "save_changes")?.let{ label ->
+                GetDefaultButton(text = label, enabled = true, onClick = {
+                    authRepository.editUser2(
+                        userInfoToUpdate = model.User(
+                            email = infoUser["email"].toString(),
+                            userId = infoUser["user_id"].toString(),
+                            userName = userName,
+                            profileImageUrl = infoUser["profileImageUrl"].toString(),
+                            gender = infoUser["gender"].toString(),
+                            birthDate = infoUser["birthDate"].toString(),
+                            weight = weight.toInt(),
+                            height = height.toInt()
+                        ),
+                        onSuccess = {
+                            authRepository.editUserImageStorage(uriImage = selectImageUri, onSuccess = {navigationActions.navigateToHome()})
+                        }
+                    )
+                })
+            }
+
         }
 
 

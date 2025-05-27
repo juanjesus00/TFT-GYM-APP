@@ -23,4 +23,17 @@
     <string name="dead_lift" translatable="false">Dead Lift</string>
     <string name="bench_press" translatable="false">Bench Press</string>
     <string name="squad" translatable="false">Squad</string>
+    <string name="user_name" translatable="false">User Name</string>
+    <string name="weight" translatable="false">Weight</string>
+    <string name="height" translatable="false">Height</string>
+    <string name="password" translatable="false">Password</string>
+    <string name="repeat_password" translatable="false">Repeat Password</string>
+    <string name="save_changes" translatable="false">Save Changes</string>
+    <string name="email" translatable="false">E-mail</string>
+    <string name="terms_of_use" translatable="false">By continuing you accept our Privacy Policy and Term of Use</string>
+    <string name="next" translatable="false">Continue</string>
+    <string name="cancel" translatable="false">Cancel</string>
+    <string name="accept" translatable="false">Accept</string>
+    <string name="gender" translatable="false">Gender</string>
+    <string name="birthdate" translatable="false">Birthdate</string>
 </resources>

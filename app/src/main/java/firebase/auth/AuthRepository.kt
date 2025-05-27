@@ -152,7 +152,8 @@ class AuthRepository : ViewModel(){
         context: Context,
         name: String,
         onSuccess: () -> Unit,
-        navigationActions: NavigationActions
+        navigationActions: NavigationActions,
+        repeatPassword: String
     ) = viewModelScope.launch {
         var isCorrectEmail = true//verifyEmailWithAPI(email)
         var passwordValid = isPasswordValid(password)
@@ -166,24 +167,40 @@ class AuthRepository : ViewModel(){
                         Toast.LENGTH_SHORT
                     ).show()
                 } else if(passwordValid){
+                    if(!name.isEmpty()){
+                        if(password != repeatPassword){
+                            Toast.makeText(
+                                context,
+                                "Las contraseñas No coinciden",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }else{
+                            //navigationActions.navigateToCarga()
+                            _loading.value = true
 
-                    //navigationActions.navigateToCarga()
-                    _loading.value = true
-
-                    auth.createUserWithEmailAndPassword(email, password)
-                        .addOnCompleteListener { task ->
-                            if (task.isSuccessful) {
-                                sendVerificationRegisterEmail()
-                                createUser(name, email, "", password)
-                                onSuccess()
-                            } else {
-                                Log.d(
-                                    "loginbackend",
-                                    "La creacion de usuarios falló: ${task.result.toString()}"
-                                )
-                            }
-                            _loading.value = false
+                            auth.createUserWithEmailAndPassword(email, password)
+                                .addOnCompleteListener { task ->
+                                    if (task.isSuccessful) {
+                                        sendVerificationRegisterEmail()
+                                        createUser(name, email, "")
+                                        onSuccess()
+                                    } else {
+                                        Log.d(
+                                            "loginbackend",
+                                            "La creacion de usuarios falló: ${task.result.toString()}"
+                                        )
+                                    }
+                                    _loading.value = false
+                                }
                         }
+                    }else{
+                        Toast.makeText(
+                            context,
+                            "El nombre de usuario no puede ser vacío",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+
                 }else{
                     Toast.makeText(
                         context,
@@ -208,8 +225,7 @@ class AuthRepository : ViewModel(){
     private fun createUser(
         displayName: String,
         email: String,
-        profileImage: String,
-        password: String
+        profileImage: String
     ) {
         val userId = auth.currentUser?.uid
         val user = model.User(
@@ -217,7 +233,6 @@ class AuthRepository : ViewModel(){
             userName = displayName,
             profileImageUrl = profileImage,
             email = email,
-            password = password,
             gender = "",
             birthDate = "",
             weight = 0,
@@ -268,7 +283,6 @@ class AuthRepository : ViewModel(){
                 "weight" to userInfoToUpdate.weight,
                 "height" to userInfoToUpdate.height,
                 "email" to userInfoToUpdate.email,
-                "password" to userInfoToUpdate.password,
                 "userName" to userInfoToUpdate.userName,
                 "user_id" to userInfoToUpdate.userId
             )
@@ -334,7 +348,6 @@ class AuthRepository : ViewModel(){
                             gender = document.getString("gender").toString(),
                             height = (document.get("height") as Long).toInt(),
                             weight = (document.getLong("weight") as Long).toInt(),
-                            password = document.getString("password").toString(),
                         ).toMap()
                         onResult(user)
                     }else{
@@ -349,4 +362,75 @@ class AuthRepository : ViewModel(){
             onResult(null)
         }
     }
+
+    fun deleteUser(
+        context: Context,
+        onSuccess: () -> Unit
+    ):Boolean {
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        if (currentUser != null) {
+            return try {
+                // Eliminar los datos asociados al usuario de Firestore
+                val db = FirebaseFirestore.getInstance()
+                val userId = currentUser.uid
+
+                // Eliminar datos de Firestore
+                db.collection("Usuarios").document(userId).delete()
+                    .addOnSuccessListener {
+                        // Luego de eliminar los datos, eliminamos el usuario
+                        logOut(onSuccess={})
+                        currentUser.delete()
+                            .addOnCompleteListener { task ->
+                                if (task.isSuccessful) {
+                                    // Usuario eliminado exitosamente
+                                    Toast.makeText(
+                                        context,
+                                        "El usuario se ha eliminado con éxito",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                    onSuccess.invoke()
+                                } else {
+                                    // Manejar error al eliminar el usuario
+                                    task.exception?.let {
+                                        Toast.makeText(
+                                            context,
+                                            "El usuario no se ha podido eliminar",
+                                            Toast.LENGTH_LONG
+                                        ).show()
+                                    }
+                                }
+                            }
+                    }
+                    .addOnFailureListener { e ->
+                        // Error al eliminar los datos de Firestore
+                        Toast.makeText(
+                            context,
+                            "Error al eliminar los datos del usuario: ${e.localizedMessage}",
+                            Toast.LENGTH_LONG
+                        ).show()
+                        false
+                    }
+                true // Si todo salió bien
+            } catch (e: Exception) {
+                // Manejo de excepciones
+                Toast.makeText(
+                    context,
+                    "Ocurrió un error: ${e.localizedMessage}",
+                    Toast.LENGTH_LONG
+                ).show()
+                false
+            }
+        } else {
+            // Si no hay un usuario autenticado
+            Toast.makeText(
+                context,
+                "No hay un usuario autenticado",
+                Toast.LENGTH_LONG
+            ).show()
+            return false
+        }
+
+    }
+
+
 }

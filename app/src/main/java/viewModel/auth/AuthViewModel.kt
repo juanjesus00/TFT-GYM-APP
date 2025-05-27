@@ -16,8 +16,16 @@ class  AuthViewModel(private val repository: AuthRepository = AuthRepository()) 
         repository.signIn(email, password, context = context, onSuccess = onSuccess, navigationActions = navigationActions, onErrorAction)
     }
 
-    fun register(email: String, password: String, context: Context, name: String, onSuccess: () -> Unit, navigationActions: NavigationActions){
-        repository.register(email, password, context, name, onSuccess, navigationActions)
+    fun register(
+        email: String,
+        password: String,
+        context: Context,
+        name: String,
+        onSuccess: () -> Unit,
+        navigationActions: NavigationActions,
+        repeatPassword: String
+    ){
+        repository.register(email, password, context, name, onSuccess, navigationActions = navigationActions, repeatPassword = repeatPassword)
     }
 
     fun editUser(gender: String, birthDate: String, weight: Int, height: Int, onSuccess: () -> Unit){

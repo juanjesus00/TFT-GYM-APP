@@ -22,4 +22,17 @@
     <string name="dead_lift" translatable="false">Peso Muerto</string>
     <string name="bench_press" translatable="false">Press de Banca</string>
     <string name="squad" translatable="false">Sentadilla</string>
+    <string name="user_name" translatable="false">Nombre de Usuario</string>
+    <string name="weight" translatable="false">Peso</string>
+    <string name="height" translatable="false">Altura</string>
+    <string name="password" translatable="false">Contraseña</string>
+    <string name="repeat_password" translatable="false">Repetir Contraseña</string>
+    <string name="save_changes" translatable="false">Guardar Cambios</string>
+    <string name="email" translatable="false">Correo</string>
+    <string name="terms_of_use" translatable="false">Al continuar, aceptas nuestra Política de Privacidad y Términos de Uso</string>
+    <string name="next" translatable="false">Continuar</string>
+    <string name="cancel" translatable="false">Cancelar</string>
+    <string name="accept" translatable="false">Aceptar</string>
+    <string name="gender" translatable="false">Género</string>
+    <string name="birthdate" translatable="false">Fecha de nacimiento</string>
 </resources>
