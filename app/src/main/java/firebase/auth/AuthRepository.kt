@@ -12,7 +12,9 @@ import kotlinx.coroutines.launch
 import routes.NavigationActions
 import android.widget.Toast
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.Dispatchers
@@ -239,14 +241,49 @@ class AuthRepository : ViewModel(){
             height = 0
         ).toMap()
 
+        val registro = model.Registro(
+            fecha = "",
+            peso = 0f,
+            repeticiones = 0,
+            rm = 0f
+        )
+
         FirebaseFirestore.getInstance().collection("Usuarios")
             .document(userId.toString())
             .set(user)
             .addOnSuccessListener {
                 Log.d("loginbackend", "Creado ${it}")
+                FirebaseFirestore.getInstance().collection("Usuarios")
+                    .document(userId.toString()).collection("Ejercicios").document("Press de Banca").set(hashMapOf(
+                        "registros" to listOf(registro),
+                        "max_rm" to 0
+                    )).addOnSuccessListener {
+                        Log.d("loginbackend", "Creado ${it}")
+                    }.addOnFailureListener {
+                        Log.d("loginbackend", "Error ${it}")
+                    }
+                FirebaseFirestore.getInstance().collection("Usuarios")
+                    .document(userId.toString()).collection("Ejercicios").document("Peso Muerto").set(hashMapOf(
+                        "registros" to listOf(registro),
+                        "max_rm" to 0
+                    )).addOnSuccessListener {
+                        Log.d("loginbackend", "Creado ${it}")
+                    }.addOnFailureListener {
+                        Log.d("loginbackend", "Error ${it}")
+                    }
+                FirebaseFirestore.getInstance().collection("Usuarios")
+                    .document(userId.toString()).collection("Ejercicios").document("Sentadilla").set(hashMapOf(
+                        "registros" to listOf(registro),
+                        "max_rm" to 0
+                    )).addOnSuccessListener {
+                        Log.d("loginbackend", "Creado ${it}")
+                    }.addOnFailureListener {
+                        Log.d("loginbackend", "Error ${it}")
+                    }
             }.addOnFailureListener {
                 Log.d("loginbackend", "Error ${it}")
             }
+
     }
 
     fun editUser(gender: String, birthDate: String, weight: Int, height: Int, onSuccess: () -> Unit)=viewModelScope.launch{
@@ -329,6 +366,65 @@ class AuthRepository : ViewModel(){
         }
     }
 
+    fun calculateUserMaxRm(rm: Float, exercise: String, callback: (Boolean) -> Unit){
+        currentUser?.let { user ->
+            val uid = user.uid
+            val db = FirebaseFirestore.getInstance()
+            db.collection("Usuarios").document(uid).collection("Ejercicios").document(exercise).get()
+                .addOnSuccessListener { document ->
+                    if(document != null && document.exists()){
+                        val currentRm = document.get("max_rm")
+                        if((currentRm as? Number)?.toFloat() ?: 0f > rm){
+                            callback(false)
+
+                        }else{
+                            callback(true)
+                        }
+
+                    }else{
+                        callback(true)
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    exception.printStackTrace()
+                    callback(false)
+                }
+        }
+    }
+
+    fun editUserFromVideo(exercise: String, weight: Float, repetitions: Int, date:String, rm: Float?){
+        currentUser?.let{ user ->
+            val uid = user.uid
+            val db = FirebaseFirestore.getInstance()
+
+            val registro = model.Registro(
+                fecha = date,
+                peso = weight,
+                repeticiones = repetitions,
+                rm = rm ?: 0f
+            )
+
+            calculateUserMaxRm(rm ?: 0f, exercise) { isNewMaxRm ->
+                val updateData = hashMapOf<String, Any>(
+                    "registros" to FieldValue.arrayUnion(registro)
+                )
+
+                if (isNewMaxRm) {
+                    updateData["max_rm"] = rm ?: 0f
+                }
+
+                db.collection("Usuarios").document(uid)
+                    .collection("Ejercicios").document(exercise)
+                    .set(updateData, SetOptions.merge()) // merge para no borrar campos anteriores
+                    .addOnSuccessListener {
+                        Log.d("editUserFromVideo", "Datos de ejercicio actualizados correctamente")
+                    }
+                    .addOnFailureListener { e ->
+                        Log.w("editUserFromVideo", "Error al actualizar datos del ejercicio", e)
+                    }
+            }
+        }
+    }
 
     fun getInfoUser(onResult: (Map<String, Any>?) -> Unit){
         val currentUser = FirebaseAuth.getInstance().currentUser
@@ -431,6 +527,4 @@ class AuthRepository : ViewModel(){
         }
 
     }
-
-
 }

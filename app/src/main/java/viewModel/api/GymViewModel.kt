@@ -1,15 +1,12 @@
 package viewModel.api
 
 import android.util.Log
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import api.AnalyzeResponse
-import api.ProgressResponse
 import api.ResultResponse
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -19,6 +16,8 @@ import kotlinx.coroutines.launch
 import network.ApiClient
 import okhttp3.MultipartBody
 import retrofit2.Response
+import viewModel.rm.RepetitionAnalyzer
+import java.time.LocalDate
 
 class GymViewModel : ViewModel(){
     private val _analyzeResponse = MutableStateFlow<String>("")
@@ -36,7 +35,10 @@ class GymViewModel : ViewModel(){
     private var pollingJob: Job? = null
 
     public var analysisId = mutableStateOf("")
-    fun uploadVideo(videoPart: MultipartBody.Part) {
+
+    fun uploadVideo(
+        videoPart: MultipartBody.Part
+    ) {
         viewModelScope.launch {
             try {
                 _loading.value = true
@@ -126,4 +128,11 @@ class GymViewModel : ViewModel(){
     private fun stopPolling() {
         pollingJob?.cancel()
     }
+
+    fun clearResponses() {
+        _analyzeResponse.value = ""
+        _resultResponse.value = null
+        _progress.value = "0"
+    }
+
 }

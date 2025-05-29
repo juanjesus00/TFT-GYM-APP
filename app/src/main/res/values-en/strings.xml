@@ -19,7 +19,7 @@
     <string name="login_link" translatable="false">Login</string>
     <string name="log_out" translatable="false">Log out</string>
     <string name="delete_user" translatable="false">Delete User</string>
-    <string name="upload_video" translatable="false">Upload Video</string>
+    <string name="upload_video" translatable="false">Upload a Video</string>
     <string name="dead_lift" translatable="false">Dead Lift</string>
     <string name="bench_press" translatable="false">Bench Press</string>
     <string name="squad" translatable="false">Squad</string>
@@ -36,4 +36,5 @@
     <string name="accept" translatable="false">Accept</string>
     <string name="gender" translatable="false">Gender</string>
     <string name="birthdate" translatable="false">Birthdate</string>
+    <string name="analyze" translatable="false">Analyze</string>
 </resources>

@@ -58,7 +58,7 @@ fun GetInputWithDropdown(
                     text = { Text(selectionOption) },
                     onClick = {
                         onSelectedText(selectionOption)
-                        onDismissExpanded
+                        onDismissExpanded.invoke()
                     }
                 )
             }

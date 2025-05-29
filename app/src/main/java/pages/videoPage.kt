@@ -10,19 +10,21 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -30,11 +32,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -44,11 +44,13 @@ import components.inputs.GetInputLogin
 import components.inputs.GetInputWithDropdown
 import components.langSwitcher.getStringByName
 import components.progressBar.GetRoundProgressBar
+import firebase.auth.AuthRepository
 import okhttp3.MultipartBody
 import routes.NavigationActions
 import viewModel.api.GymViewModel
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import viewModel.rm.RmCalculator
 import java.io.File
 
 @Composable
@@ -56,7 +58,9 @@ fun GetVideoPage(
     scrollState: ScrollState,
     navigationActions: NavigationActions,
     navController: NavController,
-    viewModel: GymViewModel = viewModel()
+    viewModel: GymViewModel = viewModel(),
+    viewModelRmCalculator: RmCalculator = viewModel(),
+    viewModelRepository: AuthRepository = viewModel()
 ) {
 
 
@@ -68,7 +72,8 @@ fun GetVideoPage(
     var selectedText by remember { mutableStateOf("") }
     var weight by remember { mutableStateOf("") }
     var selectVideoUri by remember { mutableStateOf<Uri?>(null) }
-    var enabled by remember { mutableStateOf(true) }
+    val rm by viewModelRmCalculator.estimatedRm.observeAsState()
+    val currentDateTime = java.time.LocalDate.now()
 
     val progress by viewModel.progress.collectAsState()
     val progressFloat = progress.toFloatOrNull()?.div(100f) ?: 0f
@@ -101,28 +106,52 @@ fun GetVideoPage(
         }
     }
 
+    var alreadySaved by remember { mutableStateOf(false) }
+
+    LaunchedEffect(results) {
+        val data = results?.results
+        if (data != null && !alreadySaved) {
+            try {
+                viewModelRmCalculator.analyzeRepetition(
+                    weight = weight.toFloat(),
+                    reps = data.reps
+                )
+
+                viewModelRepository.editUserFromVideo(
+                    exercise = selectedText,
+                    weight = weight.toFloat(),
+                    repetitions = data.reps,
+                    date = currentDateTime.toString(),
+                    rm = rm
+                )
+
+                alreadySaved = true // Para evitar repeticiones
+            } catch (e: Exception) {
+                Log.e("VideoPage", "Error al guardar en Firebase: ${e.message}")
+            }
+        }
+    }
+
     Column (
         modifier = Modifier
             .fillMaxSize()
-            .padding(top = 80.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .padding(top = 80.dp)
+            .verticalScroll(scrollState),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(30.dp)
     ){
-        Text(text = "Sube un video")
+        getStringByName(context, "upload_video")?.let{
+            Text(text = it)
+        }
+
         Box (
             modifier = Modifier
                 .size(width = 350.dp, height = 250.dp)
                 .background(color = Color(0x1A000000), shape = RoundedCornerShape(20.dp))
                 .clickable(
                     onClick = {
-                        videoBody?.let {
-                            enabled = false
-                        }
-                            ?:
-                            launcher.launch("video/*")
-                            enabled = true
-
-                    },
-                    enabled = enabled
+                        launcher.launch("video/*")
+                    }
                 ),
             contentAlignment = Alignment.Center
         ){
@@ -159,26 +188,9 @@ fun GetVideoPage(
 
         }
 
-        getStringByName(LocalContext.current, "upload_video")?.let{
-            GetDefaultButton(text = it, onClick = {
-                videoBody?.let {
-                    viewModel.uploadVideo(it)
-                    enabled = false
-                    videoBody = null
-                    selectVideoUri = null
-                } ?: Toast.makeText(context, "Primero selecciona un video", Toast.LENGTH_SHORT).show()
-            },
-                enabled = enabled
-            )
-        }
-
         results?.results?.let {
-            enabled = true
-            Text(text = "Repeticiones: ${it.reps}")
-            Text(text = "Duracion: ${it.reps_durations}")
-            Text(text = "velocidad: ${it.mean_speed}")
-        } ?: run {
-            Text(text = "todavia no hay resultados")
+            viewModelRmCalculator.analyzeRepetition(weight = weight.toFloat(), reps = it.reps)
+            viewModelRepository.editUserFromVideo(exercise = selectedText, weight = weight.toFloat(), repetitions = it.reps, date = currentDateTime.toString(), rm = rm)
         }
 
         GetInputWithDropdown(
@@ -196,5 +208,20 @@ fun GetVideoPage(
             label = "peso",
             placeholder = "peso"
         )
+
+        getStringByName(LocalContext.current, "analyze")?.let{
+            GetDefaultButton(text = it, onClick = {
+                videoBody?.let {
+                    viewModel.uploadVideo(it)
+                    videoBody = null
+                    selectVideoUri = null
+                    alreadySaved = false
+                    viewModel.clearResponses()
+                } ?: Toast.makeText(context, "Primero selecciona un video", Toast.LENGTH_SHORT).show()
+            },
+                //poner condicion de enable = true si los inputs y el video han sido seleccionados
+                enabled = selectedText.isNotEmpty() && weight.isNotEmpty() && selectVideoUri != null
+            )
+        }
     }
 }
