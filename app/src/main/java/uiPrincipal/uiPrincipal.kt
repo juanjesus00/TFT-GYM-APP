@@ -32,6 +32,7 @@ import routes.Routes
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import pages.GetEditUserInfo
 import pages.GetVideoPage
+import viewModel.api.GymViewModel
 
 object LanguageManager {
     var languageCode by mutableStateOf("")
@@ -40,7 +41,11 @@ object LanguageManager {
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun MyComposeApp(navigationActions: NavigationActions, navController: NavController){
+fun MyComposeApp(
+    navigationActions: NavigationActions,
+    navController: NavController,
+    gymViewModel: GymViewModel
+){
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
     val color = Color(0xFF2A2C38)
     val scrollState = rememberScrollState()
@@ -99,10 +104,10 @@ fun MyComposeApp(navigationActions: NavigationActions, navController: NavControl
             .navigationBarsPadding() // ← ESTO
         ) {
             when(currentRoute) {
-                Routes.HOME -> GetPrincipalMidSection(scrollState, navigationActions, navController)
-                Routes.USERPROFILE -> GetUserProfile(scrollState, navigationActions, navController)
-                Routes.VIDEO -> GetVideoPage(scrollState, navigationActions, navController)
-                Routes.EDITUSERINFO -> GetEditUserInfo(scrollState, navigationActions, navController)
+                Routes.HOME -> GetPrincipalMidSection(scrollState, navigationActions, navController, gymViewModel)
+                Routes.USERPROFILE -> GetUserProfile(scrollState, navigationActions, navController,gymViewModel)
+                Routes.VIDEO -> GetVideoPage(scrollState, navigationActions, navController,gymViewModel)
+                Routes.EDITUSERINFO -> GetEditUserInfo(scrollState, navigationActions, navController,gymViewModel)
             }
         }
     }

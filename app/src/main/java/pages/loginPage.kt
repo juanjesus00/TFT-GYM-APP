@@ -30,10 +30,11 @@ import components.inputs.PasswordInputField
 import components.langSwitcher.getStringByName
 import components.registerSuggest.GetRegisterSuggest
 import components.separator.GetLoginSeparator
+import viewModel.api.GymViewModel
 import viewModel.auth.AuthViewModel
 
 @Composable
-fun GetLoginScreen(navigationActions: NavigationActions, navController: NavHostController, viewModel: AuthViewModel = viewModel()) {
+fun GetLoginScreen(navigationActions: NavigationActions, navController: NavHostController, gymViewModel: GymViewModel,viewModel: AuthViewModel = viewModel()) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     val context = LocalContext.current

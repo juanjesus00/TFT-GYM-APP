@@ -1,10 +1,12 @@
 package pages
 
+import android.annotation.SuppressLint
 import android.net.Uri
 import android.util.Log
 import android.widget.MediaController
 import android.widget.Toast
 import android.widget.VideoView
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.ScrollState
@@ -58,7 +60,7 @@ fun GetVideoPage(
     scrollState: ScrollState,
     navigationActions: NavigationActions,
     navController: NavController,
-    viewModel: GymViewModel = viewModel(),
+    gymViewModel: GymViewModel,
     viewModelRmCalculator: RmCalculator = viewModel(),
     viewModelRepository: AuthRepository = viewModel()
 ) {
@@ -69,23 +71,23 @@ fun GetVideoPage(
         getStringByName(context, name)
     }
     var expanded by remember { mutableStateOf(false) }
-    var selectedText by remember { mutableStateOf("") }
-    var weight by remember { mutableStateOf("") }
-    var selectVideoUri by remember { mutableStateOf<Uri?>(null) }
+    val selectedText = gymViewModel.selectedText //by remember { mutableStateOf("") }
+    val weight = gymViewModel.weight
+    val selectVideoUri = gymViewModel.selectVideoUri
     val rm by viewModelRmCalculator.estimatedRm.observeAsState()
     val currentDateTime = java.time.LocalDate.now()
 
-    val progress by viewModel.progress.collectAsState()
+    val progress by gymViewModel.progress.collectAsState()
     val progressFloat = progress.toFloatOrNull()?.div(100f) ?: 0f
-    val analysis by viewModel.analyzeResponse.collectAsState()
-    val results by viewModel.resultResponse.collectAsState()
-    val isLoading by viewModel.loading.collectAsState()
+    val analysis by gymViewModel.analyzeResponse.collectAsState()
+    val results by gymViewModel.resultResponse.collectAsState()
+    val isLoading by gymViewModel.loading.collectAsState()
 
     var videoBody by remember { mutableStateOf<MultipartBody.Part?>(null) }
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
         onResult = { uri ->
-            selectVideoUri = uri
+            gymViewModel.actualizarSelectedVideoUri(uri)
             uri?.let {
                 val inputStream = context.contentResolver.openInputStream(uri)
                 val tempFile = File(context.cacheDir, "temp_video.mp4")
@@ -102,7 +104,7 @@ fun GetVideoPage(
 
     LaunchedEffect(analysis) {
         if (analysis.isNotBlank()) {
-            viewModel.startPollingProgress(id = analysis)
+            gymViewModel.startPollingProgress(id = analysis)
         }
     }
 
@@ -151,13 +153,14 @@ fun GetVideoPage(
                 .clickable(
                     onClick = {
                         launcher.launch("video/*")
-                    }
+                    },
+                    enabled = !isLoading
                 ),
             contentAlignment = Alignment.Center
         ){
             Log.d("videoPage:", "$isLoading")
             if (isLoading){
-                GetRoundProgressBar()
+                GetRoundProgressBar(gymViewModel)
             }else if (selectVideoUri != null){
                 AndroidView(
                     factory = { context ->
@@ -190,21 +193,30 @@ fun GetVideoPage(
 
         results?.results?.let {
             viewModelRmCalculator.analyzeRepetition(weight = weight.toFloat(), reps = it.reps)
-            viewModelRepository.editUserFromVideo(exercise = selectedText, weight = weight.toFloat(), repetitions = it.reps, date = currentDateTime.toString(), rm = rm)
+            viewModelRepository.editUserFromVideo(
+                exercise = selectedText,
+                weight = weight.toFloat(),
+                repetitions = it.reps,
+                date = currentDateTime.toString(),
+                rm = rm
+            )
+            gymViewModel.actualizarWeight("")
+            gymViewModel.actualizarSelectedText("")
+            gymViewModel.clearResponses()
         }
 
         GetInputWithDropdown(
             expanded = expanded,
             selectedText = selectedText,
             onExpanded = {expanded = it},
-            onSelectedText = {selectedText = it},
+            onSelectedText = {gymViewModel.actualizarSelectedText(it)},
             onDismissExpanded = {expanded = false},
             options = options
         )
 
         GetInputLogin(
             text = weight,
-            onValueChange = { weight = it},
+            onValueChange = { gymViewModel.actualizarWeight(it)},
             label = "peso",
             placeholder = "peso"
         )
@@ -212,11 +224,10 @@ fun GetVideoPage(
         getStringByName(LocalContext.current, "analyze")?.let{
             GetDefaultButton(text = it, onClick = {
                 videoBody?.let {
-                    viewModel.uploadVideo(it)
+                    gymViewModel.uploadVideo(it)
                     videoBody = null
-                    selectVideoUri = null
+                    gymViewModel.actualizarSelectedVideoUri(null)
                     alreadySaved = false
-                    viewModel.clearResponses()
                 } ?: Toast.makeText(context, "Primero selecciona un video", Toast.LENGTH_SHORT).show()
             },
                 //poner condicion de enable = true si los inputs y el video han sido seleccionados

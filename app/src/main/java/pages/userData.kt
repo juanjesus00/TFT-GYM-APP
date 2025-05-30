@@ -23,10 +23,11 @@ import components.buttons.GetNextButton
 import components.inputs.GetInputLogin
 import components.langSwitcher.getStringByName
 import routes.NavigationActions
+import viewModel.api.GymViewModel
 import viewModel.auth.AuthViewModel
 
 @Composable
-fun GetUserDataScreen(navigationActions: NavigationActions, navController: NavHostController, viewModel: AuthViewModel = viewModel()){
+fun GetUserDataScreen(navigationActions: NavigationActions, navController: NavHostController, gymViewModel: GymViewModel,viewModel: AuthViewModel = viewModel()){
     var gender by remember { mutableStateOf("") }
     var birthDate by remember { mutableStateOf("") }
     var weight by remember { mutableStateOf("") }
@@ -44,39 +45,46 @@ fun GetUserDataScreen(navigationActions: NavigationActions, navController: NavHo
             Text(text = it , color = Color(0xFFD78323))
         }
 
-        GetInputLogin(
-            text = gender,
-            onValueChange = { gender = it },
-            label = "test label",
-            placeholder = "texto de prueba"
-        )
+        getStringByName(context, "gender")?.let{
+            GetInputLogin(
+                text = gender,
+                onValueChange = { gender = it },
+                label = it,
+                placeholder = it
+            )
+        }
+        getStringByName(context, "birthDate")?.let{
+            GetInputLogin(
+                text = birthDate,
+                onValueChange = { birthDate = it },
+                label = it,
+                placeholder = it
+            )
+        }
+        getStringByName(context, "weight")?.let{
+            GetInputLogin(
+                text = weight,
+                onValueChange = { weight = it },
+                label = it,
+                placeholder = it
+            )
+        }
+        getStringByName(context, "height")?.let{
+            GetInputLogin(
+                text = height,
+                onValueChange = { height = it },
+                label = it,
+                placeholder = it
+            )
+        }
+        getStringByName(context, "next")?.let{
+            GetNextButton (
+                buttonText = it,
+                onNextButton = { viewModel.editUser(gender = gender, birthDate = birthDate, weight = weight.toInt(), height = height.toInt(), onSuccess = {navigationActions.navigateToHome()})},
+                enable = gender.isNotEmpty() && birthDate.isNotEmpty() && weight.isNotEmpty() && height.isNotEmpty()
+            )
+        }
 
-        GetInputLogin(
-            text = birthDate,
-            onValueChange = { birthDate = it },
-            label = "test label",
-            placeholder = "texto de prueba"
-        )
-
-        GetInputLogin(
-            text = weight,
-            onValueChange = { weight = it },
-            label = "test label",
-            placeholder = "texto de prueba"
-        )
-
-        GetInputLogin(
-            text = height,
-            onValueChange = { height = it },
-            label = "test label",
-            placeholder = "texto de prueba"
-        )
-
-        GetNextButton (
-            buttonText = "next",
-            onNextButton = { viewModel.editUser(gender = gender, birthDate = birthDate, weight = weight.toInt(), height = height.toInt(), onSuccess = {navigationActions.navigateToHome()})},
-            enable = gender.isNotEmpty() && birthDate.isNotEmpty() && weight.isNotEmpty() && height.isNotEmpty()
-        )
 
         getStringByName(context, "cancel")?.let {
             GetDefaultButton(

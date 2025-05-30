@@ -18,12 +18,14 @@ import components.userProfileComponents.GetProfileImage
 import components.userProfileComponents.GetUserPersonalRecords
 import components.userProfileComponents.GetUserStats
 import routes.NavigationActions
+import viewModel.api.GymViewModel
 
 @Composable
 fun GetUserProfile(
     scrollState: ScrollState,
     navigationActions: NavigationActions,
-    navController: NavController
+    navController: NavController,
+    gymViewModel: GymViewModel
 ) {
     val user = Firebase.auth.currentUser
 

@@ -1,5 +1,6 @@
 package components.progressBar
 
+import android.util.Log
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
@@ -12,11 +13,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import viewModel.api.GymViewModel
 
 @Composable
-fun GetRoundProgressBar(viewModel: GymViewModel = viewModel()){
+fun GetRoundProgressBar(viewModel: GymViewModel){
 
     val progress by viewModel.progress.collectAsState()
     val progressFloat = progress.toFloatOrNull()?.div(100f) ?: 0f
-
+    Log.d("GetRoundProgressBar:", "$progressFloat")
     CircularProgressIndicator(
         progress = { progressFloat },
         color = Color(0xFFD78323),

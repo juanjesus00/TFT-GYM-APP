@@ -19,11 +19,11 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import routes.NavigationActions
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import components.newbox.GetBox
 import components.newbox.UnloggedGetBox
 import components.newbox.ViewModelBox
+import viewModel.api.GymViewModel
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -31,6 +31,7 @@ fun GetPrincipalMidSection(
     scrollState: ScrollState,
     navigationActions: NavigationActions,
     navController: NavController,
+    gymViewModel: GymViewModel,
     viewModel: ViewModelBox = viewModel()
 ){
     Column (

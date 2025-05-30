@@ -27,10 +27,11 @@ import components.langSwitcher.getStringByName
 import components.registerSuggest.GetRegisterSuggest
 import components.separator.GetLoginSeparator
 import routes.NavigationActions
+import viewModel.api.GymViewModel
 import viewModel.auth.AuthViewModel
 
 @Composable
-fun GetRegisterScreen(navigationActions: NavigationActions, navController: NavHostController, viewModel: AuthViewModel = viewModel()){
+fun GetRegisterScreen(navigationActions: NavigationActions, navController: NavHostController, gymViewModel: GymViewModel,viewModel: AuthViewModel = viewModel()){
     var nickName by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }

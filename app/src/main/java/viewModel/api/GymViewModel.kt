@@ -1,7 +1,10 @@
 package viewModel.api
 
+import android.net.Uri
 import android.util.Log
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -18,8 +21,10 @@ import okhttp3.MultipartBody
 import retrofit2.Response
 import viewModel.rm.RepetitionAnalyzer
 import java.time.LocalDate
+import javax.inject.Inject
 
-class GymViewModel : ViewModel(){
+
+class GymViewModel: ViewModel(){
     private val _analyzeResponse = MutableStateFlow<String>("")
     val analyzeResponse: StateFlow<String> = _analyzeResponse
 
@@ -35,6 +40,25 @@ class GymViewModel : ViewModel(){
     private var pollingJob: Job? = null
 
     public var analysisId = mutableStateOf("")
+
+    var selectedText by mutableStateOf("")
+        private set
+    var weight by mutableStateOf("")
+        private set
+    var selectVideoUri by mutableStateOf<Uri?>(null)
+        private set
+
+    fun actualizarSelectedText(value: String){
+        selectedText = value
+    }
+
+    fun actualizarWeight(value: String){
+        weight = value
+    }
+
+    fun actualizarSelectedVideoUri(value: Uri?){
+        selectVideoUri = value
+    }
 
     fun uploadVideo(
         videoPart: MultipartBody.Part
