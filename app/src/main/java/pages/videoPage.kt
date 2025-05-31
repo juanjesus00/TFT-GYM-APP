@@ -110,7 +110,7 @@ fun GetVideoPage(
 
     var alreadySaved by remember { mutableStateOf(false) }
 
-    LaunchedEffect(results) {
+    /*LaunchedEffect(results) {
         val data = results?.results
         if (data != null && !alreadySaved) {
             try {
@@ -132,7 +132,7 @@ fun GetVideoPage(
                 Log.e("VideoPage", "Error al guardar en Firebase: ${e.message}")
             }
         }
-    }
+    }*/
 
     Column (
         modifier = Modifier
@@ -191,7 +191,7 @@ fun GetVideoPage(
 
         }
 
-        results?.results?.let {
+        /*results?.results?.let {
             viewModelRmCalculator.analyzeRepetition(weight = weight.toFloat(), reps = it.reps)
             viewModelRepository.editUserFromVideo(
                 exercise = selectedText,
@@ -203,7 +203,7 @@ fun GetVideoPage(
             gymViewModel.actualizarWeight("")
             gymViewModel.actualizarSelectedText("")
             gymViewModel.clearResponses()
-        }
+        }*/
 
         GetInputWithDropdown(
             expanded = expanded,

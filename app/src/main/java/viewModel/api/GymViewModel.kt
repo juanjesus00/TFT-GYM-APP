@@ -45,15 +45,23 @@ class GymViewModel: ViewModel(){
         private set
     var weight by mutableStateOf("")
         private set
+
+    private val _weight = MutableLiveData<String>()
+    val observeWeight: LiveData<String> = _weight
+    private val _selectedText = MutableLiveData<String>()
+    val observeSelectedText: LiveData<String> = _selectedText
+
     var selectVideoUri by mutableStateOf<Uri?>(null)
         private set
 
     fun actualizarSelectedText(value: String){
         selectedText = value
+        _selectedText.value = value
     }
 
     fun actualizarWeight(value: String){
         weight = value
+        _weight.value = value
     }
 
     fun actualizarSelectedVideoUri(value: Uri?){
