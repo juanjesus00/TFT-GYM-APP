@@ -83,8 +83,9 @@ fun GetBox(viewModel: ViewModelBox = viewModel()) {
                             targetValue = 1f,
                             animationSpec = tween(150)
                         )
+                        isVisible = !isVisible
                     }
-                    isVisible = !isVisible
+
                 },
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center

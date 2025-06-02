@@ -11,6 +11,7 @@ import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 import routes.NavigationActions
 import android.widget.Toast
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
@@ -21,8 +22,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import model.User
 import org.json.JSONObject
+import viewModel.api.GymViewModel
 import java.net.HttpURLConnection
 import java.net.URL
+import kotlin.String
+import kotlin.toString
 
 class AuthRepository : ViewModel(){
     private val auth = FirebaseAuth.getInstance()
@@ -35,6 +39,7 @@ class AuthRepository : ViewModel(){
 
     private val storageRef= FirebaseStorage.getInstance().reference
     private val dbRef = FirebaseFirestore.getInstance()
+
 
     fun signIn(
         email: String,
@@ -392,7 +397,7 @@ class AuthRepository : ViewModel(){
         }
     }
 
-    fun editUserFromVideo(exercise: String, weight: Float, repetitions: Int, date:String, rm: Float?){
+    fun editUserFromVideo(exercise: String, weight: Float, repetitions: Int, date:String, rm: Float?, onSuccess: () -> Unit){
         currentUser?.let{ user ->
             val uid = user.uid
             val db = FirebaseFirestore.getInstance()
@@ -418,6 +423,7 @@ class AuthRepository : ViewModel(){
                     .set(updateData, SetOptions.merge()) // merge para no borrar campos anteriores
                     .addOnSuccessListener {
                         Log.d("editUserFromVideo", "Datos de ejercicio actualizados correctamente")
+                        onSuccess.invoke()
                     }
                     .addOnFailureListener { e ->
                         Log.w("editUserFromVideo", "Error al actualizar datos del ejercicio", e)
@@ -446,6 +452,43 @@ class AuthRepository : ViewModel(){
                             weight = (document.getLong("weight") as Long).toInt(),
                         ).toMap()
                         onResult(user)
+                    }else{
+                        onResult(null)
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    exception.printStackTrace()
+                    onResult(null)
+                }
+        } ?: run{
+            onResult(null)
+        }
+    }
+
+    fun getHistoryUser(onResult: (List<model.Registro>?) -> Unit, exercise: String){
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        currentUser?.let { user ->
+            val uid = user.uid
+            val db = FirebaseFirestore.getInstance()
+
+            db.collection("Usuarios").document(uid).collection("Ejercicios").document(exercise).get()
+                .addOnSuccessListener { document ->
+                    if(document != null && document.exists()){
+                        val registrosRaw = document.get("registros") as? List<Map<String, Any>>
+                        val registros = registrosRaw?.mapNotNull { item ->
+                            try {
+                                model.Registro(
+                                    fecha = item["fecha"] as String,
+                                    peso = (item["peso"] as Number).toFloat(),
+                                    repeticiones = (item["repeticiones"] as Number).toInt(),
+                                    rm = (item["rm"] as Number).toFloat()
+                                )
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                                null
+                            }
+                        }
+                        onResult(registros)
                     }else{
                         onResult(null)
                     }

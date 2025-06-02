@@ -51,6 +51,9 @@ class GymViewModel: ViewModel(){
     private val _selectedText = MutableLiveData<String>()
     val observeSelectedText: LiveData<String> = _selectedText
 
+    private val _historyExercise = MutableLiveData<String>()
+    val historyExercise: LiveData<String> = _historyExercise
+
     var selectVideoUri by mutableStateOf<Uri?>(null)
         private set
 
@@ -66,6 +69,10 @@ class GymViewModel: ViewModel(){
 
     fun actualizarSelectedVideoUri(value: Uri?){
         selectVideoUri = value
+    }
+
+    fun actualizarHistoryExercise(value: String){
+        _historyExercise.value = value
     }
 
     fun uploadVideo(

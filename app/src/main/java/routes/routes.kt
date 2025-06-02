@@ -8,5 +8,7 @@ object Routes {
     const val USERPROFILE = "userprofile"
     const val VIDEO = "video"
     const val EDITUSERINFO = "editUserInfo"
+    const val HISTORY = "history"
+    const val HISTORYPAGE = "historyPage"
 
 }

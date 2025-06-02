@@ -31,6 +31,8 @@ import routes.NavigationActions
 import routes.Routes
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import pages.GetEditUserInfo
+import pages.GetHistorialPage
+import pages.GetHistory
 import pages.GetVideoPage
 import viewModel.api.GymViewModel
 
@@ -108,6 +110,8 @@ fun MyComposeApp(
                 Routes.USERPROFILE -> GetUserProfile(scrollState, navigationActions, navController,gymViewModel)
                 Routes.VIDEO -> GetVideoPage(scrollState, navigationActions, navController,gymViewModel)
                 Routes.EDITUSERINFO -> GetEditUserInfo(scrollState, navigationActions, navController,gymViewModel)
+                Routes.HISTORY -> GetHistory(scrollState, navigationActions, navController,gymViewModel)
+                Routes.HISTORYPAGE -> GetHistorialPage(scrollState, navigationActions, navController,gymViewModel)
             }
         }
     }

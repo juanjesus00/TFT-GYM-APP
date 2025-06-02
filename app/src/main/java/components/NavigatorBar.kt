@@ -98,7 +98,7 @@ fun GetNavigatorBar(navigationActions: NavigationActions, navController: NavCont
                 Image(modifier = Modifier.size(80.dp), painter = painterResource(R.drawable.video_analisis), contentDescription = "video")
             }
             IconButton(
-                onClick = {}
+                onClick = {navigationActions.navigateToUserProfile()}
             ) {
                 Image(painter = painterResource(R.drawable.user_icon), contentDescription = "user")
             }

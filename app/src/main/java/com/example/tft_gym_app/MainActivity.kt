@@ -1,5 +1,11 @@
 package com.example.tft_gym_app
 
+import android.Manifest
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -9,6 +15,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -24,11 +34,28 @@ import routes.Routes
 import uiPrincipal.MyComposeApp
 import viewModel.api.GymViewModel
 import viewModel.rm.RmCalculator
+import android.Manifest.permission.POST_NOTIFICATIONS
+import android.annotation.SuppressLint
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.workDataOf
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, POST_NOTIFICATIONS)
+                != PackageManager.PERMISSION_GRANTED
+            ) {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(POST_NOTIFICATIONS),
+                    1001
+                )
+            }
+        }
         FirebaseApp.initializeApp(this)
+        createNotificationChannel()
         enableEdgeToEdge()
 
         setContent {
@@ -52,13 +79,13 @@ class MainActivity : ComponentActivity() {
                                     weight = weight?.toFloat() ?: 0f,
                                     reps = result.results.reps
                                 )
-
                                 viewModelRepository.editUserFromVideo(
                                     exercise = selectedText.toString(),
                                     weight = weight?.toFloat() ?: 0f,
                                     repetitions = result.results.reps,
                                     date = currentDateTime.toString(),
-                                    rm = rm
+                                    rm = rm,
+                                    onSuccess = {showSuccessNotification(this@MainActivity)} // een este caso siempre redirige a Home, pero deberia de enviar una notificacion al usuario
                                 )
                                 gymViewModel.actualizarWeight("")
                                 gymViewModel.actualizarSelectedText("")
@@ -70,6 +97,7 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 }
+
                 NavHost(navController = navController, startDestination = Routes.HOME){
                     composable(Routes.HOME){ MyComposeApp(navigationActions, navController,gymViewModel) }
                     composable(Routes.LOGIN){ GetLoginScreen(navigationActions, navController,gymViewModel) }
@@ -78,8 +106,42 @@ class MainActivity : ComponentActivity() {
                     composable(Routes.USERPROFILE){ MyComposeApp(navigationActions, navController,gymViewModel) }
                     composable(Routes.VIDEO){ MyComposeApp(navigationActions, navController,gymViewModel) }
                     composable(Routes.EDITUSERINFO){ MyComposeApp(navigationActions, navController,gymViewModel) }
+                    composable(Routes.HISTORY){ MyComposeApp(navigationActions, navController,gymViewModel) }
+                    composable(Routes.HISTORYPAGE){ MyComposeApp(navigationActions, navController,gymViewModel) }
                 }
 
+            }
+        }
+    }
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val name = "Datos guardados"
+            val descriptionText = "Notifica cuando los datos del usuario han sido guardados"
+            val importance = NotificationManager.IMPORTANCE_DEFAULT
+            val channel = NotificationChannel("firebase_channel", name, importance).apply {
+                description = descriptionText
+            }
+            val notificationManager: NotificationManager =
+                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
+    }
+    private fun showSuccessNotification(context: Context) {
+        val builder = NotificationCompat.Builder(this, "firebase_channel")
+            .setSmallIcon(R.drawable.ic_launcher_foreground) // Usa tu icono aquí
+            .setContentTitle("AI análisis")
+            .setContentText("El video se ha analizado correctemente")
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+
+        with(NotificationManagerCompat.from(this)) {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+                ContextCompat.checkSelfPermission(context, POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+            ) {
+                with(NotificationManagerCompat.from(context)) {
+                    notify(1001, builder.build())
+                }
+            } else {
+                Log.w("Notificación", "Permiso POST_NOTIFICATIONS denegado. No se puede mostrar la notificación.")
             }
         }
     }

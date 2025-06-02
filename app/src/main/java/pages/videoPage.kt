@@ -74,13 +74,8 @@ fun GetVideoPage(
     val selectedText = gymViewModel.selectedText //by remember { mutableStateOf("") }
     val weight = gymViewModel.weight
     val selectVideoUri = gymViewModel.selectVideoUri
-    val rm by viewModelRmCalculator.estimatedRm.observeAsState()
-    val currentDateTime = java.time.LocalDate.now()
 
-    val progress by gymViewModel.progress.collectAsState()
-    val progressFloat = progress.toFloatOrNull()?.div(100f) ?: 0f
     val analysis by gymViewModel.analyzeResponse.collectAsState()
-    val results by gymViewModel.resultResponse.collectAsState()
     val isLoading by gymViewModel.loading.collectAsState()
 
     var videoBody by remember { mutableStateOf<MultipartBody.Part?>(null) }
@@ -109,30 +104,6 @@ fun GetVideoPage(
     }
 
     var alreadySaved by remember { mutableStateOf(false) }
-
-    /*LaunchedEffect(results) {
-        val data = results?.results
-        if (data != null && !alreadySaved) {
-            try {
-                viewModelRmCalculator.analyzeRepetition(
-                    weight = weight.toFloat(),
-                    reps = data.reps
-                )
-
-                viewModelRepository.editUserFromVideo(
-                    exercise = selectedText,
-                    weight = weight.toFloat(),
-                    repetitions = data.reps,
-                    date = currentDateTime.toString(),
-                    rm = rm
-                )
-
-                alreadySaved = true // Para evitar repeticiones
-            } catch (e: Exception) {
-                Log.e("VideoPage", "Error al guardar en Firebase: ${e.message}")
-            }
-        }
-    }*/
 
     Column (
         modifier = Modifier
@@ -190,20 +161,6 @@ fun GetVideoPage(
             }
 
         }
-
-        /*results?.results?.let {
-            viewModelRmCalculator.analyzeRepetition(weight = weight.toFloat(), reps = it.reps)
-            viewModelRepository.editUserFromVideo(
-                exercise = selectedText,
-                weight = weight.toFloat(),
-                repetitions = it.reps,
-                date = currentDateTime.toString(),
-                rm = rm
-            )
-            gymViewModel.actualizarWeight("")
-            gymViewModel.actualizarSelectedText("")
-            gymViewModel.clearResponses()
-        }*/
 
         GetInputWithDropdown(
             expanded = expanded,

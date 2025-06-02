@@ -59,7 +59,7 @@ fun HamburgerMenu(
                 GetItem("my_data", 0, navigationActions, LocalContext, onClick = {navigationActions.navigateToUserProfile()})
                 GetItem("favoriote_videos", 0, navigationActions, LocalContext, onClick = {})
                 GetItem("routines", 0, navigationActions, LocalContext, onClick = {})
-                GetItem("record", 0, navigationActions, LocalContext, onClick = {})
+                GetItem("record", 0, navigationActions, LocalContext, onClick = {navigationActions.navigateToHistory()})
             }else{
                 GetItem("login_button", 0, navigationActions, LocalContext, onClick = {navigationActions.navigateToLogin()})
                 GetItem("register_button", 0, navigationActions, LocalContext, onClick = {navigationActions.navigateToRegister()})
