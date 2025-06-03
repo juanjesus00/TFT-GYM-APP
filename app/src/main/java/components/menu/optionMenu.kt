@@ -47,9 +47,12 @@ fun GetOptionMenu(
     navController: NavController,
     isMenuVisible: Boolean,
     onDismiss: () -> Unit,
-    viewModelRepository: AuthRepository = viewModel()
+    onClickAction1: () -> Unit,
+    actionText1: String,
+    onClickAction2: () -> Unit,
+    actionText2: String
 ){
-    val context = LocalContext.current
+
     if(isMenuVisible){
         Dialog(onDismissRequest = onDismiss) {
             Column(
@@ -59,16 +62,20 @@ fun GetOptionMenu(
                 verticalArrangement = Arrangement.spacedBy(20.dp, Alignment.CenterVertically),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                getStringByName(LocalContext.current, "accept")?.let{
+                getStringByName(LocalContext.current, actionText1)?.let{
                     GetOptionButton(
                         text = it,
-                        onClick = {viewModelRepository.deleteUser(context = context, onSuccess = {navigationActions.navigateToHome()})}
+                        onClick = {
+                            onClickAction1.invoke()
+                        }
                     )
                 }
-                getStringByName(LocalContext.current, "cancel")?.let{
+                getStringByName(LocalContext.current, actionText2)?.let{
                     GetOptionButton(
                         text = it,
-                        onClick = {onDismiss()}
+                        onClick = {
+                            onClickAction2.invoke()
+                        }
                     )
                 }
 

@@ -36,4 +36,10 @@
     <string name="gender" translatable="false">Género</string>
     <string name="birthdate" translatable="false">Fecha de nacimiento</string>
     <string name="analyze" translatable="false">Analizar</string>
+    <string name="edit" translatable="false">Editar</string>
+    <string name="delete" translatable="false">Borrar</string>
+    <string name="date" translatable="false">Fecha</string>
+    <string name="repetitions" translatable="false">Repeticiones</string>
+    <string name="rm" translatable="false">Repetición Máxima</string>
+    <string name="add" translatable="false">Añadir</string>
 </resources>

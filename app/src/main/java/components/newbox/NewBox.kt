@@ -99,7 +99,7 @@ fun GetBox(viewModel: ViewModelBox = viewModel()) {
             )
 
         }
-        CascadingPopup(isVisible = isVisible, anchorBounds = anchorBounds, screenWidthPx = screenWidthPx, onDismiss = {isVisible = false}, listIcons = listOf(R.drawable.chart, R.drawable.schedule, R.drawable.video, R.drawable.pr))
+        CascadingPopup(isVisible = isVisible, anchorBounds = anchorBounds, screenWidthPx = screenWidthPx, onDismiss = {isVisible = false}, listIcons = listOf(R.drawable.chart, R.drawable.schedule, R.drawable.video, R.drawable.pr), onClick = {viewModel.addBox()})
     }
 
 }

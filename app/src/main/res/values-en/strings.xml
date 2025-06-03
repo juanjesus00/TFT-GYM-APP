@@ -37,4 +37,10 @@
     <string name="gender" translatable="false">Gender</string>
     <string name="birthdate" translatable="false">Birthdate</string>
     <string name="analyze" translatable="false">Analyze</string>
+    <string name="edit" translatable="false">Edit</string>
+    <string name="delete" translatable="false">Delete</string>
+    <string name="date" translatable="false">Date</string>
+    <string name="repetitions" translatable="false">Repetitions</string>
+    <string name="rm" translatable="false">Maximum Repetition</string>
+    <string name="add" translatable="false">Add On</string>
 </resources>

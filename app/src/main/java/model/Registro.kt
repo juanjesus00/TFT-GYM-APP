@@ -3,10 +3,10 @@ package model
 import java.util.Date
 
 data class Registro (
-    val fecha: String,
-    val peso: Float,
-    val repeticiones: Int,
-    val rm: Float
+    var fecha: String,
+    var peso: Float,
+    var repeticiones: Int,
+    var rm: Float
 ) {
     fun toMap(): MutableMap<String, Any>{
         return mutableMapOf(

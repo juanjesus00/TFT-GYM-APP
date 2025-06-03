@@ -20,6 +20,7 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import model.Registro
 import model.User
 import org.json.JSONObject
 import viewModel.api.GymViewModel
@@ -429,6 +430,35 @@ class AuthRepository : ViewModel(){
                         Log.w("editUserFromVideo", "Error al actualizar datos del ejercicio", e)
                     }
             }
+        }
+    }
+
+    fun updateHistoryUser(history: List<Registro>, rm: Float, exercise: String, onSuccess: () -> Unit){
+        currentUser?.let{ user ->
+            val uid = user.uid
+            val db = FirebaseFirestore.getInstance()
+
+            calculateUserMaxRm(rm ?: 0f, exercise) { isNewMaxRm ->
+                val updateData = hashMapOf<String, Any>(
+                    "registros" to FieldValue.arrayUnion(history)
+                )
+
+                if (isNewMaxRm) {
+                    updateData["max_rm"] = rm ?: 0f
+                }
+
+                db.collection("Usuarios").document(uid)
+                    .collection("Ejercicios").document(exercise)
+                    .set(updateData, SetOptions.merge()) // merge para no borrar campos anteriores
+                    .addOnSuccessListener {
+                        Log.d("editUserFromVideo", "Datos de ejercicio actualizados correctamente")
+                        onSuccess.invoke()
+                    }
+                    .addOnFailureListener { e ->
+                        Log.w("editUserFromVideo", "Error al actualizar datos del ejercicio", e)
+                    }
+            }
+
         }
     }
 

@@ -50,8 +50,8 @@ fun CascadingPopup(
     anchorBounds: Rect?,
     screenWidthPx: Float,
     onDismiss: () -> Unit,
-    listIcons: List<Int>,
-    viewModel: ViewModelBox = viewModel()
+    onClick: () -> Unit,
+    listIcons: List<Int>
 ) {
     if (!isVisible || anchorBounds == null) return
 
@@ -112,7 +112,7 @@ fun CascadingPopup(
         ) {
 
             listIcons.forEachIndexed { index, iconRes ->
-                AnimatedIconWithCascade(iconRes, index, onDismiss,viewModel)
+                AnimatedIconWithCascade(iconRes, index, onDismiss,onClick)
             }
         }
     }
@@ -125,7 +125,7 @@ fun AnimatedIconWithCascade(
     iconRes: Int,
     index: Int,
     onDismiss: () -> Unit,
-    viewModel: ViewModelBox
+    onClick: () -> Unit
 ) {
     var visible by remember { mutableStateOf(false) }
 
@@ -158,7 +158,7 @@ fun AnimatedIconWithCascade(
             .clip(CircleShape)
             .background(Color(0xFF161818))
             .clickable {
-                viewModel.addBox()
+                onClick.invoke()
                 onDismiss()
                        },
         contentAlignment = Alignment.Center,

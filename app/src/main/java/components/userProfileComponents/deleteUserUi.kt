@@ -10,15 +10,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import components.buttons.GetDefaultButton
 import components.langSwitcher.getStringByName
 import components.menu.GetOptionMenu
+import firebase.auth.AuthRepository
 import routes.NavigationActions
 
 @Composable
-fun GetDeleteUserUi(navigationActions: NavigationActions, navController: NavController) {
+fun GetDeleteUserUi(navigationActions: NavigationActions, navController: NavController, viewModelRepository: AuthRepository = viewModel()) {
     var isVisible by remember { mutableStateOf(false) }
+    val context = LocalContext.current
     Box (
         modifier = Modifier.fillMaxWidth(),
         contentAlignment = Alignment.Center
@@ -30,7 +33,11 @@ fun GetDeleteUserUi(navigationActions: NavigationActions, navController: NavCont
             isMenuVisible = isVisible,
             onDismiss = { isVisible = false},
             navigationActions = navigationActions,
-            navController = navController
+            navController = navController,
+            onClickAction1 = {viewModelRepository.deleteUser(context = context, onSuccess = {navigationActions.navigateToHome()})},
+            actionText1 = "accept",
+            onClickAction2 = {isVisible = false},
+            actionText2 = "cancel"
         )
     }
 }

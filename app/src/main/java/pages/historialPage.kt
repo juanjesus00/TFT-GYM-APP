@@ -20,6 +20,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -37,7 +38,11 @@ import androidx.navigation.NavController
 import com.example.tft_gym_app.R
 import com.example.tft_gym_app.ui.theme.detailsColor
 import components.box.GetHistoryDayBox
+import components.buttons.GetOptionButton
+import components.chart.HistoryChart
 import components.langSwitcher.getStringByName
+import components.menu.GetEditHistoryMenu
+import components.menu.GetSettingMenu
 import firebase.auth.AuthRepository
 import routes.NavigationActions
 import viewModel.api.GymViewModel
@@ -54,6 +59,11 @@ fun GetHistorialPage(
     val exercise by gymViewModel.historyExercise.observeAsState()
     val context = LocalContext.current
     var history by remember { mutableStateOf(emptyList<model.Registro>()) }
+    var changeMode by remember { mutableStateOf(false) }
+    var editableMenu by remember { mutableStateOf(false) }
+
+
+
     LaunchedEffect(Unit) {
         getStringByName(context, exercise.toString())?.let{
             authRepository.getHistoryUser( exercise = it, onResult = { value ->
@@ -72,7 +82,9 @@ fun GetHistorialPage(
         modifier = Modifier
             .fillMaxSize()
             .padding(top = 120.dp)
-            .verticalScroll(scrollState)
+            .verticalScroll(scrollState),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
     ){
         Row (
             modifier = Modifier
@@ -81,7 +93,7 @@ fun GetHistorialPage(
             horizontalArrangement = Arrangement.SpaceBetween
 
         ){
-            getStringByName(LocalContext.current, exercise?:"")?.let{
+            getStringByName(context, exercise?:"")?.let{
                 Text(
                     buildAnnotatedString {
                         withStyle(style = SpanStyle(brush = gradient, fontSize = 20.sp, fontWeight = FontWeight.Bold)) {
@@ -92,29 +104,69 @@ fun GetHistorialPage(
             }
 
             Icon(
-                painter = painterResource(R.drawable.chart),
+                painter = if(!changeMode) painterResource(R.drawable.chart) else painterResource(R.drawable.schedule),
                 contentDescription = "history type",
                 tint = detailsColor,
                 modifier = Modifier
                     .size(30.dp)
                     .clickable(
-                        onClick = {}
+                        onClick = {
+                            changeMode = !changeMode
+                        }
                     )
             )
         }
 
-        history.forEachIndexed { index, item ->
-            GetHistoryDayBox(
-                date = item.fecha,
-                isExpanded = expandedIndex == index,
-                onToggleExpand = {
-                    expandedIndex = if (expandedIndex == index) -1 else index
-                },
-                peso = "${item.peso} KG",
-                repeticiones = item.repeticiones.toString(),
-                rm = "${item.rm} KG"
+        if(changeMode){
+            getStringByName(context, exercise.toString())?.let{
+                HistoryChart(history = history, exerciseName = it)
+            }
+
+        }else{
+            history.forEachIndexed { index, item ->
+                Row (
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(20.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ){
+                    GetHistoryDayBox(
+                        date = item.fecha,
+                        isExpanded = expandedIndex == index,
+                        onToggleExpand = {
+                            expandedIndex = if (expandedIndex == index) -1 else index
+                        },
+                        peso = "${item.peso} KG",
+                        repeticiones = item.repeticiones.toString(),
+                        rm = "${item.rm} KG"
+                    )
+
+                    GetSettingMenu(navigationActions, navController, index, history, exercise)
+
+                }
+
+            }
+
+            getStringByName(context, "add")?.let{
+                GetOptionButton(
+                    text = it,
+                    onClick = {
+                        editableMenu = !editableMenu
+                    }
+                )
+            }
+            GetEditHistoryMenu(
+                navigationActions = navigationActions,
+                navController = navController,
+                isMenuVisible = editableMenu,
+                onDismiss = {editableMenu = false},
+                onAccept = "add",
+                index = 0,
+                history = history,
+                exercise = exercise
             )
         }
+
 
     }
 }

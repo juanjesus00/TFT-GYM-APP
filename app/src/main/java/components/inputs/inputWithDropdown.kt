@@ -51,7 +51,7 @@ fun GetInputWithDropdown(
                                },
             modifier = Modifier
                 .background(Color(0xFF161818), shape = RoundedCornerShape(bottomEnd = 20.dp, bottomStart = 20.dp)),
-            shape = RoundedCornerShape(bottomEnd = 20.dp, bottomStart = 20.dp)
+            shape = RoundedCornerShape(20.dp)
         ) {
             options.forEach { selectionOption ->
                 DropdownMenuItem(
