@@ -42,4 +42,6 @@
     <string name="repetitions" translatable="false">Repeticiones</string>
     <string name="rm" translatable="false">Repetición Máxima</string>
     <string name="add" translatable="false">Añadir</string>
+    <string name="CompletePrifile" translatable="false">Completa el perfil para visualizar mas información</string>
+    <string name="personalRecords" translatable="false">Record Personales</string>
 </resources>

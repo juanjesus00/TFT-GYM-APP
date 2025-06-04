@@ -26,6 +26,8 @@ import org.json.JSONObject
 import viewModel.api.GymViewModel
 import java.net.HttpURLConnection
 import java.net.URL
+import java.text.SimpleDateFormat
+import java.util.Locale
 import kotlin.String
 import kotlin.toString
 
@@ -236,7 +238,7 @@ class AuthRepository : ViewModel(){
         profileImage: String
     ) {
         val userId = auth.currentUser?.uid
-        val user = model.User(
+        val user = User(
             userId = userId.toString(),
             userName = displayName,
             profileImageUrl = profileImage,
@@ -247,7 +249,7 @@ class AuthRepository : ViewModel(){
             height = 0
         ).toMap()
 
-        val registro = model.Registro(
+        val registro = Registro(
             fecha = "",
             peso = 0f,
             repeticiones = 0,
@@ -261,7 +263,7 @@ class AuthRepository : ViewModel(){
                 Log.d("loginbackend", "Creado ${it}")
                 FirebaseFirestore.getInstance().collection("Usuarios")
                     .document(userId.toString()).collection("Ejercicios").document("Press de Banca").set(hashMapOf(
-                        "registros" to listOf(registro),
+                        "registros" to listOf(null),
                         "max_rm" to 0
                     )).addOnSuccessListener {
                         Log.d("loginbackend", "Creado ${it}")
@@ -270,7 +272,7 @@ class AuthRepository : ViewModel(){
                     }
                 FirebaseFirestore.getInstance().collection("Usuarios")
                     .document(userId.toString()).collection("Ejercicios").document("Peso Muerto").set(hashMapOf(
-                        "registros" to listOf(registro),
+                        "registros" to listOf(null),
                         "max_rm" to 0
                     )).addOnSuccessListener {
                         Log.d("loginbackend", "Creado ${it}")
@@ -279,7 +281,7 @@ class AuthRepository : ViewModel(){
                     }
                 FirebaseFirestore.getInstance().collection("Usuarios")
                     .document(userId.toString()).collection("Ejercicios").document("Sentadilla").set(hashMapOf(
-                        "registros" to listOf(registro),
+                        "registros" to listOf(null),
                         "max_rm" to 0
                     )).addOnSuccessListener {
                         Log.d("loginbackend", "Creado ${it}")
@@ -403,7 +405,7 @@ class AuthRepository : ViewModel(){
             val uid = user.uid
             val db = FirebaseFirestore.getInstance()
 
-            val registro = model.Registro(
+            val registro = Registro(
                 fecha = date,
                 peso = weight,
                 repeticiones = repetitions,
@@ -434,13 +436,15 @@ class AuthRepository : ViewModel(){
     }
 
     fun updateHistoryUser(history: List<Registro>, rm: Float, exercise: String, onSuccess: () -> Unit){
+        val historySorted = sortHistoryFromFecha(history)
+
         currentUser?.let{ user ->
             val uid = user.uid
             val db = FirebaseFirestore.getInstance()
 
             calculateUserMaxRm(rm ?: 0f, exercise) { isNewMaxRm ->
                 val updateData = hashMapOf<String, Any>(
-                    "registros" to FieldValue.arrayUnion(history)
+                    "registros" to historySorted
                 )
 
                 if (isNewMaxRm) {
@@ -461,6 +465,47 @@ class AuthRepository : ViewModel(){
 
         }
     }
+    fun deleteHistoryRegistro(history: List<Registro>, rm: Float, exercise: String, onSuccess: () -> Unit){
+        val historySorted = sortHistoryFromFecha(history)
+
+        currentUser?.let{ user ->
+            val uid = user.uid
+            val db = FirebaseFirestore.getInstance()
+
+            val updateData = hashMapOf<String, Any>(
+                "registros" to historySorted
+            )
+
+            updateData["max_rm"] = rm ?: 0f
+
+            db.collection("Usuarios").document(uid)
+                .collection("Ejercicios").document(exercise)
+                .set(updateData, SetOptions.merge()) // merge para no borrar campos anteriores
+                .addOnSuccessListener {
+                    Log.d("editUserFromVideo", "Datos de ejercicio actualizados correctamente")
+                    onSuccess.invoke()
+                }
+                .addOnFailureListener { e ->
+                    Log.w("editUserFromVideo", "Error al actualizar datos del ejercicio", e)
+                }
+
+        }
+    }
+
+    fun sortHistoryFromFecha(history: List<Registro>): List<Registro> {
+        val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        return history.sortedBy { registro ->
+            try {
+                formatter.parse(registro.fecha)
+            } catch (e: Exception) {
+                null
+            }
+        }
+    }
+
+    fun getNewMaxRmFromHistory(history: List<Registro>): Float {
+        return history.maxOfOrNull { it.rm } ?: 0f
+    }
 
     fun getInfoUser(onResult: (Map<String, Any>?) -> Unit){
         val currentUser = FirebaseAuth.getInstance().currentUser
@@ -471,7 +516,7 @@ class AuthRepository : ViewModel(){
             db.collection("Usuarios").document(uid).get()
                 .addOnSuccessListener { document ->
                     if(document != null && document.exists()){
-                        val user = model.User(
+                        val user = User(
                             userId = document.getString("user_id").toString(),
                             email = document.getString("email").toString(),
                             userName = document.getString("userName").toString(),
@@ -495,7 +540,7 @@ class AuthRepository : ViewModel(){
         }
     }
 
-    fun getHistoryUser(onResult: (List<model.Registro>?) -> Unit, exercise: String){
+    fun getHistoryUser(onResult: (List<Registro>?) -> Unit, exercise: String){
         val currentUser = FirebaseAuth.getInstance().currentUser
         currentUser?.let { user ->
             val uid = user.uid
@@ -507,7 +552,7 @@ class AuthRepository : ViewModel(){
                         val registrosRaw = document.get("registros") as? List<Map<String, Any>>
                         val registros = registrosRaw?.mapNotNull { item ->
                             try {
-                                model.Registro(
+                                Registro(
                                     fecha = item["fecha"] as String,
                                     peso = (item["peso"] as Number).toFloat(),
                                     repeticiones = (item["repeticiones"] as Number).toInt(),
@@ -529,6 +574,45 @@ class AuthRepository : ViewModel(){
                 }
         } ?: run{
             onResult(null)
+        }
+    }
+
+    fun getRMUser(onResult: (Map<String, Float>) -> Unit){
+        var resultList = mutableMapOf<String, Float>()
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        currentUser?.let { user ->
+            val uid = user.uid
+            val db = FirebaseFirestore.getInstance()
+            val listExercise = listOf("Press de Banca", "Peso Muerto", "Sentadilla")
+            var completedRequests = 0
+
+            listExercise.forEach { exerciseName ->
+                db.collection("Usuarios").document(uid)
+                    .collection("Ejercicios").document(exerciseName).get()
+                    .addOnSuccessListener { document ->
+                        if (document != null && document.exists()) {
+                            val value = document.get("max_rm")
+                            resultList[exerciseName] = (value as? Number)?.toFloat() ?: 0f
+                        } else {
+                            resultList[exerciseName] = 0f
+                        }
+                        completedRequests++
+                        if (completedRequests == listExercise.size) {
+                            onResult(resultList)
+                        }
+                    }
+                    .addOnFailureListener { exception ->
+                        exception.printStackTrace()
+                        completedRequests++
+                        resultList[exerciseName] = 0f
+                        if (completedRequests == listExercise.size) {
+                            onResult(resultList)
+                        }
+                    }
+            }
+
+        } ?: run{
+            onResult(resultList)
         }
     }
 

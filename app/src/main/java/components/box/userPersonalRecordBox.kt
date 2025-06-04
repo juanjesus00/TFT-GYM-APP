@@ -33,24 +33,30 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import components.langSwitcher.getStringByName
 
 @Composable
-fun GetUserPersonalRecordBox(){
+fun GetUserPersonalRecordBox(exercise: String, rm: Float) {
     val gradient = Brush.linearGradient(
         colors = listOf(Color(0xFFD78323), Color(0xFF27DD03)),
         start = Offset(25f, 25f),
         end = Offset(100f, 100f)
     )
     var expanded by remember { mutableStateOf(false) }
-
+    val translationKeys = mapOf(
+        "Press de Banca" to "bench_press",
+        "Peso Muerto" to "dead_lift",
+        "Sentadilla" to "squad"
+    )
     val width by animateDpAsState(
-        targetValue = if (expanded) 350.dp else 100.dp,
+        targetValue = if (expanded) 350.dp else 120.dp,
         animationSpec = tween(durationMillis = 350),
         label = "Width Animation"
     )
@@ -58,8 +64,8 @@ fun GetUserPersonalRecordBox(){
     Box(
         modifier = Modifier
             .width(width)
-            .height(100.dp)
-            .clip(RoundedCornerShape(50)) // Círculo cerrado + extremos redondeados al expandirse
+            .height(120.dp)
+            .clip(RoundedCornerShape(60)) // Círculo cerrado + extremos redondeados al expandirse
             .background(if (expanded) Color(0xFFD78323) else Color(0xFF161818))
             .clickable { expanded = !expanded },
         contentAlignment = Alignment.CenterStart
@@ -71,18 +77,24 @@ fun GetUserPersonalRecordBox(){
             // Círculo fijo
             Box(
                 modifier = Modifier
-                    .size(100.dp)
-                    .clip(CircleShape)
+                    .size(120.dp)
+                    .clip(RoundedCornerShape(60))
                     .background(Color(0xFF161818)),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    buildAnnotatedString {
-                        withStyle(style = SpanStyle(brush = gradient, fontSize = 15.sp, fontWeight = FontWeight.Bold)) {
-                            append("sentadilla")
-                        }
+                translationKeys[exercise]?.let { value ->
+                    getStringByName(LocalContext.current, value)?.let{
+                        Text(
+                            buildAnnotatedString {
+                                withStyle(style = SpanStyle(brush = gradient, fontSize = 15.sp, fontWeight = FontWeight.Bold)) {
+                                    append(it)
+                                }
+                            }
+                        )
                     }
-                )
+                }
+
+
             }
 
             // Contenido extra, visible solo si está expandido
@@ -98,7 +110,7 @@ fun GetUserPersonalRecordBox(){
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    InfoColumn(title = "Record", value = "140 kg")
+                    InfoColumn(title = "Record", value = "${String.format("%.2f", rm)} KG")
                     InfoColumn(title = "Nivel", value = "Élite")
                     InfoColumn(title = "Rareza", value = "0.5%")
                 }

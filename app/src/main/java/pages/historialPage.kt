@@ -83,7 +83,6 @@ fun GetHistorialPage(
             .fillMaxSize()
             .padding(top = 120.dp)
             .verticalScroll(scrollState),
-        verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ){
         Row (

@@ -101,7 +101,11 @@ fun GetEditHistoryMenu(
                         onClick = {
                             getStringByName(context, exercise?:"")?.let {
                                 when(onAccept){
-                                    "add" -> authRepository.editUserFromVideo(exercise = it, date = date, weight = weight.toFloat(), repetitions = repetitions.toInt(), rm = rm.toFloat(), onSuccess = {navigationActions.navigateToHome()})
+                                    "add" -> {
+                                        val newHistory = history.toMutableList()
+                                        newHistory.add(model.Registro(fecha = date, peso = weight.toFloat(), repeticiones = repetitions.toInt(), rm = rm.toFloat()))
+                                        authRepository.updateHistoryUser(history = newHistory, rm = rm.toFloat(), exercise = it, onSuccess = {navigationActions.navigateToHistory()})
+                                    }//authRepository.editUserFromVideo(exercise = it, date = date, weight = weight.toFloat(), repetitions = repetitions.toInt(), rm = rm.toFloat(), onSuccess = {navigationActions.navigateToHistory()})
                                     "edit" -> {
                                         history.forEachIndexed { i, item ->
                                             if (i == index) {

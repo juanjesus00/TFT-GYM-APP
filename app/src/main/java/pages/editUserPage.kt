@@ -174,8 +174,8 @@ fun GetEditUserInfo(
                             profileImageUrl = infoUser["profileImageUrl"].toString(),
                             gender = gender,
                             birthDate = birthdate,
-                            weight = weight.toInt(),
-                            height = height.toInt()
+                            weight = weight.toInt() ?: 0,
+                            height = height.toInt() ?: 0
                         ),
                         onSuccess = {
                             if(selectImageUri != null ) authRepository.editUserImageStorage(uriImage = selectImageUri, onSuccess = {navigationActions.navigateToHome()}) else navigationActions.navigateToHome()

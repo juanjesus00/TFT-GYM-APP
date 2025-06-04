@@ -45,7 +45,6 @@ fun GetSettingMenu(
     val screenWidthPx = with(LocalDensity.current) {
         configuration.screenWidthDp.dp.toPx()
     }
-    val rm = history[index].rm
     val context = LocalContext.current
 
 
@@ -78,8 +77,9 @@ fun GetSettingMenu(
             isVisible = false
             val newHistory = history.toMutableList()
             newHistory.removeAt(index)
+            val rm = authRepository.getNewMaxRmFromHistory(newHistory)
             getStringByName(context, exercise?:"")?.let{
-                authRepository.updateHistoryUser(history = newHistory, rm = rm, exercise = it, onSuccess = {navigationActions.navigateToHistory()})
+                authRepository.deleteHistoryRegistro(history = newHistory, rm = rm, exercise = it, onSuccess = {navigationActions.navigateToHistory()})
             }
                          },
         actionText2 = "delete")

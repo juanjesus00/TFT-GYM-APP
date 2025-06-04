@@ -53,7 +53,7 @@ fun GetUserDataScreen(navigationActions: NavigationActions, navController: NavHo
                 placeholder = it
             )
         }
-        getStringByName(context, "birthDate")?.let{
+        getStringByName(context, "birthdate")?.let{
             GetInputLogin(
                 text = birthDate,
                 onValueChange = { birthDate = it },
@@ -77,13 +77,11 @@ fun GetUserDataScreen(navigationActions: NavigationActions, navController: NavHo
                 placeholder = it
             )
         }
-        getStringByName(context, "next")?.let{
-            GetNextButton (
-                buttonText = it,
-                onNextButton = { viewModel.editUser(gender = gender, birthDate = birthDate, weight = weight.toInt(), height = height.toInt(), onSuccess = {navigationActions.navigateToHome()})},
-                enable = gender.isNotEmpty() && birthDate.isNotEmpty() && weight.isNotEmpty() && height.isNotEmpty()
-            )
-        }
+        GetNextButton (
+            buttonText = "accept",
+            onNextButton = { viewModel.editUser(gender = gender, birthDate = birthDate, weight = weight.toInt(), height = height.toInt(), onSuccess = {navigationActions.navigateToHome()})},
+            enable = gender.isNotEmpty() && birthDate.isNotEmpty() && weight.isNotEmpty() && height.isNotEmpty()
+        )
 
 
         getStringByName(context, "cancel")?.let {

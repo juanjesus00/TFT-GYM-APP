@@ -57,7 +57,7 @@ fun HistoryChart(
     }
     val options = listOf(TimeFilter.LAST_7_DAYS.toString(), TimeFilter.LAST_MONTH.toString(), TimeFilter.LAST_YEAR.toString(), TimeFilter.ALL.toString())
     var expanded by remember { mutableStateOf(false) }
-    val formatter = remember { SimpleDateFormat("YYYY-MM-DD", Locale.getDefault()) }
+    val formatter = remember { SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()) }
     val now = remember { Date() }
 
     var selectedFilter by remember { mutableStateOf(TimeFilter.ALL) }
@@ -66,8 +66,14 @@ fun HistoryChart(
     // UI: Selectores de filtro y tipo de gráfico
 
     val filteredHistory = remember(history, selectedFilter) {
-        history.filter {
-            val date = formatter.parse(it.fecha)
+        history.mapNotNull {
+            val date = try {
+                formatter.parse(it.fecha)
+            } catch (e: Exception) {
+                null
+            }
+            if (date != null) Pair(it, date) else null
+        }.filter { (_, date) ->
             val diff = now.time - date.time
             when (selectedFilter) {
                 TimeFilter.LAST_7_DAYS -> diff <= 7 * 24 * 60 * 60 * 1000
@@ -75,7 +81,8 @@ fun HistoryChart(
                 TimeFilter.LAST_YEAR -> diff <= 365L * 24 * 60 * 60 * 1000
                 TimeFilter.ALL -> true
             }
-        }.sortedBy { formatter.parse(it.fecha) }
+        }.map { it.first } // Te quedas solo con el Registro
+            .sortedBy { formatter.parse(it.fecha) }
     }
 
     if (filteredHistory.isEmpty()) {
