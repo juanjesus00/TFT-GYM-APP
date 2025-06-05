@@ -13,13 +13,13 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
@@ -28,6 +28,8 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.*
 import com.example.tft_gym_app.ui.theme.darkDetailColor
@@ -35,24 +37,16 @@ import com.example.tft_gym_app.ui.theme.detailsColor
 import components.inputs.GetInputWithDropdown
 import kotlinx.coroutines.launch
 import model.Registro
+import okhttp3.internal.platform.android.AndroidLogHandler.close
 import java.text.SimpleDateFormat
 import java.util.*
+import com.example.tft_gym_app.R
 
+import kotlin.io.path.moveTo
 
-enum class TimeFilter(val label: String) {
-    LAST_7_DAYS("Últimos 7 días"),
-    LAST_MONTH("Último mes"),
-    LAST_YEAR("Último año"),
-    ALL("Todos")
-}
-
-enum class ChartType(val label: String) {
-    LINE("Línea"),
-    BAR("Barras")
-}
 
 @Composable
-fun HistoryChart(
+fun SmallHistoryChart(
     history: List<Registro>,
     exerciseName: String
 ) {
@@ -60,13 +54,12 @@ fun HistoryChart(
         Text("No hay datos disponibles para $exerciseName")
         return
     }
-    val options = listOf(TimeFilter.LAST_7_DAYS.toString(), TimeFilter.LAST_MONTH.toString(), TimeFilter.LAST_YEAR.toString(), TimeFilter.ALL.toString())
-    var expanded by remember { mutableStateOf(false) }
+
     val formatter = remember { SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()) }
     val now = remember { Date() }
 
     var selectedFilter by remember { mutableStateOf(TimeFilter.ALL) }
-    var chartType by remember { mutableStateOf(ChartType.LINE) }
+
 
     // UI: Selectores de filtro y tipo de gráfico
 
@@ -90,18 +83,20 @@ fun HistoryChart(
             .sortedBy { formatter.parse(it.fecha) }
     }
 
-    if (filteredHistory.isEmpty()) {
-        Text("No hay datos en el periodo seleccionado.")
-        return
-    }
-
     val pesos = filteredHistory.map { it.rm.toFloat() }
-    val fechas = filteredHistory.map { it.fecha }
 
     val maxPeso = (pesos.maxOrNull() ?: 1f) + 5
     val minPeso = pesos.minOrNull() ?: 0f
 
     var touchedIndex by remember { mutableIntStateOf(-1) }
+
+    val rendimiento = remember(pesos) {
+        if (pesos.size >= 2) {
+            val diff = pesos.last() - pesos.first()
+            val percentage = (diff / pesos.first()) * 100
+            percentage
+        } else null
+    }
 
     val animatedYs = remember(pesos) {
         pesos.map { Animatable(0f) }
@@ -120,7 +115,7 @@ fun HistoryChart(
     Column (
         modifier = Modifier
             .fillMaxSize()
-            .padding(top = 20.dp),
+            .padding(top = 5.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(50.dp)
     )
@@ -128,10 +123,37 @@ fun HistoryChart(
         Box (
             modifier = Modifier
                 .fillMaxWidth()
-                .height(450.dp)
+                .fillMaxHeight()
                 .padding(16.dp),
             contentAlignment = Alignment.Center
         ) {
+
+            rendimiento?.let {
+                val color = if (it >= 0) Color(0xFF27DD03) else Color(0xFFFF4C4C)
+                val signo = if (it >= 0) "+" else "-"
+                val texto = "$signo${kotlin.math.abs(it).toInt()}%    "
+
+                Row(
+                    modifier = Modifier
+                        .offset(x = 120.dp, y = -(115).dp)
+                        .size(width = 80.dp, height = 35.dp)
+                        .background(Color(0xFF2A2C38), shape = RoundedCornerShape(12.dp)),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+
+
+                ) {
+                    Text(text = texto, color = color, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                    Icon(
+                        modifier = Modifier.size(17.dp),
+                        painter = painterResource(if(signo == "-") R.drawable.decrease else R.drawable.increase),
+                        contentDescription = "icon chart",
+                        tint = if (signo == "-") Color(0xFFFF4C4C) else Color(0xFF27DD03)
+                    )
+
+                }
+            }
+
             Canvas(
                 modifier = Modifier
                     .matchParentSize()
@@ -161,11 +183,49 @@ fun HistoryChart(
                         y = size.height - animY.value * size.height
                     )
                 }
+                // Curva suavizada
+                val curvedPath = Path().apply {
+                    if (points.isNotEmpty()) {
+                        moveTo(points.first().x, points.first().y)
+                        for (i in 1 until points.size) {
+                            val prev = points[i - 1]
+                            val curr = points[i]
+                            val midX = (prev.x + curr.x) / 2
+                            cubicTo(
+                                midX, prev.y,
+                                midX, curr.y,
+                                curr.x, curr.y
+                            )
+                        }
+                    }
+                }
+
+                // Copia la misma curva y añade la base para formar el área rellena
+                val fillPath = Path().apply {
+                    addPath(curvedPath) // añade la misma curva
+                    lineTo(points.last().x, size.height) // baja al fondo
+                    lineTo(points.first().x, size.height) // traza la base
+                    close() // cierra el área
+                }
+
+                // Relleno debajo de la curva
+                drawPath(
+                    path = fillPath,
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            Color(0xFF3A86FF).copy(alpha = 0.4f),
+                            Color.Transparent
+                        )
+                    )
+                )
+
+
 
                 drawLine(Color.Gray, Offset(0f, 0f), Offset(0f, size.height), strokeWidth = 4f)
                 drawLine(Color.Gray, Offset(0f, size.height), Offset(size.width, size.height), strokeWidth = 4f)
+
                 // Eje Y
-                val ySteps = 10
+                val ySteps = 5
                 for (i in 0..ySteps) {
                     val y = size.height - (i / ySteps.toFloat()) * size.height - 10
                     val pesoLabel = minPeso + (i / ySteps.toFloat()) * (maxPeso - minPeso)
@@ -180,86 +240,30 @@ fun HistoryChart(
                     )
                 }
 
-                // Eje X
-                val labelEvery = (fechas.size / 4).coerceAtLeast(1)
-                fechas.forEachIndexed { index, fecha ->
-                    if (index % labelEvery == 0) {
-                        val x = index * spacing + 10
-                        drawContext.canvas.nativeCanvas.drawText(
-                            fecha,
-                            x,
-                            size.height + 55f,
-                            android.graphics.Paint().apply {
-                                color = android.graphics.Color.GRAY
-                                textSize = 30f
-                                textAlign = android.graphics.Paint.Align.CENTER
-                            }
-                        )
-                    }
-                }
 
-                if (chartType == ChartType.LINE) {
-                    // === Curva suavizada ===
-                    val curvedPath = Path().apply {
-                        if (points.isNotEmpty()) {
-                            moveTo(points.first().x, points.first().y)
-                            for (i in 1 until points.size) {
-                                val prev = points[i - 1]
-                                val curr = points[i]
-                                val midX = (prev.x + curr.x) / 2
-                                cubicTo(
-                                    midX, prev.y,
-                                    midX, curr.y,
-                                    curr.x, curr.y
-                                )
-                            }
+                points.forEach {
+                    drawCircle(Color(0xFF27DD03), center = it, radius = 8f)
+                }
+                val path = Path().apply {
+                    if (points.isNotEmpty()) {
+                        moveTo(points.first().x, points.first().y)
+                        for (i in 1 until points.size) {
+                            val prev = points[i - 1]
+                            val curr = points[i]
+                            val controlPointX = (prev.x + curr.x) / 2
+                            cubicTo(
+                                controlPointX, prev.y,
+                                controlPointX, curr.y,
+                                curr.x, curr.y
+                            )
                         }
                     }
-
-                    // === Relleno con la misma curva ===
-                    val fillPath = Path().apply {
-                        addPath(curvedPath)
-                        lineTo(points.last().x, size.height)
-                        lineTo(points.first().x, size.height)
-                        close()
-                    }
-
-                    drawPath(
-                        path = fillPath,
-                        brush = Brush.verticalGradient(
-                            colors = listOf(
-                                Color(0xFF3A86FF).copy(alpha = 0.4f),
-                                Color.Transparent
-                            )
-                        )
-                    )
-
-                    drawPath(
-                        path = curvedPath,
-                        color = Color(0xFF27DD03),
-                        style = Stroke(width = 4f, cap = StrokeCap.Round)
-                    )
-                    // Puntos
-                    points.forEach {
-                        drawCircle(Color(0xFF27DD03), center = it, radius = 8f)
-                    }
-                }else if (chartType == ChartType.BAR){
-                    // === Barras verticales ===
-                    points.forEachIndexed { index, point ->
-                        val barWidth = spacing * 0.6f
-                        val barX = point.x - barWidth / 2
-                        drawRect(
-                            color = Color(0xFF27DD03),
-                            topLeft = Offset(barX, point.y),
-                            size = Size(barWidth, size.height - point.y)
-                        )
-                    }
-
                 }
-
-
-
-
+                drawPath(
+                    path = path,
+                    color = Color(0xFF27DD03),
+                    style = Stroke(width = 4f, cap = StrokeCap.Round)
+                )
 
                 // Tooltip
                 if (touchedIndex in points.indices) {
@@ -308,46 +312,6 @@ fun HistoryChart(
                     }
                 }
             }
-
-        }
-
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp),
-            verticalArrangement = Arrangement.spacedBy(30.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-
-                GetInputWithDropdown(
-                    expanded = expanded,
-                    selectedText = selectedFilter.toString(),
-                    onExpanded = {expanded = it},
-                    onSelectedText = {selectedFilter = TimeFilter.valueOf(it.toString())},
-                    onDismissExpanded = {expanded = false},
-                    options = options
-                )
-            }
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                ChartType.values().forEach { type ->
-                    Text(
-                        text = type.label,
-                        modifier = Modifier
-                            .padding(4.dp)
-                            .background(if (chartType == type) Color.Gray else detailsColor, shape = RoundedCornerShape(10.dp))
-                            .padding(horizontal = 8.dp, vertical = 4.dp)
-                            .clickable { chartType = type }
-                    )
-                }
-            }
-
 
         }
     }
