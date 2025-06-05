@@ -40,10 +40,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.tft_gym_app.R
 import com.google.firebase.auth.FirebaseAuth
 import components.menu.CascadingPopup
+import components.menu.GetOptionBoxMenu
 import kotlinx.coroutines.launch
 
 @Composable
-fun GetBox(viewModel: ViewModelBox = viewModel()) {
+fun GetBox(onIconClick: (Int) -> Unit, viewModel: ViewModelBox = viewModel()) {
     var isVisible by remember { mutableStateOf(false) }
     var anchorBounds by remember { mutableStateOf<Rect?>(null) }
     val configuration = LocalConfiguration.current
@@ -99,7 +100,9 @@ fun GetBox(viewModel: ViewModelBox = viewModel()) {
             )
 
         }
-        CascadingPopup(isVisible = isVisible, anchorBounds = anchorBounds, screenWidthPx = screenWidthPx, onDismiss = {isVisible = false}, listIcons = listOf(R.drawable.chart, R.drawable.schedule, R.drawable.video, R.drawable.pr), onClick = {viewModel.addBox()})
+        CascadingPopup(isVisible = isVisible, anchorBounds = anchorBounds, screenWidthPx = screenWidthPx, onDismiss = {isVisible = false}, listIcons = listOf(R.drawable.chart, R.drawable.schedule, R.drawable.video, R.drawable.pr), onIconClick = { iconIndex ->
+            onIconClick(iconIndex)  // << pasar el índice hacia arriba
+        })
     }
 
 }

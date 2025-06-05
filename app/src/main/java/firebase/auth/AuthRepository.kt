@@ -11,19 +11,19 @@ import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 import routes.NavigationActions
 import android.widget.Toast
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
+import components.newbox.ViewModelBox
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import model.Registro
 import model.User
+import model.Widget
 import org.json.JSONObject
-import viewModel.api.GymViewModel
 import java.net.HttpURLConnection
 import java.net.URL
 import java.text.SimpleDateFormat
@@ -288,6 +288,8 @@ class AuthRepository : ViewModel(){
                     }.addOnFailureListener {
                         Log.d("loginbackend", "Error ${it}")
                     }
+
+
             }.addOnFailureListener {
                 Log.d("loginbackend", "Error ${it}")
             }
@@ -616,16 +618,62 @@ class AuthRepository : ViewModel(){
         }
     }
 
+    fun addNewWidget(
+        widgetType: String,
+        exercise: String,
+        onSuccess: () -> Unit,
+        viewModelBox: ViewModelBox
+    ){
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        val widgetData = mutableMapOf(
+            "type" to widgetType,
+            "exercise" to exercise
+        )
+        currentUser?.let { user ->
+            val uid = user.uid
+            val db = FirebaseFirestore.getInstance()
+
+            db.collection("Usuarios").document(uid)
+                .collection("dashboardWidgets")
+                .document("$widgetType-$exercise").set(widgetData)
+                .addOnSuccessListener {
+                    Log.d("Firebase", "Widget añadido con ID: $it")
+                    val widget = Widget(
+                        id = "$widgetType-$exercise",
+                        type = widgetType,
+                        exercise = exercise
+                    )
+                    viewModelBox.addWidget(widget)
+                    onSuccess()
+                }
+                .addOnFailureListener { e ->
+                    Log.e("Firebase", "Error al añadir widget", e)
+                }
+
+
+        }
+    }
+
     fun deleteUser(
         context: Context,
         onSuccess: () -> Unit
     ):Boolean {
         val currentUser = FirebaseAuth.getInstance().currentUser
+        val exercises = listOf("Press de Banca", "Peso Muerto", "Sentadilla")
         if (currentUser != null) {
             return try {
                 // Eliminar los datos asociados al usuario de Firestore
                 val db = FirebaseFirestore.getInstance()
                 val userId = currentUser.uid
+                exercises.forEach { exercise ->
+                    db.collection("Usuarios").document(userId).collection("Ejercicios").document(exercise).delete()
+                        .addOnSuccessListener {
+                            Log.d("delete User", "$exercise is now deleted")
+                        }
+                        .addOnFailureListener { e ->
+                            Log.w("delete User", "$e trying to delete $exercise")
+                        }
+                }
 
                 // Eliminar datos de Firestore
                 db.collection("Usuarios").document(userId).delete()

@@ -32,7 +32,10 @@ fun GetUserStatsBox(text:String, stat: String){
     Box (
         modifier = Modifier
             .size(100.dp)
-            .background(color = Color(0xFF161818), shape = RoundedCornerShape(15.dp))
+            .background(
+                color = Color(0xFF161818),
+                shape = RoundedCornerShape(15.dp)
+            )
     ){
         Column (
             modifier = Modifier

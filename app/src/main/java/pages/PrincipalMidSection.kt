@@ -12,6 +12,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -20,6 +26,8 @@ import androidx.navigation.NavController
 import routes.NavigationActions
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.firebase.auth.FirebaseAuth
+import components.box.Box
+import components.menu.GetOptionBoxMenu
 import components.newbox.GetBox
 import components.newbox.UnloggedGetBox
 import components.newbox.ViewModelBox
@@ -34,27 +42,44 @@ fun GetPrincipalMidSection(
     gymViewModel: GymViewModel,
     viewModel: ViewModelBox = viewModel()
 ){
+    var isMenuVisible by remember { mutableStateOf(false) }
+    var index by remember { mutableIntStateOf(0) }
+    val widgetList = viewModel.widgetList
+
+    LaunchedEffect(Unit) {
+        viewModel.loadWidgets()
+    }
+
     Column (
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFF2A2C38))
             .verticalScroll(scrollState)
-            .padding(top = 80.dp),
+            .padding(top = 100.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
     ){
-        FlowRow (
+
+
+
+        Column (
             modifier = Modifier
                 .fillMaxSize()
                 .padding(30.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalArrangement = Arrangement.spacedBy(40.dp)
-
+            verticalArrangement = Arrangement.spacedBy(30.dp)
         ){
-            for (i in 0 until viewModel.boxCount) components.box.Box()
-            if(FirebaseAuth.getInstance().currentUser != null) GetBox() else UnloggedGetBox()
+            widgetList.forEach { widget ->
+                Box(widget = widget)
+            }
+
+            if(FirebaseAuth.getInstance().currentUser != null) GetBox(onIconClick = {selectedIndex ->
+                index = selectedIndex
+                isMenuVisible = true
+            }
+            ) else UnloggedGetBox()
         }
     }
+    GetOptionBoxMenu(index, isMenuVisible = isMenuVisible, onDismiss = {isMenuVisible = false})
 }
 
 

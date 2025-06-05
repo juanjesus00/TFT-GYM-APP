@@ -50,8 +50,8 @@ fun CascadingPopup(
     anchorBounds: Rect?,
     screenWidthPx: Float,
     onDismiss: () -> Unit,
-    onClick: () -> Unit,
-    listIcons: List<Int>
+    listIcons: List<Int>,
+    onIconClick: (Int) -> Unit
 ) {
     if (!isVisible || anchorBounds == null) return
 
@@ -112,7 +112,10 @@ fun CascadingPopup(
         ) {
 
             listIcons.forEachIndexed { index, iconRes ->
-                AnimatedIconWithCascade(iconRes, index, onDismiss,onClick)
+                AnimatedIconWithCascade(iconRes, index, onDismiss, onClick = {
+                    onIconClick(index)  // importante
+                    onDismiss()
+                })
             }
         }
     }
@@ -127,6 +130,7 @@ fun AnimatedIconWithCascade(
     onDismiss: () -> Unit,
     onClick: () -> Unit
 ) {
+    var isMenuVisible by remember { mutableStateOf(false) }
     var visible by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
@@ -170,4 +174,5 @@ fun AnimatedIconWithCascade(
             contentScale = Crop
         )
     }
+
 }
