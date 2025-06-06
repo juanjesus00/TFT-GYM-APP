@@ -66,8 +66,6 @@ fun GetSettingMenu(
     }
     GetOptionMenu(isMenuVisible = isVisible,
         onDismiss = {isVisible = false},
-        navController = navController,
-        navigationActions = navigationActions,
         onClickAction1 = {
             isVisible = false
             editableMenu = true

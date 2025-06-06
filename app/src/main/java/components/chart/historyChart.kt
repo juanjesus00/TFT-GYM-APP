@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -28,8 +29,11 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.*
+import com.example.tft_gym_app.R
 import com.example.tft_gym_app.ui.theme.darkDetailColor
 import com.example.tft_gym_app.ui.theme.detailsColor
 import components.inputs.GetInputWithDropdown
@@ -103,6 +107,14 @@ fun HistoryChart(
 
     var touchedIndex by remember { mutableIntStateOf(-1) }
 
+    val rendimiento = remember(pesos) {
+        if (pesos.size >= 2) {
+            val diff = pesos.last() - pesos.first()
+            val percentage = (diff / pesos.first()) * 100
+            percentage
+        } else null
+    }
+
     val animatedYs = remember(pesos) {
         pesos.map { Animatable(0f) }
     }
@@ -132,6 +144,33 @@ fun HistoryChart(
                 .padding(16.dp),
             contentAlignment = Alignment.Center
         ) {
+
+            rendimiento?.let {
+                val color = if (it >= 0) Color(0xFF27DD03) else Color(0xFFFF4C4C)
+                val signo = if (it >= 0) "+" else "-"
+                val texto = "$signo${kotlin.math.abs(it).toInt()}%    "
+
+                Row(
+                    modifier = Modifier
+                        .offset(x = 10.dp, y = -(235).dp)
+                        .size(width = 80.dp, height = 35.dp)
+                        .background(darkDetailColor, shape = RoundedCornerShape(12.dp)),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+
+
+                ) {
+                    Text(text = texto, color = color, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                    Icon(
+                        modifier = Modifier.size(17.dp),
+                        painter = painterResource(if(signo == "-") R.drawable.decrease else R.drawable.increase),
+                        contentDescription = "icon chart",
+                        tint = if (signo == "-") Color(0xFFFF4C4C) else Color(0xFF27DD03)
+                    )
+
+                }
+            }
+
             Canvas(
                 modifier = Modifier
                     .matchParentSize()

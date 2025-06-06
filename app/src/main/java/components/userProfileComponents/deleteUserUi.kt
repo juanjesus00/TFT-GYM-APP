@@ -32,8 +32,6 @@ fun GetDeleteUserUi(navigationActions: NavigationActions, navController: NavCont
         GetOptionMenu(
             isMenuVisible = isVisible,
             onDismiss = { isVisible = false},
-            navigationActions = navigationActions,
-            navController = navController,
             onClickAction1 = {viewModelRepository.deleteUser(context = context, onSuccess = {navigationActions.navigateToHome()})},
             actionText1 = "accept",
             onClickAction2 = {isVisible = false},

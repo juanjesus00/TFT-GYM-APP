@@ -654,6 +654,24 @@ class AuthRepository : ViewModel(){
         }
     }
 
+    fun deleteWidgetFromFirebase(widgetId: String) {
+        val currentUser = FirebaseAuth.getInstance().currentUser ?: return
+        val uid = currentUser.uid
+
+        FirebaseFirestore.getInstance()
+            .collection("Usuarios")
+            .document(uid)
+            .collection("dashboardWidgets")
+            .document(widgetId)
+            .delete()
+            .addOnSuccessListener {
+                Log.d("Firebase", "Widget $widgetId eliminado con éxito")
+            }
+            .addOnFailureListener { e ->
+                Log.e("Firebase", "Error al eliminar el widget", e)
+            }
+    }
+
     fun deleteUser(
         context: Context,
         onSuccess: () -> Unit

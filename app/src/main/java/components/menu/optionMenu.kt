@@ -43,8 +43,6 @@ import viewModel.auth.AuthViewModel
 
 @Composable
 fun GetOptionMenu(
-    navigationActions: NavigationActions,
-    navController: NavController,
     isMenuVisible: Boolean,
     onDismiss: () -> Unit,
     onClickAction1: () -> Unit,
