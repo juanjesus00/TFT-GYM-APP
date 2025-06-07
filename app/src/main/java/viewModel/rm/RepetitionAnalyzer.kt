@@ -30,7 +30,8 @@ object RepetitionAnalyzer {
 
     fun estimateRmWithFatigue(weight: Float, reps: Int, lossRate: Float = 0.03f): Float {
         // Basado en un modelo simple donde 1 rep más equivale a pérdida del 3%
-        val estimatedRm = ((weight * reps)*lossRate)+weight
+
+        val estimatedRm = if(reps > 1 ) ((weight * reps)*lossRate)+weight else weight
         return estimatedRm
     }
 }

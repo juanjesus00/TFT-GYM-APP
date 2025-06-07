@@ -451,6 +451,8 @@ class AuthRepository : ViewModel(){
 
                 if (isNewMaxRm) {
                     updateData["max_rm"] = rm ?: 0f
+                }else{
+                    updateData["max_rm"] = getNewMaxRmFromHistory(history)
                 }
 
                 db.collection("Usuarios").document(uid)

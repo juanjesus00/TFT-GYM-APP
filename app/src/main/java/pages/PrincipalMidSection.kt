@@ -77,9 +77,13 @@ fun GetPrincipalMidSection(
                 isMenuVisible = true
             }
             ) else UnloggedGetBox()
+
         }
     }
     GetOptionBoxMenu(index, isMenuVisible = isMenuVisible, onDismiss = {isMenuVisible = false})
+
+
+
 }
 
 
