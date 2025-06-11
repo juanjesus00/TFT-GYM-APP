@@ -108,6 +108,7 @@ class MainActivity : ComponentActivity() {
                     composable(Routes.EDITUSERINFO){ MyComposeApp(navigationActions, navController,gymViewModel) }
                     composable(Routes.HISTORY){ MyComposeApp(navigationActions, navController,gymViewModel) }
                     composable(Routes.HISTORYPAGE){ MyComposeApp(navigationActions, navController,gymViewModel) }
+                    composable(Routes.ROUTINEPAGE){ MyComposeApp(navigationActions, navController,gymViewModel) }
                 }
 
             }

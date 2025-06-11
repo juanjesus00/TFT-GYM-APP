@@ -75,7 +75,7 @@ fun GetMenuVideo(
                     enable = true)
                 GetMenuVideoButton(
                     onClick = {
-                        if(isCurrentUserLogged && isEmailVerified) /*TODO*/ else  Toast.makeText(context, "Tienes que iniciar sesión y verificar la cuenta para usar esta función", Toast.LENGTH_LONG).show()
+                        if(isCurrentUserLogged && isEmailVerified) navigationActions.navigateToRoutinePage() else  Toast.makeText(context, "Tienes que iniciar sesión y verificar la cuenta para usar esta función", Toast.LENGTH_LONG).show()
                     },
                     text = "new_routine",
                     enable = true)

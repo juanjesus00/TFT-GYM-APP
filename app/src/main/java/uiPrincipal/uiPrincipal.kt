@@ -34,6 +34,7 @@ import pages.GetEditUserInfo
 import pages.GetHistorialPage
 import pages.GetHistory
 import pages.GetVideoPage
+import pages.RutinaGeneradorScreen
 import viewModel.api.GymViewModel
 
 object LanguageManager {
@@ -112,6 +113,7 @@ fun MyComposeApp(
                 Routes.EDITUSERINFO -> GetEditUserInfo(scrollState, navigationActions, navController,gymViewModel)
                 Routes.HISTORY -> GetHistory(scrollState, navigationActions, navController,gymViewModel)
                 Routes.HISTORYPAGE -> GetHistorialPage(scrollState, navigationActions, navController,gymViewModel)
+                Routes.ROUTINEPAGE -> RutinaGeneradorScreen(scrollState, navigationActions, navController,gymViewModel)
             }
         }
     }

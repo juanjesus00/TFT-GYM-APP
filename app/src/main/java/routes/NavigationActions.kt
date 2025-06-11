@@ -44,6 +44,14 @@ class NavigationActions (private val navController: NavController) {
             launchSingleTop = true
         }
     }
+
+    fun navigateToRoutinePage(){
+        navController.navigate(Routes.ROUTINEPAGE){
+            popUpTo(Routes.ROUTINEPAGE){ inclusive = true}
+            launchSingleTop = true
+        }
+    }
+
     fun navigateToHistory(){
         navController.navigate(Routes.HISTORY){
             popUpTo(Routes.HISTORY){ inclusive = true}

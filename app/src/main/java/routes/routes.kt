@@ -10,5 +10,6 @@ object Routes {
     const val EDITUSERINFO = "editUserInfo"
     const val HISTORY = "history"
     const val HISTORYPAGE = "historyPage"
+    const val ROUTINEPAGE = "routinepage"
 
 }
