@@ -45,4 +45,11 @@
     <string name="add" translatable="false">Add On</string>
     <string name="CompletePrifile" translatable="false">Complete your profile to view more information</string>
     <string name="personalRecords" translatable="false">Personal Records</string>
+    <string name="hypertrophy" translatable="false">Hypertrophy</string>
+    <string name="strength" translatable="false">Strength</string>
+    <string name="weeks" translatable="false">Weeks</string>
+    <string name="beginner" translatable="false">Beginner</string>
+    <string name="intermediate" translatable="false">Intermediate</string>
+    <string name="advanced" translatable="false">Advance</string>
+    <string name="days" translatable="false">Days</string>
 </resources>

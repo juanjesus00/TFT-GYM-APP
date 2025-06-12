@@ -14,6 +14,8 @@ import viewModel.api.GymViewModel
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.style.TextAlign
+import components.inputs.GetInputWithDropdown
+import components.langSwitcher.getStringByName
 
 
 @Composable
@@ -31,20 +33,89 @@ fun RutinaGeneradorScreen(
     var cargando by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     var prompt by remember { mutableStateOf("") }
+    var expandedRoutine by remember { mutableStateOf(false) }
+    var expandedExercise by remember { mutableStateOf(false) }
+    var expandedTime by remember { mutableStateOf(false) }
+    var expandedLevel by remember { mutableStateOf(false) }
 
+    var selectedRoutine by remember { mutableStateOf("") }
+    var selectedExercise by remember { mutableStateOf("") }
+    var selectedTimeStrength by remember { mutableStateOf("") }
+    var selectedTimeHypertrophy by remember { mutableStateOf("") }
+    var selectedLevel by remember { mutableStateOf("") }
+
+    val exerciseOptions = listOf("dead_lift", "bench_press", "squad").mapNotNull { name ->
+        getStringByName(context, name)
+    }
+    val routineTypeOptions = listOf("hypertrophy", "strength").mapNotNull { name ->
+        getStringByName(context, name)
+    }
+    val timeHypertrophyOptions =
+        getStringByName(context, "days")?.let {
+            listOf("2 $it", "3 $it", "4 $it", "5 $it", "6 $it", "7 $it")
+        }
+
+    val timeStrengthOptions =
+        getStringByName(context, "weeks")?.let {
+            listOf("3 $it", "4 $it", "5 $it", "6 $it", "7 $it", "8 $it", "9 $it", "10 $it", "11 $it", "12 $it")
+        }
+    val userLevelOptions = listOf("beginner", "intermediate", "advanced").mapNotNull { name ->
+        getStringByName(context, name)
+    }
     Column(
         modifier = Modifier
+            .fillMaxWidth()
             .padding(16.dp, top = 100.dp)
             .verticalScroll(scrollState),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Campo para personalizar el prompt
-        OutlinedTextField(
-            value = prompt,
-            onValueChange = { prompt = it },
-            label = { Text("Describe tu rutina deseada") },
-            modifier = Modifier.fillMaxWidth(),
-            placeholder = { Text("Ej: Rutina para ganar masa muscular, 4 semanas, método 5x5") }
+        GetInputWithDropdown(
+            expanded = expandedRoutine,
+            selectedText = selectedRoutine,
+            onExpanded = {expandedRoutine = it},
+            onSelectedText = {selectedRoutine = it},
+            onDismissExpanded = {expandedRoutine = false},
+            options = routineTypeOptions
+        )
+
+        if (selectedRoutine == "Hypertrophy" || selectedRoutine == "Hipertrofia" ) {
+            GetInputWithDropdown(
+                expanded = expandedTime,
+                selectedText = selectedTimeHypertrophy,
+                onExpanded = {expandedTime = it},
+                onSelectedText = {selectedTimeHypertrophy = it},
+                onDismissExpanded = {expandedTime = false},
+                options = timeHypertrophyOptions?:listOf("")
+            )
+        }else if (selectedRoutine == "Strength" || selectedRoutine == "Fuerza" ){
+            GetInputWithDropdown(
+                expanded = expandedTime,
+                selectedText = selectedTimeStrength,
+                onExpanded = {expandedTime = it},
+                onSelectedText = {selectedTimeStrength = it},
+                onDismissExpanded = {expandedTime = false},
+                options = timeStrengthOptions?:listOf("")
+            )
+        }
+
+
+        GetInputWithDropdown(
+            expanded = expandedExercise,
+            selectedText = selectedExercise,
+            onExpanded = {expandedExercise = it},
+            onSelectedText = {selectedExercise = it},
+            onDismissExpanded = {expandedExercise = false},
+            options = exerciseOptions
+        )
+        GetInputWithDropdown(
+            expanded = expandedLevel,
+            selectedText = selectedLevel,
+            onExpanded = {expandedLevel = it},
+            onSelectedText = {selectedLevel = it},
+            onDismissExpanded = {expandedLevel = false},
+            options = userLevelOptions
         )
 
         Button(
