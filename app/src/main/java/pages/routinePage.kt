@@ -1,4 +1,5 @@
 package pages
+import android.util.Log
 import androidx.compose.foundation.ScrollState
 import androidx.compose.runtime.*
 import androidx.compose.material3.*
@@ -14,6 +15,9 @@ import viewModel.api.GymViewModel
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.style.TextAlign
+import com.example.tft_gym_app.R
+import components.buttons.GetDefaultButton
+import components.buttons.GetDefaultIconButton
 import components.inputs.GetInputWithDropdown
 import components.langSwitcher.getStringByName
 
@@ -32,12 +36,11 @@ fun RutinaGeneradorScreen(
     var resultado by remember { mutableStateOf("") }
     var cargando by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
-    var prompt by remember { mutableStateOf("") }
+    var prompt by remember { mutableStateOf("genera una rutina de entrenamiento para ") }
     var expandedRoutine by remember { mutableStateOf(false) }
     var expandedExercise by remember { mutableStateOf(false) }
     var expandedTime by remember { mutableStateOf(false) }
     var expandedLevel by remember { mutableStateOf(false) }
-
     var selectedRoutine by remember { mutableStateOf("") }
     var selectedExercise by remember { mutableStateOf("") }
     var selectedTimeStrength by remember { mutableStateOf("") }
@@ -62,10 +65,27 @@ fun RutinaGeneradorScreen(
     val userLevelOptions = listOf("beginner", "intermediate", "advanced").mapNotNull { name ->
         getStringByName(context, name)
     }
+
+    val benchPressRoutine = listOf("Smolov Jr. Bench", "Sheiko", "Bench Press Specialization (Greg Nuckols)", "Westside Barbell (DE/ME method)", "5/3/1 (Jim Wendler)", "Bilbo Method")
+    var expandedBPR by remember { mutableStateOf(false) }
+    var selectedBPR by remember { mutableStateOf("") }
+
+    val deadLiftRoutine = listOf("Candito 6 Week Program", "Coan/Phillipi Deadlift", "Texas Method (Deadlift Variant)", "Sheiko (Deadlift focused)", "5/3/1 Deadlift")
+    var expandedDLR by remember { mutableStateOf(false) }
+    var selectedDLR by remember { mutableStateOf("") }
+
+    val squadRoutine = listOf("Smolov (Full)", "Russian Squat Routine", "Texas Method (Squat Focused)", "Shako (Squat oriented)", "5x5 Stronglifts / Madcow")
+    var expandedSR by remember { mutableStateOf(false) }
+    var selectedSR by remember { mutableStateOf("") }
+
+    val hypertrophyRoutine = listOf("Push Pull Legs (PPL)","Full Body (Cuerpo completo)","Upper/Lower Split","Bro Split (Weider)", "Hypertrophy-Specific Training (HST)", "heavyDuty (Mike Mentzer)")
+    var expandedHR by remember { mutableStateOf(false) }
+    var selectedHR by remember { mutableStateOf("") }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp, top = 100.dp)
+            .padding(top = 120.dp)
             .verticalScroll(scrollState),
         verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -89,6 +109,14 @@ fun RutinaGeneradorScreen(
                 onDismissExpanded = {expandedTime = false},
                 options = timeHypertrophyOptions?:listOf("")
             )
+            GetInputWithDropdown(
+                expanded = expandedHR,
+                selectedText = selectedHR,
+                onExpanded = {expandedHR = it},
+                onSelectedText = {selectedHR = it},
+                onDismissExpanded = {expandedHR = false},
+                options = hypertrophyRoutine
+            )
         }else if (selectedRoutine == "Strength" || selectedRoutine == "Fuerza" ){
             GetInputWithDropdown(
                 expanded = expandedTime,
@@ -98,17 +126,55 @@ fun RutinaGeneradorScreen(
                 onDismissExpanded = {expandedTime = false},
                 options = timeStrengthOptions?:listOf("")
             )
+
+            GetInputWithDropdown(
+                expanded = expandedExercise,
+                selectedText = selectedExercise,
+                onExpanded = {expandedExercise = it},
+                onSelectedText = {selectedExercise = it},
+                onDismissExpanded = {expandedExercise = false},
+                options = exerciseOptions
+            )
+            when(true){
+                (selectedExercise == "Press de Banca" || selectedExercise == "Bench Press") -> {
+                    GetInputWithDropdown(
+                        expanded = expandedBPR,
+                        selectedText = selectedBPR,
+                        onExpanded = {expandedBPR = it},
+                        onSelectedText = {selectedBPR = it},
+                        onDismissExpanded = {expandedBPR = false},
+                        options = benchPressRoutine
+                    )
+                }
+                (selectedExercise == "Peso Muerto" || selectedExercise == "Deadlift") -> {
+                    GetInputWithDropdown(
+                        expanded = expandedDLR,
+                        selectedText = selectedDLR,
+                        onExpanded = {expandedDLR = it},
+                        onSelectedText = {selectedDLR = it},
+                        onDismissExpanded = {expandedDLR = false},
+                        options = deadLiftRoutine
+                    )
+                }
+                (selectedExercise == "Sentadilla" || selectedExercise == "Squad") -> {
+                    GetInputWithDropdown(
+                        expanded = expandedSR,
+                        selectedText = selectedSR,
+                        onExpanded = {expandedSR = it},
+                        onSelectedText = {selectedSR = it},
+                        onDismissExpanded = {expandedSR = false},
+                        options = squadRoutine
+                    )
+                }
+                else -> {
+                    // Acción por defecto
+                }
+            }
+
+
+
         }
 
-
-        GetInputWithDropdown(
-            expanded = expandedExercise,
-            selectedText = selectedExercise,
-            onExpanded = {expandedExercise = it},
-            onSelectedText = {selectedExercise = it},
-            onDismissExpanded = {expandedExercise = false},
-            options = exerciseOptions
-        )
         GetInputWithDropdown(
             expanded = expandedLevel,
             selectedText = selectedLevel,
@@ -118,12 +184,39 @@ fun RutinaGeneradorScreen(
             options = userLevelOptions
         )
 
-        Button(
+        GetDefaultIconButton(
+            text = "Generar Rutina",
             onClick = {
-                if (prompt.isEmpty()) {
-                    error = "Por favor ingresa una descripción"
-                    return@Button
+                if (selectedRoutine.isEmpty() || selectedLevel.isEmpty()) {
+                    error = getStringByName(context, "complete_fields") ?: "Complete all fields"
+                    return@GetDefaultIconButton
                 }
+
+                val promptBuilder = StringBuilder().apply {
+                    append("Genera una rutina de entrenamiento para $selectedRoutine ")
+
+                    when (selectedRoutine) {
+                        "Hypertrophy", "Hipertrofia" -> {
+                            append("de $selectedTimeHypertrophy días, ")
+                            append("usando el programa $selectedHR. ")
+                        }
+                        "Strength", "Fuerza" -> {
+                            append("de $selectedTimeStrength semanas, ")
+                            append("especializada en $selectedExercise ")
+                            append("con el método ${getSelectedRoutineName(selectedExercise, selectedBPR, selectedDLR, selectedSR)}. ")
+                        }
+                    }
+
+                    append("Nivel: $selectedLevel. ")
+                    append("Formato requerido: \n")
+                    append("- SOLO incluir listas por días en formato MARKDOWN\n")
+                    append("- Cada día con encabezado ## Día [número/nombre]\n")
+                    append("- Tabla de ejercicios con columnas: Ejercicio, Series, Repeticiones\n")
+                    append("- Sin explicaciones adicionales, solo la rutina")
+                }
+
+                prompt = promptBuilder.toString()
+                Log.d("PromptOptimizado", prompt)
 
                 cargando = true
                 error = null
@@ -132,7 +225,15 @@ fun RutinaGeneradorScreen(
                 coroutineScope.launch {
                     when (val result = geminiApiService.sendPrompt(prompt)) {
                         is Result.Success<*> -> {
-                            resultado = result.value.toString()
+                            val rawResponse = result.value.toString()
+                            // Extraer solo la parte entre ## Día 1 y el último día
+                            val startIndex = rawResponse.indexOf("## Día")
+                            if (startIndex != -1) {
+                                resultado = rawResponse.substring(startIndex)
+                                    .replace(Regex("(?i)notas|descripción"), "Descripción") // Normalizar encabezados
+                            } else {
+                                resultado = rawResponse // Fallback si no encuentra el formato
+                            }
                         }
                         is Result.Failure -> {
                             error = result.exception.message
@@ -142,10 +243,9 @@ fun RutinaGeneradorScreen(
                 }
             },
             enabled = !cargando,
-            modifier = Modifier.align(Alignment.CenterHorizontally)
-        ) {
-            Text("Generar Rutina")
-        }
+            icon = R.drawable.aiicon
+        )
+
 
         // Estado de carga
         if (cargando) {
@@ -187,6 +287,17 @@ fun RutinaGeneradorScreen(
             }
         }
     }
+
+
+}
+
+private fun getSelectedRoutineName(selectedExercise:String, selectedBPR: String, selectedDLR: String, selectedSR: String): String {
+    return when (selectedExercise) {
+        "Press de Banca" -> selectedBPR
+        "Peso Muerto" -> selectedDLR
+        "Sentadilla" -> selectedSR
+        else -> ""
+    }
 }
 
 // Clase auxiliar para resultados
@@ -194,3 +305,5 @@ sealed class Result<out T> {
     data class Success<out T>(val value: T) : Result<T>()
     data class Failure(val exception: Exception) : Result<Nothing>()
 }
+
+
