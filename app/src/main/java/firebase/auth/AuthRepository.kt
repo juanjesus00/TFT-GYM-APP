@@ -12,6 +12,8 @@ import kotlinx.coroutines.launch
 import routes.NavigationActions
 import android.widget.Toast
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.CollectionReference
+import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
@@ -19,6 +21,7 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import components.newbox.ViewModelBox
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import model.Registro
 import model.User
@@ -27,6 +30,8 @@ import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
 import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlin.String
 import kotlin.toString
@@ -674,6 +679,82 @@ class AuthRepository : ViewModel(){
             }
     }
 
+    suspend fun saveRoutine(
+        tipo: String,
+        ejercicio: String?,
+        contenido: String
+    ) {
+        currentUser?.uid?.let { uid ->
+            val db = FirebaseFirestore.getInstance()
+            val userRef = db.collection("Usuarios").document(uid)
+            val rutina = parsearRutinaTextoAJson(contenido)
+            when (tipo.lowercase()) {
+                "hipertrofia", "hypertrophy" -> saveHypertrophyRoutine(userRef, rutina)
+                "fuerza", "strength" -> saveStrengthRoutine(userRef, ejercicio, rutina)
+            }
+        }
+    }
+
+
+    private suspend fun saveHypertrophyRoutine(
+        userRef: DocumentReference,
+        contenido: List<Map<String, Any>>
+    ) {
+        val hypertrophyRef = userRef.collection("Rutinas").document("Hipertrofia")
+
+        val docSnapshot = hypertrophyRef.get().await()
+        val existingRoutines = docSnapshot.get("rutinas") as? List<Map<String, Any>> ?: emptyList()
+
+        // Marcar todas como inactivas
+        val updatedRoutines = existingRoutines.map { it.toMutableMap().apply { this["activa"] = false } }
+
+        val fechaActual = LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+
+        // Agregar nueva rutina activa
+        val newRoutine = mapOf(
+            "contenido" to contenido,
+            "fecha" to fechaActual,
+            "activa" to true
+        )
+        val allRoutines = updatedRoutines + newRoutine
+
+        hypertrophyRef.set(mapOf("rutinas" to allRoutines), SetOptions.merge()).await()
+    }
+
+
+    private suspend fun saveStrengthRoutine(
+        userRef: DocumentReference,
+        ejercicio: String?,
+        contenido: List<Map<String, Any>>
+    ) {
+        val strengthRef = userRef.collection("Rutinas").document("Fuerza")
+
+        val exerciseKey = when (ejercicio?.lowercase()) {
+            "press de banca", "bench press" -> "Press de Banca"
+            "peso muerto", "deadlift" -> "Peso Muerto"
+            "sentadilla", "squad" -> "Sentadilla"
+            else -> return
+        }
+
+        val docSnapshot = strengthRef.get().await()
+        val existingRoutines = docSnapshot.get(exerciseKey) as? List<Map<String, Any>> ?: emptyList()
+
+        val updatedRoutines = existingRoutines.map { it.toMutableMap().apply { this["activa"] = false } }
+
+        val fechaActual = LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+
+        val newRoutine = mapOf(
+            "contenido" to contenido,
+            "fecha" to fechaActual,
+            "activa" to true
+        )
+
+        val allRoutines = updatedRoutines + newRoutine
+
+        strengthRef.set(mapOf(exerciseKey to allRoutines), SetOptions.merge()).await()
+    }
+
+
     fun deleteUser(
         context: Context,
         onSuccess: () -> Unit
@@ -751,5 +832,56 @@ class AuthRepository : ViewModel(){
             return false
         }
 
+    }
+
+
+    fun parsearRutinaTextoAJson(rutinaTexto: String): List<Map<String, Any>> {
+        val dias = mutableListOf<Map<String, Any>>()
+
+        val bloques = rutinaTexto.split("##")
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
+
+        for (bloque in bloques) {
+            val lineas = bloque.lines()
+                .map { it.trim() }
+                .filter { it.isNotEmpty() }
+
+            if (lineas.isEmpty()) continue
+
+            val nombreDia = lineas.first()
+
+            val ejercicios = mutableListOf<Map<String, Any>>()
+            for (linea in lineas.drop(3)) { // Saltamos título, encabezado, separador
+                if (!linea.contains("|")) continue
+
+                val columnas = linea.split("|")
+                    .map { it.trim() }
+                    .filter { it.isNotEmpty() }
+
+                if (columnas.size >= 3) {
+                    val nombre = columnas[0]
+                    val series = columnas[1].toIntOrNull() ?: 0
+                    val reps = columnas[2]
+
+                    ejercicios.add(
+                        mapOf(
+                            "nombre" to nombre,
+                            "series" to series,
+                            "reps" to reps
+                        )
+                    )
+                }
+            }
+
+            dias.add(
+                mapOf(
+                    "dia" to nombreDia,
+                    "ejercicios" to ejercicios
+                )
+            )
+        }
+
+        return dias
     }
 }

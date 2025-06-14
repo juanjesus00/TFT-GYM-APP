@@ -15,11 +15,13 @@ import viewModel.api.GymViewModel
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.style.TextAlign
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.tft_gym_app.R
 import components.buttons.GetDefaultButton
 import components.buttons.GetDefaultIconButton
 import components.inputs.GetInputWithDropdown
 import components.langSwitcher.getStringByName
+import firebase.auth.AuthRepository
 
 
 @Composable
@@ -27,7 +29,8 @@ fun RutinaGeneradorScreen(
     scrollState: ScrollState,
     navigationActions: NavigationActions,
     navController: NavController,
-    gymViewModel: GymViewModel
+    gymViewModel: GymViewModel,
+    authRepository: AuthRepository = viewModel()
 ) {
     val context = LocalContext.current
     val geminiApiService = remember { GeminiApiService(context) }
@@ -223,21 +226,18 @@ fun RutinaGeneradorScreen(
                 resultado = ""
 
                 coroutineScope.launch {
-                    when (val result = geminiApiService.sendPrompt(prompt)) {
-                        is Result.Success<*> -> {
-                            val rawResponse = result.value.toString()
-                            // Extraer solo la parte entre ## Día 1 y el último día
-                            val startIndex = rawResponse.indexOf("## Día")
-                            if (startIndex != -1) {
-                                resultado = rawResponse.substring(startIndex)
-                                    .replace(Regex("(?i)notas|descripción"), "Descripción") // Normalizar encabezados
-                            } else {
-                                resultado = rawResponse // Fallback si no encuentra el formato
-                            }
+                    try {
+                        val result = geminiApiService.sendPrompt(prompt)
+                        result.onSuccess { textoLimpio ->
+                            resultado = textoLimpio
+                            authRepository.saveRoutine(selectedRoutine, selectedExercise, textoLimpio)
+                        }.onFailure { e ->
+                            error = "Error: ${e.message}"
+                            Log.e("routinePage", "Error capturado: $e")
                         }
-                        is Result.Failure -> {
-                            error = result.exception.message
-                        }
+                    } catch (e: Exception) {
+                        error = "Error: ${e.message}"
+                        Log.e("routinePage", "Error capturado: $e")
                     }
                     cargando = false
                 }
@@ -269,23 +269,6 @@ fun RutinaGeneradorScreen(
             )
         }
 
-        // Mostrar resultados
-        if (resultado.isNotEmpty()) {
-            Card(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Text(
-                        text = "Tu Rutina Personalizada:",
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(text = resultado)
-                }
-            }
-        }
     }
 
 

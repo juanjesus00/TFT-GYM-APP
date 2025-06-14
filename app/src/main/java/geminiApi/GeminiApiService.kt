@@ -40,7 +40,7 @@ class GeminiApiService(private val context: Context) {
         return try {
             withContext(Dispatchers.IO) {
                 val apiKey = context.getString(R.string.gemini_api_key)
-                val url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro-preview-06-05:generateContent?key=$apiKey"
+                val url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=$apiKey"
 
                 val requestBody = json.encodeToString(
                     GeminiRequest(
