@@ -58,7 +58,7 @@ fun HamburgerMenu(
                 GetItem("log_out", 0, navigationActions, LocalContext, onClick = {viewModel.logOut(onSuccess = {navigationActions.navigateToHome()})})
                 GetItem("my_data", 0, navigationActions, LocalContext, onClick = {navigationActions.navigateToUserProfile()})
                 GetItem("favoriote_videos", 0, navigationActions, LocalContext, onClick = {})
-                GetItem("routines", 0, navigationActions, LocalContext, onClick = {})
+                GetItem("routines", 0, navigationActions, LocalContext, onClick = {navigationActions.navigateToRoutineSelector()})
                 GetItem("record", 0, navigationActions, LocalContext, onClick = {navigationActions.navigateToHistory()})
             }else{
                 GetItem("login_button", 0, navigationActions, LocalContext, onClick = {navigationActions.navigateToLogin()})

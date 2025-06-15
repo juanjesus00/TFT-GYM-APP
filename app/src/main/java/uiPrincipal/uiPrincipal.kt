@@ -33,6 +33,7 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import pages.GetEditUserInfo
 import pages.GetHistorialPage
 import pages.GetHistory
+import pages.GetRoutineSelector
 import pages.GetVideoPage
 import pages.RutinaGeneradorScreen
 import viewModel.api.GymViewModel
@@ -114,6 +115,7 @@ fun MyComposeApp(
                 Routes.HISTORY -> GetHistory(scrollState, navigationActions, navController,gymViewModel)
                 Routes.HISTORYPAGE -> GetHistorialPage(scrollState, navigationActions, navController,gymViewModel)
                 Routes.ROUTINEPAGE -> RutinaGeneradorScreen(scrollState, navigationActions, navController,gymViewModel)
+                Routes.ROUTINESELECTOR -> GetRoutineSelector(scrollState, navigationActions, navController,gymViewModel)
             }
         }
     }

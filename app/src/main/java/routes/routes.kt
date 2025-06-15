@@ -11,5 +11,6 @@ object Routes {
     const val HISTORY = "history"
     const val HISTORYPAGE = "historyPage"
     const val ROUTINEPAGE = "routinepage"
+    const val ROUTINESELECTOR = "routineSelector"
 
 }

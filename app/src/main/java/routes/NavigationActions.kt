@@ -52,6 +52,13 @@ class NavigationActions (private val navController: NavController) {
         }
     }
 
+    fun navigateToRoutineSelector(){
+        navController.navigate(Routes.ROUTINESELECTOR){
+            popUpTo(Routes.ROUTINESELECTOR){ inclusive = true}
+            launchSingleTop = true
+        }
+    }
+
     fun navigateToHistory(){
         navController.navigate(Routes.HISTORY){
             popUpTo(Routes.HISTORY){ inclusive = true}
