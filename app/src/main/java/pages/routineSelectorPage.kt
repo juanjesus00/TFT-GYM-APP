@@ -50,7 +50,7 @@ fun GetRoutineSelector(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(50.dp, Alignment.CenterVertically)
     ) {
-        routineList.forEachIndexed { index, (exercise, image, _) ->
+        routineList.forEachIndexed { index, (routineType, image, _) ->
             // Visibilidad controlada con delay
             var visible = remember { androidx.compose.runtime.mutableStateOf(false) }
 
@@ -71,7 +71,7 @@ fun GetRoutineSelector(
                 ) + fadeOut(animationSpec = tween(800))
             ) {
                 GetRoutineTypeBox(
-                    exercise = exercise,
+                    routineType = routineType,
                     exerciseImage = image,
                     navigationActions = navigationActions,
                     gymViewModel = gymViewModel,

@@ -46,7 +46,7 @@ import viewModel.api.GymViewModel
 
 @Composable
 fun GetRoutineTypeBox(
-    exercise: String,
+    routineType: String,
     exerciseImage: Int,
     navigationActions: NavigationActions,
     gymViewModel: GymViewModel,
@@ -86,8 +86,8 @@ fun GetRoutineTypeBox(
                         targetValue = 1f,
                         animationSpec = tween(150)
                     )
-                    //navigationActions.navigateToRoutineSelector()
-                    //gymViewModel.actualizarHistoryExercise(exercise)
+                    navigationActions.navigateToRoutinePage()
+                    gymViewModel.actualizarRoutineType(routineType)
                 }
 
             },
@@ -111,7 +111,7 @@ fun GetRoutineTypeBox(
             )
         }
 
-        getStringByName(LocalContext.current, exercise)?.let{
+        getStringByName(LocalContext.current, routineType)?.let{
             Text(
                 buildAnnotatedString {
                     withStyle(style = SpanStyle(brush = gradient, fontSize = 20.sp, fontWeight = FontWeight.Bold)) {

@@ -45,9 +45,9 @@ class NavigationActions (private val navController: NavController) {
         }
     }
 
-    fun navigateToRoutinePage(){
-        navController.navigate(Routes.ROUTINEPAGE){
-            popUpTo(Routes.ROUTINEPAGE){ inclusive = true}
+    fun navigateToRoutineGeneratorPage(){
+        navController.navigate(Routes.ROUTINEGENERATOR){
+            popUpTo(Routes.ROUTINEGENERATOR){ inclusive = true}
             launchSingleTop = true
         }
     }
@@ -55,6 +55,13 @@ class NavigationActions (private val navController: NavController) {
     fun navigateToRoutineSelector(){
         navController.navigate(Routes.ROUTINESELECTOR){
             popUpTo(Routes.ROUTINESELECTOR){ inclusive = true}
+            launchSingleTop = true
+        }
+    }
+
+    fun navigateToRoutinePage(){
+        navController.navigate(Routes.ROUTINEPAGE){
+            popUpTo(Routes.ROUTINEPAGE){ inclusive = true}
             launchSingleTop = true
         }
     }

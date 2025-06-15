@@ -10,7 +10,8 @@ object Routes {
     const val EDITUSERINFO = "editUserInfo"
     const val HISTORY = "history"
     const val HISTORYPAGE = "historyPage"
-    const val ROUTINEPAGE = "routinepage"
+    const val ROUTINEGENERATOR = "routineGenerator"
     const val ROUTINESELECTOR = "routineSelector"
+    const val ROUTINEPAGE = "routinePage"
 
 }

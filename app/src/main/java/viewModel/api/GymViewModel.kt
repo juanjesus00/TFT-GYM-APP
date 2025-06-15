@@ -9,13 +9,16 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import api.AnalyzeResponse
 import api.ResultResponse
+import firebase.auth.AuthRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import model.RutinaFirebase
 import network.ApiClient
 import okhttp3.MultipartBody
 import retrofit2.Response
@@ -25,6 +28,9 @@ import javax.inject.Inject
 
 
 class GymViewModel: ViewModel(){
+
+    private val authRepository = AuthRepository()
+
     private val _analyzeResponse = MutableStateFlow<String>("")
     val analyzeResponse: StateFlow<String> = _analyzeResponse
 
@@ -46,6 +52,9 @@ class GymViewModel: ViewModel(){
     var weight by mutableStateOf("")
         private set
 
+    var rutinasHipertrofia by mutableStateOf<List<RutinaFirebase>>(emptyList())
+    var rutinasFuerza by mutableStateOf<Map<String, List<RutinaFirebase>>>(emptyMap())
+
     private val _weight = MutableLiveData<String>()
     val observeWeight: LiveData<String> = _weight
     private val _selectedText = MutableLiveData<String>()
@@ -53,6 +62,9 @@ class GymViewModel: ViewModel(){
 
     private val _historyExercise = MutableLiveData<String>()
     val historyExercise: LiveData<String> = _historyExercise
+
+    private val _routineType = MutableLiveData<String>()
+    val routineType: LiveData<String> = _routineType
 
     var selectVideoUri by mutableStateOf<Uri?>(null)
         private set
@@ -73,6 +85,10 @@ class GymViewModel: ViewModel(){
 
     fun actualizarHistoryExercise(value: String){
         _historyExercise.value = value
+    }
+
+    fun actualizarRoutineType(value: String){
+        _routineType.value = value
     }
 
     fun uploadVideo(
@@ -122,6 +138,22 @@ class GymViewModel: ViewModel(){
                 e.printStackTrace()
             } finally {
                 _loading.value = false
+            }
+        }
+    }
+
+    fun cargarRutinas(tipo: String) {
+
+        when (tipo) {
+            "Hipertrofia" -> {
+                authRepository.getRutinasHipertrofia() {
+                    rutinasHipertrofia = it
+                }
+            }
+            "Fuerza" -> {
+                authRepository.getRutinasFuerza() {
+                    rutinasFuerza = it
+                }
             }
         }
     }

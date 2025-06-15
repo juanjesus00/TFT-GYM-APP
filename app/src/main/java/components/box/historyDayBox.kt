@@ -1,6 +1,5 @@
 package components.box
 
-import android.R
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -12,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.Icon
@@ -24,9 +22,23 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.material3.Text
 import androidx.compose.ui.text.font.FontWeight
 import com.example.tft_gym_app.ui.theme.darkDetailColor
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @Composable
-fun GetHistoryDayBox(date: String, isExpanded: Boolean, onToggleExpand: () -> Unit, peso: String = "", repeticiones: String = "", rm: String = ""){
+fun GetHistoryDayBox(
+    date: String,
+    isExpanded: Boolean,
+    onToggleExpand: () -> Unit,
+    peso: String,
+    repeticiones: String,
+    rm: String
+){
+
+    val parsedDate = LocalDate.parse(date, DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+    val formatter = DateTimeFormatter.ofPattern("EEEE, d 'de' MMMM 'de' yyyy", Locale("es", "ES"))
+
     Column(
         modifier = Modifier
             .padding(10.dp)
@@ -41,7 +53,7 @@ fun GetHistoryDayBox(date: String, isExpanded: Boolean, onToggleExpand: () -> Un
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = date,
+                text = parsedDate.format(formatter),
                 color = Color.White,
                 fontWeight = FontWeight.Bold
             )
