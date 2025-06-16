@@ -10,6 +10,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.example.tft_gym_app.ui.theme.darkDetailColor
+import com.example.tft_gym_app.ui.theme.detailsColor
+import com.example.tft_gym_app.ui.theme.labelColor
 import components.langSwitcher.getStringByName
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -21,6 +24,7 @@ fun GetInputWithDropdown(
     onExpanded: (Boolean) -> Unit,
     onDismissExpanded: () -> Unit,
     options: List<String>,
+    labelText: String
 ) {
 
 
@@ -34,14 +38,23 @@ fun GetInputWithDropdown(
 
             value = selectedText,
             onValueChange = { onSelectedText(it) },
-            label = { Text("Selecciona una opción") },
+            label = { Text(labelText) },
             modifier = Modifier
                 .menuAnchor()
                 .fillMaxWidth(),
             readOnly = true, // Solo permite elegir del dropdown
+            shape = RoundedCornerShape(20.dp),
             trailingIcon = {
                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
-            }
+            },
+            colors = TextFieldDefaults.colors(
+                focusedLabelColor = detailsColor,
+                focusedIndicatorColor = detailsColor,
+                unfocusedContainerColor = darkDetailColor,
+                unfocusedLabelColor = labelColor,
+                unfocusedIndicatorColor = labelColor
+            )
+
         )
 
         ExposedDropdownMenu(

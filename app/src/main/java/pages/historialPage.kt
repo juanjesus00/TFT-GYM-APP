@@ -140,7 +140,7 @@ fun GetHistorialPage(
                         rm = "${item.rm} KG"
                     )
 
-                    GetSettingMenu(navigationActions, navController, index, history, exercise)
+                    GetSettingMenu(navigationActions, navController, index, history = history, exercise = exercise)
 
                 }
 

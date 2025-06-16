@@ -24,6 +24,7 @@ import androidx.navigation.NavController
 import components.langSwitcher.getStringByName
 import firebase.auth.AuthRepository
 import model.Registro
+import model.RutinaFirebase
 import routes.NavigationActions
 import viewModel.api.GymViewModel
 
@@ -32,7 +33,8 @@ fun GetSettingMenu(
     navigationActions: NavigationActions,
     navController: NavController,
     index: Int,
-    history: List<Registro>,
+    history: List<Registro> = listOf(),
+    routine: List<RutinaFirebase> = listOf(),
     exercise: String?,
     authRepository: AuthRepository = viewModel(),
     gymViewModel: GymViewModel = viewModel()

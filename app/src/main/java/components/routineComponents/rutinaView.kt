@@ -59,8 +59,8 @@ fun RutinaCard(
 
     Card(
         modifier = Modifier
-            .width(340.dp)
-            .padding(vertical = 8.dp),
+            .padding(10.dp)
+            .width(340.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(
             containerColor = darkDetailColor

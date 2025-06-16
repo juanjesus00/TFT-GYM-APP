@@ -20,7 +20,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import components.buttons.GetDefaultButton
 import components.buttons.GetNextButton
+import components.inputs.DatePickerDocked
 import components.inputs.GetInputLogin
+import components.inputs.GetInputWithDropdown
 import components.langSwitcher.getStringByName
 import routes.NavigationActions
 import viewModel.api.GymViewModel
@@ -33,6 +35,12 @@ fun GetUserDataScreen(navigationActions: NavigationActions, navController: NavHo
     var weight by remember { mutableStateOf("") }
     var height by remember { mutableStateOf("") }
     val context = LocalContext.current
+
+    var expandedGender by remember { mutableStateOf(false) }
+    val genderList = listOf("male", "female").mapNotNull { name ->
+        getStringByName(context, name)
+    }
+
     Column (
         modifier = Modifier
             .fillMaxSize()
@@ -45,20 +53,22 @@ fun GetUserDataScreen(navigationActions: NavigationActions, navController: NavHo
             Text(text = it , color = Color(0xFFD78323))
         }
 
-        getStringByName(context, "gender")?.let{
-            GetInputLogin(
-                text = gender,
-                onValueChange = { gender = it },
-                label = it,
-                placeholder = it
+        getStringByName(context, "gender")?.let{ label ->
+            GetInputWithDropdown(
+                expanded = expandedGender,
+                selectedText = gender,
+                onExpanded = {expandedGender = it},
+                onSelectedText = {gender = it},
+                onDismissExpanded = {expandedGender = false},
+                options = genderList,
+                labelText = label
             )
         }
         getStringByName(context, "birthdate")?.let{
-            GetInputLogin(
-                text = birthDate,
-                onValueChange = { birthDate = it },
-                label = it,
-                placeholder = it
+            DatePickerDocked(
+                format = "dd/MM/yyyy",
+                onResult = {birthDate = it},
+                currentDate = it
             )
         }
         getStringByName(context, "weight")?.let{

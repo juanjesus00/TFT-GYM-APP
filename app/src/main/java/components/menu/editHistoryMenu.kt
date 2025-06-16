@@ -48,6 +48,13 @@ fun GetEditHistoryMenu(
     exercise: String?
 ){
     var date by remember { mutableStateOf("") }
+
+    /*history.forEachIndexed { i, item ->
+        if (i == index) {
+            date = item.fecha
+        }
+    }*/
+
     var weight by remember { mutableStateOf("") }
     var repetitions by remember { mutableStateOf("") }
     val rm by rmCalculator.estimatedRm.observeAsState()
@@ -67,24 +74,18 @@ fun GetEditHistoryMenu(
                 }
 
                 getStringByName(LocalContext.current, "date")?.let{ label ->
-//                    DatePickerInput(
-//                       label = label,
-//                        initialDate = date,
-//                        onDateSelected = {date = it},
-//                        separator = "-"
-//                    )
                     DatePickerDocked(
                         format = "yyyy-MM-dd",
-                        onResult = { value -> date = value }
+                        onResult = { value -> date = value },
+                        currentDate = label
                     )
-
                 }
 
                 getStringByName(LocalContext.current, "weight")?.let{ label ->
                     GetInputLogin(
                         text = weight,
                         onValueChange = { weight = it },
-                        label = label,
+                        label = "${label}-kg",
                         placeholder = label
                     )
                 }

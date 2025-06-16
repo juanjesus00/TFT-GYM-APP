@@ -162,14 +162,18 @@ fun GetVideoPage(
 
         }
 
-        GetInputWithDropdown(
-            expanded = expanded,
-            selectedText = selectedText,
-            onExpanded = {expanded = it},
-            onSelectedText = {gymViewModel.actualizarSelectedText(it)},
-            onDismissExpanded = {expanded = false},
-            options = options
-        )
+        getStringByName(context, "exercise")?.let{ label ->
+            GetInputWithDropdown(
+                expanded = expanded,
+                selectedText = selectedText,
+                onExpanded = {expanded = it},
+                onSelectedText = {gymViewModel.actualizarSelectedText(it)},
+                onDismissExpanded = {expanded = false},
+                options = options,
+                labelText = label
+            )
+        }
+
 
         GetInputLogin(
             text = weight,

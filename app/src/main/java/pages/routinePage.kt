@@ -2,8 +2,11 @@ package pages
 
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -22,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import components.buttons.GetOptionButton
 import components.langSwitcher.getStringByName
+import components.menu.GetSettingMenu
 import components.routineComponents.RutinaCard
 import routes.NavigationActions
 import viewModel.api.GymViewModel
@@ -46,13 +50,30 @@ fun GetRoutinePage(
     val routineStrength  = gymViewModel.rutinasFuerza
 
     Column(
-        modifier = Modifier.fillMaxSize().padding(top = 100.dp).verticalScroll(scrollState),
+        modifier = Modifier.fillMaxSize().padding(top = 120.dp).verticalScroll(scrollState),
         verticalArrangement = Arrangement.spacedBy(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         if(routineHypertrophy.isNotEmpty()){
             routineHypertrophy.forEachIndexed { index, rutina ->
-                RutinaCard(rutina = rutina, index = index, initiallyExpanded = rutina.activa, navController, navigationActions)
+                Row (
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(20.dp),
+
+                ){
+                    RutinaCard(rutina = rutina, index = index, initiallyExpanded = rutina.activa, navController, navigationActions)
+                    Box(
+                        modifier = Modifier.fillMaxSize()
+                            .padding(top = 8.dp),
+                        contentAlignment = Alignment.Center,
+                    )
+                    {
+                        GetSettingMenu(navigationActions, navController, index, routine = routineHypertrophy, exercise = routineType)
+                    }
+
+                }
+
             }
             getStringByName(context, "add")?.let{
                 GetOptionButton(
