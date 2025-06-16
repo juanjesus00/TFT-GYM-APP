@@ -29,6 +29,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
@@ -37,6 +38,7 @@ import com.example.tft_gym_app.R
 import com.example.tft_gym_app.ui.theme.darkDetailColor
 import com.example.tft_gym_app.ui.theme.detailsColor
 import components.inputs.GetInputWithDropdown
+import components.langSwitcher.getStringByName
 import kotlinx.coroutines.launch
 import model.Registro
 import java.text.SimpleDateFormat
@@ -44,9 +46,9 @@ import java.util.*
 
 
 enum class TimeFilter(val label: String) {
-    LAST_7_DAYS("Últimos 7 días"),
-    LAST_MONTH("Último mes"),
-    LAST_YEAR("Último año"),
+    LAST_7_DAYS("ultimos7días"),
+    LAST_MONTH("ultimomes"),
+    LAST_YEAR("ultimoaño"),
     ALL("Todos")
 }
 
@@ -64,7 +66,10 @@ fun HistoryChart(
         Text("No hay datos disponibles para $exerciseName")
         return
     }
-    val options = listOf(TimeFilter.LAST_7_DAYS.toString(), TimeFilter.LAST_MONTH.toString(), TimeFilter.LAST_YEAR.toString(), TimeFilter.ALL.toString())
+    val context = LocalContext.current
+    val options = listOf(TimeFilter.LAST_7_DAYS.label, TimeFilter.LAST_MONTH.label, TimeFilter.LAST_YEAR.label, TimeFilter.ALL.label).mapNotNull { name ->
+        getStringByName(context, name)
+    }
     var expanded by remember { mutableStateOf(false) }
     val formatter = remember { SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()) }
     val now = remember { Date() }
@@ -360,15 +365,18 @@ fun HistoryChart(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
+                getStringByName(LocalContext.current, "filteredBy")?.let{ label ->
+                    GetInputWithDropdown(
+                        expanded = expanded,
+                        selectedText = selectedFilter.toString(),
+                        onExpanded = {expanded = it},
+                        onSelectedText = {selectedFilter = TimeFilter.valueOf(it.toString())},
+                        onDismissExpanded = {expanded = false},
+                        options = options,
+                        labelText = "label"
+                    )
+                }
 
-                GetInputWithDropdown(
-                    expanded = expanded,
-                    selectedText = selectedFilter.toString(),
-                    onExpanded = {expanded = it},
-                    onSelectedText = {selectedFilter = TimeFilter.valueOf(it.toString())},
-                    onDismissExpanded = {expanded = false},
-                    options = options
-                )
             }
 
             Row(

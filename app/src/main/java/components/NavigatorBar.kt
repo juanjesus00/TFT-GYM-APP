@@ -40,6 +40,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.LocalContext
+import com.google.firebase.auth.FirebaseAuth
 import components.menu.GetMenuVideo
 import kotlinx.coroutines.launch
 
@@ -49,6 +50,8 @@ fun GetNavigatorBar(navigationActions: NavigationActions, navController: NavCont
     var isVideoPress by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     val scale = remember { Animatable(1f) }
+    val context = LocalContext.current
+
     Box (
         modifier = Modifier.fillMaxWidth()
             .padding(bottom = 30.dp),
@@ -98,7 +101,12 @@ fun GetNavigatorBar(navigationActions: NavigationActions, navController: NavCont
                 Image(modifier = Modifier.size(80.dp), painter = painterResource(R.drawable.video_analisis), contentDescription = "video")
             }
             IconButton(
-                onClick = {navigationActions.navigateToUserProfile()}
+                onClick = {
+                    FirebaseAuth.getInstance().currentUser?.let{
+                        navigationActions.navigateToUserProfile()
+                    }
+                        ?: Toast.makeText(context, "Tienes que iniciar sesión para entrar al perfil de usuario", Toast.LENGTH_LONG).show()
+                }
             ) {
                 Image(painter = painterResource(R.drawable.user_icon), contentDescription = "user")
             }

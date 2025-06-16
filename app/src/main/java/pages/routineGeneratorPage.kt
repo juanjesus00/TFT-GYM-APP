@@ -93,80 +93,108 @@ fun RutinaGeneradorScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Campo para personalizar el prompt
-        GetInputWithDropdown(
-            expanded = expandedRoutine,
-            selectedText = selectedRoutine,
-            onExpanded = {expandedRoutine = it},
-            onSelectedText = {selectedRoutine = it},
-            onDismissExpanded = {expandedRoutine = false},
-            options = routineTypeOptions
-        )
+
+        getStringByName(context, "routine")?.let{ label ->
+            GetInputWithDropdown(
+                expanded = expandedRoutine,
+                selectedText = selectedRoutine,
+                onExpanded = {expandedRoutine = it},
+                onSelectedText = {selectedRoutine = it},
+                onDismissExpanded = {expandedRoutine = false},
+                options = routineTypeOptions,
+                labelText = label
+            )
+        }
+
 
         if (selectedRoutine == "Hypertrophy" || selectedRoutine == "Hipertrofia" ) {
-            GetInputWithDropdown(
-                expanded = expandedTime,
-                selectedText = selectedTimeHypertrophy,
-                onExpanded = {expandedTime = it},
-                onSelectedText = {selectedTimeHypertrophy = it},
-                onDismissExpanded = {expandedTime = false},
-                options = timeHypertrophyOptions?:listOf("")
-            )
-            GetInputWithDropdown(
-                expanded = expandedHR,
-                selectedText = selectedHR,
-                onExpanded = {expandedHR = it},
-                onSelectedText = {selectedHR = it},
-                onDismissExpanded = {expandedHR = false},
-                options = hypertrophyRoutine
-            )
-        }else if (selectedRoutine == "Strength" || selectedRoutine == "Fuerza" ){
-            GetInputWithDropdown(
-                expanded = expandedTime,
-                selectedText = selectedTimeStrength,
-                onExpanded = {expandedTime = it},
-                onSelectedText = {selectedTimeStrength = it},
-                onDismissExpanded = {expandedTime = false},
-                options = timeStrengthOptions?:listOf("")
-            )
+            getStringByName(context, "time")?.let{ label ->
+                GetInputWithDropdown(
+                    expanded = expandedTime,
+                    selectedText = selectedTimeHypertrophy,
+                    onExpanded = {expandedTime = it},
+                    onSelectedText = {selectedTimeHypertrophy = it},
+                    onDismissExpanded = {expandedTime = false},
+                    options = timeHypertrophyOptions?:listOf(""),
+                    labelText = label
+                )
+            }
 
-            GetInputWithDropdown(
-                expanded = expandedExercise,
-                selectedText = selectedExercise,
-                onExpanded = {expandedExercise = it},
-                onSelectedText = {selectedExercise = it},
-                onDismissExpanded = {expandedExercise = false},
-                options = exerciseOptions
-            )
+            getStringByName(context, "routine")?.let{ label ->
+                GetInputWithDropdown(
+                    expanded = expandedHR,
+                    selectedText = selectedHR,
+                    onExpanded = {expandedHR = it},
+                    onSelectedText = {selectedHR = it},
+                    onDismissExpanded = {expandedHR = false},
+                    options = hypertrophyRoutine,
+                    labelText = label
+                )
+            }
+
+        }else if (selectedRoutine == "Strength" || selectedRoutine == "Fuerza" ){
+            getStringByName(context, "time")?.let{ label ->
+                GetInputWithDropdown(
+                    expanded = expandedTime,
+                    selectedText = selectedTimeStrength,
+                    onExpanded = {expandedTime = it},
+                    onSelectedText = {selectedTimeStrength = it},
+                    onDismissExpanded = {expandedTime = false},
+                    options = timeStrengthOptions?:listOf(""),
+                    labelText = label
+                )
+            }
+            getStringByName(context, "exercise")?.let{ label ->
+                GetInputWithDropdown(
+                    expanded = expandedExercise,
+                    selectedText = selectedExercise,
+                    onExpanded = {expandedExercise = it},
+                    onSelectedText = {selectedExercise = it},
+                    onDismissExpanded = {expandedExercise = false},
+                    options = exerciseOptions,
+                    labelText = label
+                )
+            }
             when(true){
                 (selectedExercise == "Press de Banca" || selectedExercise == "Bench Press") -> {
-                    GetInputWithDropdown(
-                        expanded = expandedBPR,
-                        selectedText = selectedBPR,
-                        onExpanded = {expandedBPR = it},
-                        onSelectedText = {selectedBPR = it},
-                        onDismissExpanded = {expandedBPR = false},
-                        options = benchPressRoutine
-                    )
+                    getStringByName(context, "routine")?.let{ label ->
+                        GetInputWithDropdown(
+                            expanded = expandedBPR,
+                            selectedText = selectedBPR,
+                            onExpanded = {expandedBPR = it},
+                            onSelectedText = {selectedBPR = it},
+                            onDismissExpanded = {expandedBPR = false},
+                            options = benchPressRoutine,
+                            labelText = label
+                        )
+                    }
                 }
                 (selectedExercise == "Peso Muerto" || selectedExercise == "Deadlift") -> {
-                    GetInputWithDropdown(
-                        expanded = expandedDLR,
-                        selectedText = selectedDLR,
-                        onExpanded = {expandedDLR = it},
-                        onSelectedText = {selectedDLR = it},
-                        onDismissExpanded = {expandedDLR = false},
-                        options = deadLiftRoutine
-                    )
+                    getStringByName(context, "routine")?.let{ label ->
+                        GetInputWithDropdown(
+                            expanded = expandedDLR,
+                            selectedText = selectedDLR,
+                            onExpanded = {expandedDLR = it},
+                            onSelectedText = {selectedDLR = it},
+                            onDismissExpanded = {expandedDLR = false},
+                            options = deadLiftRoutine,
+                            labelText = label
+                        )
+                    }
+
                 }
                 (selectedExercise == "Sentadilla" || selectedExercise == "Squad") -> {
-                    GetInputWithDropdown(
-                        expanded = expandedSR,
-                        selectedText = selectedSR,
-                        onExpanded = {expandedSR = it},
-                        onSelectedText = {selectedSR = it},
-                        onDismissExpanded = {expandedSR = false},
-                        options = squadRoutine
-                    )
+                    getStringByName(context, "routine")?.let{ label ->
+                        GetInputWithDropdown(
+                            expanded = expandedSR,
+                            selectedText = selectedSR,
+                            onExpanded = {expandedSR = it},
+                            onSelectedText = {selectedSR = it},
+                            onDismissExpanded = {expandedSR = false},
+                            options = squadRoutine,
+                            labelText = label
+                        )
+                    }
                 }
                 else -> {
                     // Acción por defecto
@@ -176,75 +204,77 @@ fun RutinaGeneradorScreen(
 
 
         }
-
-        GetInputWithDropdown(
-            expanded = expandedLevel,
-            selectedText = selectedLevel,
-            onExpanded = {expandedLevel = it},
-            onSelectedText = {selectedLevel = it},
-            onDismissExpanded = {expandedLevel = false},
-            options = userLevelOptions
-        )
-
-        GetDefaultIconButton(
-            text = "Generar Rutina",
-            onClick = {
-                if (selectedRoutine.isEmpty() || selectedLevel.isEmpty()) {
-                    error = getStringByName(context, "complete_fields") ?: "Complete all fields"
-                    return@GetDefaultIconButton
-                }
-
-                val promptBuilder = StringBuilder().apply {
-                    append("Genera una rutina de entrenamiento para $selectedRoutine ")
-
-                    when (selectedRoutine) {
-                        "Hypertrophy", "Hipertrofia" -> {
-                            append("de $selectedTimeHypertrophy días, ")
-                            append("usando el programa $selectedHR. ")
-                        }
-                        "Strength", "Fuerza" -> {
-                            append("de $selectedTimeStrength semanas, ")
-                            append("especializada en $selectedExercise ")
-                            append("con el método ${getSelectedRoutineName(selectedExercise, selectedBPR, selectedDLR, selectedSR)}. ")
-                        }
+        getStringByName(context, "userLevel")?.let{ label ->
+            GetInputWithDropdown(
+                expanded = expandedLevel,
+                selectedText = selectedLevel,
+                onExpanded = {expandedLevel = it},
+                onSelectedText = {selectedLevel = it},
+                onDismissExpanded = {expandedLevel = false},
+                options = userLevelOptions,
+                labelText = label
+            )
+        }
+        getStringByName(context, "generateRoutine")?.let{ buttonText ->
+            GetDefaultIconButton(
+                text = buttonText,
+                onClick = {
+                    if (selectedRoutine.isEmpty() || selectedLevel.isEmpty()) {
+                        error = getStringByName(context, "complete_fields") ?: "Complete all fields"
+                        return@GetDefaultIconButton
                     }
 
-                    append("Nivel: $selectedLevel. ")
-                    append("Formato requerido: \n")
-                    append("- SOLO incluir listas por días en formato MARKDOWN\n")
-                    append("- Cada día con encabezado ## Día [número/nombre]\n")
-                    append("- Tabla de ejercicios con columnas: Ejercicio, Series, Repeticiones\n")
-                    append("- Sin explicaciones adicionales, solo la rutina")
-                }
+                    val promptBuilder = StringBuilder().apply {
+                        append("Genera una rutina de entrenamiento para $selectedRoutine ")
 
-                prompt = promptBuilder.toString()
-                Log.d("PromptOptimizado", prompt)
+                        when (selectedRoutine) {
+                            "Hypertrophy", "Hipertrofia" -> {
+                                append("de $selectedTimeHypertrophy días, ")
+                                append("usando el programa $selectedHR. ")
+                            }
+                            "Strength", "Fuerza" -> {
+                                append("de $selectedTimeStrength semanas, ")
+                                append("especializada en $selectedExercise ")
+                                append("con el método ${getSelectedRoutineName(selectedExercise, selectedBPR, selectedDLR, selectedSR)}. ")
+                            }
+                        }
 
-                cargando = true
-                error = null
-                resultado = ""
+                        append("Nivel: $selectedLevel. ")
+                        append("Formato requerido: \n")
+                        append("- SOLO incluir listas por días en formato MARKDOWN\n")
+                        append("- Cada día con encabezado ## Día [número/nombre]\n")
+                        append("- Tabla de ejercicios con columnas: Ejercicio, Series, Repeticiones\n")
+                        append("- Sin explicaciones adicionales, solo la rutina")
+                    }
 
-                coroutineScope.launch {
-                    try {
-                        val result = geminiApiService.sendPrompt(prompt)
-                        result.onSuccess { textoLimpio ->
-                            resultado = textoLimpio
-                            authRepository.saveRoutine(selectedRoutine, selectedExercise, textoLimpio)
-                        }.onFailure { e ->
+                    prompt = promptBuilder.toString()
+                    Log.d("PromptOptimizado", prompt)
+
+                    cargando = true
+                    error = null
+                    resultado = ""
+
+                    coroutineScope.launch {
+                        try {
+                            val result = geminiApiService.sendPrompt(prompt)
+                            result.onSuccess { textoLimpio ->
+                                resultado = textoLimpio
+                                authRepository.saveRoutine(selectedRoutine, selectedExercise, textoLimpio)
+                            }.onFailure { e ->
+                                error = "Error: ${e.message}"
+                                Log.e("routinePage", "Error capturado: $e")
+                            }
+                        } catch (e: Exception) {
                             error = "Error: ${e.message}"
                             Log.e("routinePage", "Error capturado: $e")
                         }
-                    } catch (e: Exception) {
-                        error = "Error: ${e.message}"
-                        Log.e("routinePage", "Error capturado: $e")
+                        cargando = false
                     }
-                    cargando = false
-                }
-            },
-            enabled = !cargando,
-            icon = R.drawable.aiicon
-        )
-
+                },
+                enabled = !cargando,
+                icon = R.drawable.aiicon
+            )
+        }
 
         // Estado de carga
         if (cargando) {
@@ -254,7 +284,10 @@ fun RutinaGeneradorScreen(
             ) {
                 CircularProgressIndicator()
                 Spacer(modifier = Modifier.height(8.dp))
-                Text("Generando rutina...")
+                getStringByName(context, "generatingRoutine")?.let {
+                    Text("$it ...")
+                }
+
             }
         }
 

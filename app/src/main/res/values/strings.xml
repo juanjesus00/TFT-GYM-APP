@@ -35,6 +35,8 @@
     <string name="cancel" translatable="false">Cancelar</string>
     <string name="accept" translatable="false">Aceptar</string>
     <string name="gender" translatable="false">Género</string>
+    <string name="male" translatable="false">Masculino</string>
+    <string name="female" translatable="false">Femenino</string>
     <string name="birthdate" translatable="false">Fecha de nacimiento</string>
     <string name="analyze" translatable="false">Analizar</string>
     <string name="edit" translatable="false">Editar</string>
@@ -52,4 +54,15 @@
     <string name="intermediate" translatable="false">Medio</string>
     <string name="advanced" translatable="false">Avanzado</string>
     <string name="days" translatable="false">Días</string>
+    <string name="filteredBy" translatable="false">Filtrar por</string>
+    <string name="ultimos7días" translatable="false">Últimos 7 días</string>
+    <string name="ultimomes" translatable="false">Último mes</string>
+    <string name="ultimoaño" translatable="false">Último año</string>
+    <string name="Todos" translatable="false">Todos</string>
+    <string name="time" translatable="false">Tiempo</string>
+    <string name="routine" translatable="false">Rutina</string>
+    <string name="exercise" translatable="false">Ejercicio</string>
+    <string name="userLevel" translatable="false">Nivel de usuario</string>
+    <string name="generateRoutine" translatable="false">Generar rutina</string>
+    <string name="generatingRoutine" translatable="false">Generando rutina</string>
 </resources>

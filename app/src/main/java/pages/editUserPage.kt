@@ -30,7 +30,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.tft_gym_app.ui.theme.backgroundColor
 import components.buttons.GetDefaultButton
+import components.inputs.DatePickerDocked
 import components.inputs.GetInputLogin
+import components.inputs.GetInputWithDropdown
 import components.langSwitcher.getStringByName
 import components.userProfileComponents.GetProfileImage
 import firebase.auth.AuthRepository
@@ -55,6 +57,10 @@ fun GetEditUserInfo(
     var gender by remember { mutableStateOf("") }
     var infoUser by remember { mutableStateOf(emptyMap<String, Any>()) }
 
+    var expandedGender by remember { mutableStateOf(false) }
+    val genderList = listOf("male", "female").mapNotNull { name ->
+        getStringByName(context, name)
+    }
 
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
@@ -142,20 +148,22 @@ fun GetEditUserInfo(
         }
 
         getStringByName(context, "birthdate")?.let { label ->
-            GetInputLogin(
-                text = birthdate,
-                onValueChange = { birthdate = it },
-                label = label,
-                placeholder = label
+            DatePickerDocked(
+                format = "dd/MM/yyyy",
+                onResult = { birthdate = it },
+                currentDate = birthdate
             )
         }
 
         getStringByName(context, "gender")?.let { label ->
-            GetInputLogin(
-                text = gender,
-                onValueChange = { gender = it },
-                label = label,
-                placeholder = label
+            GetInputWithDropdown(
+                expanded = expandedGender,
+                selectedText = gender,
+                onExpanded = {expandedGender = it},
+                onSelectedText = {gender = it},
+                onDismissExpanded = {expandedGender = false},
+                options = genderList,
+                labelText = label
             )
         }
 

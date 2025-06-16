@@ -20,6 +20,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
@@ -32,9 +33,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
+import com.example.tft_gym_app.ui.theme.darkDetailColor
+import com.example.tft_gym_app.ui.theme.detailsColor
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -43,7 +47,7 @@ import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DatePickerDocked(format: String, onResult:(String) -> Unit) {
+fun DatePickerDocked(format: String, onResult:(String) -> Unit, currentDate: String) {
     var showDatePicker by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState()
     val selectedDate = datePickerState.selectedDateMillis?.let {
@@ -57,8 +61,9 @@ fun DatePickerDocked(format: String, onResult:(String) -> Unit) {
     ) {
         OutlinedTextField(
             value = selectedDate,
-            onValueChange = { },
-            label = { Text("DOB") },
+            onValueChange = {  },
+            label = { Text(text = currentDate) },
+            placeholder = {Text(text = currentDate)},
             readOnly = true,
             trailingIcon = {
                 IconButton(onClick = { showDatePicker = !showDatePicker }) {
@@ -69,8 +74,14 @@ fun DatePickerDocked(format: String, onResult:(String) -> Unit) {
                 }
             },
             shape = RoundedCornerShape(20.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedLabelColor = detailsColor,
+                focusedBorderColor = detailsColor,
+                unfocusedContainerColor = darkDetailColor
+            ),
             modifier = Modifier
                 .width(280.dp)
+
         )
 
         if (showDatePicker) {
