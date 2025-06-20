@@ -274,7 +274,7 @@ fun SmallHistoryChart(
                         "Fecha: ${registro.fecha}",
                         "Peso: ${registro.peso} kg",
                         "Reps: ${registro.repeticiones}",
-                        "RM: ${registro.rm}"
+                        "RM: ${String.format("%.2f kg", registro.rm)}"
                     )
 
                     val paint = android.graphics.Paint().apply {

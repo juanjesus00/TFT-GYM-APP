@@ -67,11 +67,11 @@ fun HistoryChart(
         return
     }
     val context = LocalContext.current
-    val options = listOf(TimeFilter.LAST_7_DAYS.toString(), TimeFilter.LAST_MONTH.toString(), TimeFilter.LAST_YEAR.toString(), TimeFilter.ALL.toString()).mapNotNull { name ->
-        getStringByName(context, name)
-    }
+//    val options = listOf(TimeFilter.LAST_7_DAYS.toString(), TimeFilter.LAST_MONTH.toString(), TimeFilter.LAST_YEAR.toString(), TimeFilter.ALL.toString()).mapNotNull { name ->
+//        getStringByName(context, name)
+//    }
 
-    //val options = listOf(TimeFilter.LAST_7_DAYS.toString(), TimeFilter.LAST_MONTH.toString(), TimeFilter.LAST_YEAR.toString(), TimeFilter.ALL.toString())
+    val options = listOf(TimeFilter.LAST_7_DAYS.toString(), TimeFilter.LAST_MONTH.toString(), TimeFilter.LAST_YEAR.toString(), TimeFilter.ALL.toString())
     var expanded by remember { mutableStateOf(false) }
     val formatter = remember { SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()) }
     val now = remember { Date() }
@@ -183,7 +183,7 @@ fun HistoryChart(
                     .matchParentSize()
                     .pointerInput(true) {
                         detectTapGestures { offset ->
-                            val spacing = size.width / (pesos.size - 1)
+                           val spacing = if (pesos.size > 1) size.width / (pesos.size - 1) else size.width / (pesos.size)
                             val points = animatedYs.mapIndexed { index, animY ->
                                 Offset(
                                     x = (index * spacing).toFloat(),
@@ -197,10 +197,11 @@ fun HistoryChart(
                                 }
                             }
                             touchedIndex = -1
+
                         }
                     }
             ) {
-                val spacing = size.width / (pesos.size - 1)
+                val spacing = if (pesos.size > 1) size.width / (pesos.size - 1) else 0f
                 val points = animatedYs.mapIndexed { index, animY ->
                     Offset(
                         x = (index * spacing),
@@ -316,7 +317,8 @@ fun HistoryChart(
                         "Fecha: ${registro.fecha}",
                         "Peso: ${registro.peso} kg",
                         "Reps: ${registro.repeticiones}",
-                        "RM: ${registro.rm}"
+                        "RM: ${String.format("%.2f kg", registro.rm)}"
+
                     )
 
                     val paint = android.graphics.Paint().apply {
