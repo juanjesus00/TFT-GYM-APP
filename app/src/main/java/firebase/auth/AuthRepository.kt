@@ -11,8 +11,8 @@ import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 import routes.NavigationActions
 import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
@@ -840,6 +840,26 @@ class AuthRepository : ViewModel(){
             .addOnFailureListener {
                 Log.e("Firebase", "Error al obtener rutinas de fuerza: ${it.message}")
                 onResult(emptyMap())
+            }
+    }
+
+    fun deleteHypertrophyRoutine(routineList: MutableList<RutinaFirebase>, onSuccess: () -> Unit){
+        val currentUser = FirebaseAuth.getInstance().currentUser ?: return
+        val uid = currentUser.uid
+
+        FirebaseFirestore.getInstance()
+            .collection("Usuarios")
+            .document(uid)
+            .collection("Rutinas")
+            .document("Hipertrofia")
+            .set(mapOf("rutinas" to routineList))
+            .addOnSuccessListener {
+                Log.d("deleteHypertrophyRoutine", "Hypertrophy routine delete successfully")
+                onSuccess.invoke()
+            }
+            .addOnFailureListener { e ->
+                Log.w("deleteHypertrophyRoutine", "Error trying to delete hypertrophy routine", e)
+                onSuccess.invoke()
             }
     }
 

@@ -1,12 +1,12 @@
 package components.menu
 
+import android.util.Log
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -75,12 +75,20 @@ fun GetSettingMenu(
         actionText1 = "edit",
         onClickAction2 = {
             isVisible = false
-            val newHistory = history.toMutableList()
-            newHistory.removeAt(index)
-            val rm = authRepository.getNewMaxRmFromHistory(newHistory)
-            getStringByName(context, exercise?:"")?.let{
-                authRepository.deleteHistoryRegistro(history = newHistory, rm = rm, exercise = it, onSuccess = {navigationActions.navigateToHistory()})
+            if(!history.isNullOrEmpty()){
+                val newHistory = history.toMutableList()
+                newHistory.removeAt(index)
+                val rm = authRepository.getNewMaxRmFromHistory(newHistory)
+                getStringByName(context, exercise?:"")?.let{
+                    authRepository.deleteHistoryRegistro(history = newHistory, rm = rm, exercise = it, onSuccess = {navigationActions.navigateToHistory()})
+                }
+            }else if(!routine.isNullOrEmpty()){
+                val newRoutine = routine.toMutableList()
+                newRoutine.removeAt(index)
+                Log.d("delete Routine", "$newRoutine")
+                authRepository.deleteHypertrophyRoutine(newRoutine, onSuccess = {navigationActions.navigateToRoutineSelector()})
             }
+
                          },
         actionText2 = "delete")
 
