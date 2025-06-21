@@ -36,6 +36,6 @@ fun GetDeleteUserUi(navigationActions: NavigationActions, navController: NavCont
             actionText1 = "accept",
             onClickAction2 = {isVisible = false},
             actionText2 = "cancel"
-        )
+        ) {}
     }
 }

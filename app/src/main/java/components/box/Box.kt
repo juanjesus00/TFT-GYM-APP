@@ -141,5 +141,5 @@ fun Box(authRepository: AuthRepository = viewModel(), widget: Widget, viewModel:
         actionText1 = "delete",
         onClickAction2 = { isMenuVisible = false },
         actionText2 = "cancel"
-    )
+    ) {}
 }

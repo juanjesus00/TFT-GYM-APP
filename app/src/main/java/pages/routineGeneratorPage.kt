@@ -269,6 +269,7 @@ fun RutinaGeneradorScreen(
                             Log.e("routinePage", "Error capturado: $e")
                         }
                         cargando = false
+                        navigationActions.navigateToRoutineSelector()
                     }
                 },
                 enabled = !cargando,

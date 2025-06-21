@@ -90,7 +90,20 @@ fun GetSettingMenu(
             }
 
                          },
-        actionText2 = "delete")
+        actionText2 = "delete",
+        exercise = exercise,
+        onClickAction3 = {
+            var newRoutine = routine
+            newRoutine.forEachIndexed { i, rutina ->
+                if(i != index){
+                    if(rutina.activa){
+                        rutina.activa = false
+                    }
+                }
+            }
+            newRoutine[index].activa = true
+            authRepository.activateHypertrophyRoutine(newRoutine.toMutableList(), onSuccess = {navigationActions.navigateToRoutineSelector()})
+        })
 
     GetEditHistoryMenu(
         navigationActions = navigationActions,

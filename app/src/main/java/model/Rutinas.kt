@@ -1,18 +1,18 @@
 package model
 
 data class RutinaFirebase(
-    val activa: Boolean = false,
-    val fecha: String = "",
-    val contenido: List<DiaRutina> = emptyList()
+    var activa: Boolean = false,
+    var fecha: String = "",
+    var contenido: List<DiaRutina> = emptyList()
 )
 
 data class DiaRutina(
-    val dia: String = "",
-    val ejercicios: List<Ejercicio> = emptyList()
+    var dia: String = "",
+    var ejercicios: List<Ejercicio> = emptyList()
 )
 
 data class Ejercicio(
-    val nombre: String = "",
-    val reps: String = "",
-    val series: Int = 0
+    var nombre: String = "",
+    var reps: String = "",
+    var series: Int = 0
 )

@@ -863,6 +863,26 @@ class AuthRepository : ViewModel(){
             }
     }
 
+    fun activateHypertrophyRoutine(routineList: MutableList<RutinaFirebase>, onSuccess: () -> Unit){
+        val currentUser = FirebaseAuth.getInstance().currentUser ?: return
+        val uid = currentUser.uid
+
+        FirebaseFirestore.getInstance()
+            .collection("Usuarios")
+            .document(uid)
+            .collection("Rutinas")
+            .document("Hipertrofia")
+            .set(mapOf("rutinas" to routineList))
+            .addOnSuccessListener {
+                Log.d("activateHypertrophyRoutine", "Hypertrophy routine activate successfully")
+                onSuccess.invoke()
+            }
+            .addOnFailureListener { e ->
+                Log.w("activateHypertrophyRoutine", "Error trying to activate hypertrophy routine", e)
+                onSuccess.invoke()
+            }
+    }
+
     fun deleteUser(
         context: Context,
         onSuccess: () -> Unit

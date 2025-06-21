@@ -65,4 +65,5 @@
     <string name="userLevel" translatable="false">Nivel de usuario</string>
     <string name="generateRoutine" translatable="false">Generar rutina</string>
     <string name="generatingRoutine" translatable="false">Generando rutina</string>
+    <string name="activateRoutine" translatable="false">Activar Rutina</string>
 </resources>
