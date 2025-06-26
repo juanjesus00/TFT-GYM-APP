@@ -2,6 +2,7 @@ package pages
 
 
 
+import android.util.Log
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -31,6 +32,7 @@ import components.menu.GetOptionBoxMenu
 import components.newbox.GetBox
 import components.newbox.UnloggedGetBox
 import components.newbox.ViewModelBox
+import firebase.auth.AuthRepository
 import viewModel.api.GymViewModel
 
 @OptIn(ExperimentalLayoutApi::class)

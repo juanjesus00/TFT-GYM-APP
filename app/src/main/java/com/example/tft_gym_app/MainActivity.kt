@@ -1,6 +1,5 @@
 package com.example.tft_gym_app
 
-import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
@@ -12,7 +11,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.core.app.ActivityCompat
@@ -35,10 +33,9 @@ import uiPrincipal.MyComposeApp
 import viewModel.api.GymViewModel
 import viewModel.rm.RmCalculator
 import android.Manifest.permission.POST_NOTIFICATIONS
-import android.annotation.SuppressLint
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
-import androidx.work.workDataOf
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -60,6 +57,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             TFTGymAppTheme {
+
                 val navController = rememberNavController()
                 val navigationActions = NavigationActions(navController)
                 val gymViewModel: GymViewModel = viewModel()
@@ -69,6 +67,8 @@ class MainActivity : ComponentActivity() {
                 val weight by gymViewModel.observeWeight.observeAsState()
                 val rm by viewModelRmCalculator.estimatedRm.observeAsState()
                 val currentDateTime = java.time.LocalDate.now()
+                var bodyWeight by remember { mutableFloatStateOf(0f) }
+
                 LaunchedEffect(Unit) {
                     gymViewModel.resultResponse.collect { result ->
                         result?.let {
@@ -96,21 +96,77 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                     }
+
+                    viewModelRepository.getInfoUser { user ->
+                        user?.let {
+                            bodyWeight = it["weight"]?.toString()?.toFloatOrNull() ?: 0f
+                        }
+                    }
+
+
                 }
 
                 NavHost(navController = navController, startDestination = Routes.HOME){
-                    composable(Routes.HOME){ MyComposeApp(navigationActions, navController,gymViewModel) }
+                    composable(Routes.HOME){ MyComposeApp(navigationActions, navController,gymViewModel, viewModelRepository, viewModelRmCalculator) }
                     composable(Routes.LOGIN){ GetLoginScreen(navigationActions, navController,gymViewModel) }
                     composable(Routes.REGISTER){ GetRegisterScreen(navigationActions, navController,gymViewModel) }
                     composable(Routes.USERDATA){ GetUserDataScreen(navigationActions, navController,gymViewModel) }
-                    composable(Routes.USERPROFILE){ MyComposeApp(navigationActions, navController,gymViewModel) }
-                    composable(Routes.VIDEO){ MyComposeApp(navigationActions, navController,gymViewModel) }
-                    composable(Routes.EDITUSERINFO){ MyComposeApp(navigationActions, navController,gymViewModel) }
-                    composable(Routes.HISTORY){ MyComposeApp(navigationActions, navController,gymViewModel) }
-                    composable(Routes.HISTORYPAGE){ MyComposeApp(navigationActions, navController,gymViewModel) }
-                    composable(Routes.ROUTINEGENERATOR){ MyComposeApp(navigationActions, navController,gymViewModel) }
-                    composable(Routes.ROUTINESELECTOR){ MyComposeApp(navigationActions, navController,gymViewModel) }
-                    composable(Routes.ROUTINEPAGE){ MyComposeApp(navigationActions, navController,gymViewModel) }
+                    composable(Routes.USERPROFILE){ MyComposeApp(
+                        navigationActions,
+                        navController,
+                        gymViewModel,
+                        viewModelRepository,
+                        viewModelRmCalculator
+                    ) }
+                    composable(Routes.VIDEO){ MyComposeApp(
+                        navigationActions,
+                        navController,
+                        gymViewModel,
+                        viewModelRepository,
+                        viewModelRmCalculator
+                    ) }
+                    composable(Routes.EDITUSERINFO){ MyComposeApp(
+                        navigationActions,
+                        navController,
+                        gymViewModel,
+                        viewModelRepository,
+                        viewModelRmCalculator
+                    ) }
+                    composable(Routes.HISTORY){ MyComposeApp(
+                        navigationActions,
+                        navController,
+                        gymViewModel,
+                        viewModelRepository,
+                        viewModelRmCalculator
+                    ) }
+                    composable(Routes.HISTORYPAGE){ MyComposeApp(
+                        navigationActions,
+                        navController,
+                        gymViewModel,
+                        viewModelRepository,
+                        viewModelRmCalculator
+                    ) }
+                    composable(Routes.ROUTINEGENERATOR){ MyComposeApp(
+                        navigationActions,
+                        navController,
+                        gymViewModel,
+                        viewModelRepository,
+                        viewModelRmCalculator
+                    ) }
+                    composable(Routes.ROUTINESELECTOR){ MyComposeApp(
+                        navigationActions,
+                        navController,
+                        gymViewModel,
+                        viewModelRepository,
+                        viewModelRmCalculator
+                    ) }
+                    composable(Routes.ROUTINEPAGE){ MyComposeApp(
+                        navigationActions,
+                        navController,
+                        gymViewModel,
+                        viewModelRepository,
+                        viewModelRmCalculator
+                    ) }
                 }
 
             }

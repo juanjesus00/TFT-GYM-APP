@@ -80,7 +80,7 @@ fun GetSettingMenu(
                 newHistory.removeAt(index)
                 val rm = authRepository.getNewMaxRmFromHistory(newHistory)
                 getStringByName(context, exercise?:"")?.let{
-                    authRepository.deleteHistoryRegistro(history = newHistory, rm = rm, exercise = it, onSuccess = {navigationActions.navigateToHistory()})
+                    authRepository.deleteHistoryRegistro(history = newHistory, rm = rm, exercise = it, onSuccess = {navigationActions.navigateToHistory()}, context)
                 }
             }else if(!routine.isNullOrEmpty()){
                 val newRoutine = routine.toMutableList()

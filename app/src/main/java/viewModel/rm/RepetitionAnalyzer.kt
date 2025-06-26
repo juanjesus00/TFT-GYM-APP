@@ -34,4 +34,5 @@ object RepetitionAnalyzer {
         val estimatedRm = if(reps > 1 ) ((weight * reps)*lossRate)+weight else weight
         return estimatedRm
     }
+
 }

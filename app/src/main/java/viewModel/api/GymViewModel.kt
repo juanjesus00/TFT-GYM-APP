@@ -206,4 +206,5 @@ class GymViewModel: ViewModel(){
         _progress.value = "0"
     }
 
+
 }

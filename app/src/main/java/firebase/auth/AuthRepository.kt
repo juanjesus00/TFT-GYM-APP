@@ -11,18 +11,22 @@ import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 import routes.NavigationActions
 import android.widget.Toast
-import androidx.compose.ui.platform.LocalContext
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import components.newbox.ViewModelBox
+import geminiApi.GeminiApiService
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import model.DiaRutina
@@ -49,9 +53,11 @@ class AuthRepository : ViewModel(){
     private val _isEmailVerified = MutableLiveData<Boolean>()
     val isEmailVerified: LiveData<Boolean> = _isEmailVerified
 
+    private var _maxRm = MutableStateFlow<Float?>(null)
+    val maxRm: StateFlow<Float?> = _maxRm
+
     private val storageRef= FirebaseStorage.getInstance().reference
     private val dbRef = FirebaseFirestore.getInstance()
-
 
     fun signIn(
         email: String,
@@ -446,7 +452,13 @@ class AuthRepository : ViewModel(){
         }
     }
 
-    fun updateHistoryUser(history: List<Registro>, rm: Float, exercise: String, onSuccess: () -> Unit){
+    fun updateHistoryUser(
+        history: List<Registro>,
+        rm: Float,
+        exercise: String,
+        onSuccess: () -> Unit,
+        context: Context
+    ){
         val historySorted = sortHistoryFromFecha(history)
 
         currentUser?.let{ user ->
@@ -460,8 +472,10 @@ class AuthRepository : ViewModel(){
 
                 if (isNewMaxRm) {
                     updateData["max_rm"] = rm ?: 0f
+
                 }else{
                     updateData["max_rm"] = getNewMaxRmFromHistory(history)
+
                 }
 
                 db.collection("Usuarios").document(uid)
@@ -478,7 +492,36 @@ class AuthRepository : ViewModel(){
 
         }
     }
-    fun deleteHistoryRegistro(history: List<Registro>, rm: Float, exercise: String, onSuccess: () -> Unit){
+
+    fun updateUserExerciseStats(exercise: String, rareza:String, nivel: String){
+        currentUser?.let{ user ->
+            val uid = user.uid
+            val db = FirebaseFirestore.getInstance()
+
+            db.collection("Usuarios").document(uid)
+                .collection("Ejercicios").document(exercise)
+                .update(
+                    mapOf(
+                        "rareza" to rareza,
+                        "nivel" to nivel
+                    )
+                )
+                .addOnSuccessListener {
+                    Log.d("Firestore", "Campos 'rareza' y 'nivel' añadidos correctamente")
+                }
+                .addOnFailureListener { e ->
+                    Log.e("Firestore", "Error al añadir campos dinámicos", e)
+                }
+        }
+    }
+
+    fun deleteHistoryRegistro(
+        history: List<Registro>,
+        rm: Float,
+        exercise: String,
+        onSuccess: () -> Unit,
+        context: Context
+    ){
         val historySorted = sortHistoryFromFecha(history)
 
         currentUser?.let{ user ->
@@ -490,6 +533,7 @@ class AuthRepository : ViewModel(){
             )
 
             updateData["max_rm"] = rm ?: 0f
+
 
             db.collection("Usuarios").document(uid)
                 .collection("Ejercicios").document(exercise)
@@ -553,6 +597,59 @@ class AuthRepository : ViewModel(){
         }
     }
 
+    private var listenerRegistration: ListenerRegistration? = null
+
+    fun setNewMaxRm(rm: Float) {
+        _maxRm.value = rm
+    }
+
+    fun observeMaxRmChanges(
+        context: Context,
+        exercise: String,
+        bodyWeight: Float,
+        levelStrength: String,
+        onResult: (String) -> Unit = {}
+    ) {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val docRef = FirebaseFirestore.getInstance()
+            .collection("Usuarios")
+            .document(uid)
+            .collection("Ejercicios")
+            .document(exercise)
+
+        listenerRegistration?.remove() // 🔁 Cancela el anterior si existe
+
+        val geminiApiService = GeminiApiService(context)
+        var lastRm: Float? = null
+
+        listenerRegistration = docRef.addSnapshotListener { snapshot, e ->
+            if (e != null) return@addSnapshotListener
+
+            val currentRm = snapshot?.getDouble("max_rm")?.toFloat()
+            if (currentRm != null && currentRm != lastRm) {
+                lastRm = currentRm
+
+                CoroutineScope(Dispatchers.IO).launch {
+                    val prompt = "Para un RM de $currentRm kg en $exercise con un peso corporal de $bodyWeight kg, indica la rareza en % comparado con levantadores de fuerza y que este porcentaje se situe en la cantidad de gente capaz no cuanto % eres superior. Responde solo con 'rareza: X%' . por ejemplo rareza: 2%"
+                    val result = geminiApiService.sendPrompt(prompt)
+                    result.onSuccess { textoLimpio ->
+                        val updateMap = parsearRarezaNivel(textoLimpio, levelStrength)
+                        docRef.update(updateMap)
+                        onResult(textoLimpio)
+                    }
+                }
+            }
+        }
+    }
+    private fun parsearRarezaNivel(respuesta: String, levelStrength: String): Map<String, Any> {
+        val regex = Regex("""rareza:\s*(\d+([.,]\d+)?)%?""", RegexOption.IGNORE_CASE)
+        val match = regex.find(respuesta)
+
+        return if (match != null) {
+            val rareza = match.groupValues[1].toFloat()
+            mapOf("rareza" to rareza, "nivel" to levelStrength)
+        } else emptyMap()
+    }
     fun getHistoryUser(onResult: (List<Registro>?) -> Unit, exercise: String){
         val currentUser = FirebaseAuth.getInstance().currentUser
         currentUser?.let { user ->
@@ -623,7 +720,6 @@ class AuthRepository : ViewModel(){
                         }
                     }
             }
-
         } ?: run{
             onResult(resultList)
         }

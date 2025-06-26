@@ -1,19 +1,20 @@
 package components.menu
 
-import android.app.Activity
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,11 +29,10 @@ import components.inputs.DatePickerDocked
 import components.inputs.GetInputLogin
 import components.langSwitcher.getStringByName
 import firebase.auth.AuthRepository
+import geminiApi.GeminiApiService
 import model.Registro
 import routes.NavigationActions
-import viewModel.api.GymViewModel
 import viewModel.rm.RmCalculator
-import java.util.Calendar
 
 @Composable
 fun GetEditHistoryMenu(
@@ -54,11 +54,20 @@ fun GetEditHistoryMenu(
             date = item.fecha
         }
     }*/
-
+    var bodyWeight by remember { mutableFloatStateOf(0f) }
+    LaunchedEffect(Unit) {
+        authRepository.getInfoUser { user ->
+            user?.let {
+               bodyWeight = it["weight"]?.toString()?.toFloatOrNull() ?: 0f
+            }
+        }
+    }
+    val context = LocalContext.current
+    val geminiApiService = remember { GeminiApiService(context) }
+    val coroutineScope = rememberCoroutineScope()
     var weight by remember { mutableStateOf("") }
     var repetitions by remember { mutableStateOf("") }
     val rm by rmCalculator.estimatedRm.observeAsState()
-    val context = LocalContext.current
     Log.d("DatePicker", date)
     if(isMenuVisible){
         Dialog(onDismissRequest = onDismiss) {
@@ -119,7 +128,21 @@ fun GetEditHistoryMenu(
                                         rmCalculator.analyzeRepetition(weight = weight.toFloat(), reps = repetitions.toInt())
                                         val newHistory = history.toMutableList()
                                         newHistory.add(model.Registro(fecha = date, peso = weight.toFloat(), repeticiones = repetitions.toInt(), rm = rm?:0f))
-                                        authRepository.updateHistoryUser(history = newHistory, rm = rm?:0f, exercise = it, onSuccess = {navigationActions.navigateToHistory()})
+
+                                        /*CoroutineScope(Dispatchers.IO).launch {
+                                            try {
+                                                val result = geminiApiService.sendPrompt("Para un RM de $rm kg en $it con un peso corporal de $bodyWeight kg, considerando solo a levantadores de powerlifting, indica la rareza en % y el nivel [principiante, novato, intermedio, avanzado, elite]. Responde solo con 'rareza: X%, nivel: Y'.")
+                                                result.onSuccess { textoLimpio ->
+                                                    Log.d("newPr", "$textoLimpio")
+                                                    //authRepository.saveRoutine(selectedRoutine, selectedExercise, textoLimpio)
+                                                }.onFailure { e ->
+                                                    Log.e("routinePage", "Error capturado: $e")
+                                                }
+                                            } catch (e: Exception) {
+                                                Log.e("routinePage", "Error capturado: $e")
+                                            }
+                                        }*/
+                                        authRepository.updateHistoryUser(history = newHistory, rm = rm?:0f, exercise = it, onSuccess = {navigationActions.navigateToHistory()}, context)
                                     }//authRepository.editUserFromVideo(exercise = it, date = date, weight = weight.toFloat(), repetitions = repetitions.toInt(), rm = rm.toFloat(), onSuccess = {navigationActions.navigateToHistory()})
                                     "edit" -> {
                                         rmCalculator.analyzeRepetition(weight = weight.toFloat(), reps = repetitions.toInt())
@@ -133,7 +156,26 @@ fun GetEditHistoryMenu(
                                             }
                                         }
 
-                                        authRepository.updateHistoryUser(history = history, rm = rm?:0f, exercise = it, onSuccess = {navigationActions.navigateToHistory()})
+                                        /*CoroutineScope(Dispatchers.IO).launch {
+                                            try {
+                                                val result = geminiApiService.sendPrompt("Para un RM de $rm kg en $exercise con un peso corporal de $bodyWeight kg, considerando solo a levantadores que entrenan fuerza, indica la rareza en % y el nivel [principiante, novato, intermedio, avanzado, elite]. Responde solo con 'rareza: X%, nivel: Y nivel'.")
+                                                result.onSuccess { textoLimpio ->
+                                                    Log.d("newPr", "$textoLimpio")
+                                                    //authRepository.saveRoutine(selectedRoutine, selectedExercise, textoLimpio)
+                                                }.onFailure { e ->
+                                                    Log.e("routinePage", "Error capturado: $e")
+                                                }
+                                            } catch (e: Exception) {
+                                                Log.e("routinePage", "Error capturado: $e")
+                                            }
+                                        }*/
+                                        authRepository.updateHistoryUser(
+                                            history = history,
+                                            rm = rm?:0f,
+                                            exercise = it,
+                                            onSuccess = {navigationActions.navigateToHistory()},
+                                            context = context
+                                        )
                                     }
 
                                 }
