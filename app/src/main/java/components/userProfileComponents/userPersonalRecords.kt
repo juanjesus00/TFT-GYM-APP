@@ -37,13 +37,20 @@ fun GetUserPersonalRecords(
 ) {
     var expanded by remember { mutableStateOf(false) }
     var listExercise by remember { mutableStateOf(emptyMap<String, Float>()) }
-
+    var listLevelRare by remember { mutableStateOf(emptyMap<String, Map<String, Any>>()) }
 
     LaunchedEffect(Unit) {
         authRepository.getRMUser(onResult = { value ->
-            value?.let{ listExercise = it}
+            value?.let{ listExercise = it }
         })
         Log.d("Personal Records", "$listExercise")
+
+        authRepository.getLevelRare { value ->
+            value?.let{
+                listLevelRare = it
+            }
+        }
+
     }
 
     Column (
@@ -75,8 +82,8 @@ fun GetUserPersonalRecords(
                     targetOffsetY = { it / 2 }
                 )
             ) {
-
-                GetUserPersonalRecordBox(exercise.key, exercise.value)
+                val levelRare = listLevelRare[exercise.key]
+                GetUserPersonalRecordBox(exercise.key, exercise.value, listLevelRare = levelRare)
             }
 
         }

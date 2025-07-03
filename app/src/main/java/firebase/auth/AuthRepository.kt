@@ -53,8 +53,8 @@ class AuthRepository : ViewModel(){
     private val _isEmailVerified = MutableLiveData<Boolean>()
     val isEmailVerified: LiveData<Boolean> = _isEmailVerified
 
-    private var _maxRm = MutableStateFlow<Float?>(null)
-    val maxRm: StateFlow<Float?> = _maxRm
+    private val _maxRm = MutableStateFlow<Map<String, Float>>(emptyMap())
+    val maxRm: StateFlow<Map<String, Float>> = _maxRm
 
     private val storageRef= FirebaseStorage.getInstance().reference
     private val dbRef = FirebaseFirestore.getInstance()
@@ -599,8 +599,10 @@ class AuthRepository : ViewModel(){
 
     private var listenerRegistration: ListenerRegistration? = null
 
-    fun setNewMaxRm(rm: Float) {
-        _maxRm.value = rm
+    fun setNewMaxRm(exercise: String, value: Float) {
+        _maxRm.value = _maxRm.value.toMutableMap().apply {
+            put(exercise, value)
+        }
     }
 
     fun observeMaxRmChanges(
@@ -725,6 +727,45 @@ class AuthRepository : ViewModel(){
         }
     }
 
+
+    fun getLevelRare(onResult: (Map<String, Map<String, Any>>) -> Unit){
+        var resultList = mutableMapOf<String, Map<String, Any>>()
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        currentUser?.let { user ->
+            val uid = user.uid
+            val db = FirebaseFirestore.getInstance()
+            val listExercise = listOf("Press de Banca", "Peso Muerto", "Sentadilla")
+            var completedRequests = 0
+
+            listExercise.forEach { exerciseName ->
+                db.collection("Usuarios").document(uid)
+                    .collection("Ejercicios").document(exerciseName).get()
+                    .addOnSuccessListener { document ->
+                        if (document != null && document.exists()) {
+                            val nivel = document.getString("nivel") ?: "Novato"
+                            val rareza = (document.get("rareza") as? Number)?.toFloat() ?: 100f
+                            resultList[exerciseName] = mapOf("nivel" to nivel, "rareza" to rareza)
+                        } else {
+                            resultList[exerciseName] = mapOf("nivel" to "", "rareza" to  0f)
+                        }
+                        completedRequests++
+                        if (completedRequests == listExercise.size) {
+                            onResult(resultList)
+                        }
+                    }
+                    .addOnFailureListener { exception ->
+                        exception.printStackTrace()
+                        completedRequests++
+                        resultList[exerciseName] = mapOf("nivel" to "", "rareza" to  0f)
+                        if (completedRequests == listExercise.size) {
+                            onResult(resultList)
+                        }
+                    }
+            }
+        } ?: run{
+            onResult(resultList)
+        }
+    }
     fun addNewWidget(
         widgetType: String,
         exercise: String,

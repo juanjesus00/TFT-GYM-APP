@@ -68,10 +68,10 @@ fun MyComposeApp(
     val coroutineScope = rememberCoroutineScope()
     val systemUiController = rememberSystemUiController()
     var listExercise by remember { mutableStateOf(emptyMap<String, Float>()) }
-    val newMaxRm by viewModelRepository.maxRm.collectAsState()
-    var currentMaxRm by remember { mutableFloatStateOf(0f) }
+    val maxRmMap by viewModelRepository.maxRm.collectAsState()
     var bodyWeight by remember { mutableFloatStateOf(0f) }
     var levelStrength by remember {mutableStateOf("")}
+    val exerciseList = listOf("Press de Banca", "Peso Muerto", "Sentadilla")
 
     val context = LocalContext.current
     LaunchedEffect(Unit) {
@@ -89,32 +89,38 @@ fun MyComposeApp(
                 bodyWeight = it["weight"]?.toString()?.toFloatOrNull() ?: 0f
                 Log.d("Peso corporal", "$bodyWeight")
 
-                // 2. Ahora obtener los RM usando el bodyWeight ya cargado
-                viewModelRepository.getRMUser { value ->
-                    value?.let { listExercise = it }
-                    currentMaxRm = listExercise["Press de Banca"] ?: 0f
+                viewModelRepository.getRMUser { rmMap ->
+                    listExercise = rmMap
 
-                    Log.d("Max RM", "Actual: $currentMaxRm, Nuevo: $newMaxRm")
+                    exerciseList.forEach { exercise ->
+                        val currentRm = rmMap[exercise] ?: 0f
+                        val previousRm = maxRmMap[exercise] ?: 0f
 
-                    if (currentMaxRm != newMaxRm) {
-                        if(newMaxRm != null){
-                            viewModelRmCalculator.getLevelStrength(
-                                exercise = "Press de Banca",
-                                bodyWeight = bodyWeight,  // Ya tiene valor
-                                rm = currentMaxRm
-                            ) { level ->
-                                levelStrength = level
-                                // 3. Llamar a observeMaxRmChanges CON los datos completos
-                                viewModelRepository.observeMaxRmChanges(
-                                    exercise = "Press de Banca",
-                                    bodyWeight = bodyWeight,
-                                    context = context,
-                                    levelStrength = levelStrength
-                                )
-                            }
+                        // Si el valor anterior es 0 (o no existe), asumimos que aún no se ha inicializado: no hacemos nada
+                        if (previousRm == 0f || currentRm == 0f) {
+                            Log.d("Max RM", "$exercise - Se omite comparación por valor inicial 0 (actual: $currentRm, anterior: $previousRm)")
+                            return@forEach
                         }
 
-                        viewModelRepository.setNewMaxRm(currentMaxRm)
+                        Log.d("Max RM", "$exercise - Actual: $currentRm, Anterior: $previousRm")
+
+                        if (currentRm != previousRm) {
+                            viewModelRmCalculator.getLevelStrength(
+                                exercise = exercise,
+                                bodyWeight = bodyWeight,
+                                rm = currentRm
+                            ) { level ->
+                                levelStrength = level
+                                viewModelRepository.observeMaxRmChanges(
+                                    exercise = exercise,
+                                    bodyWeight = bodyWeight,
+                                    context = context,
+                                    levelStrength = level
+                                )
+                            }
+
+                            viewModelRepository.setNewMaxRm(exercise, currentRm)
+                        }
                     }
                 }
             }

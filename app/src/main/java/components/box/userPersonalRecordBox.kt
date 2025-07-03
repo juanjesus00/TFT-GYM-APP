@@ -1,5 +1,6 @@
 package components.box
 
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
@@ -19,7 +20,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -43,7 +43,9 @@ import androidx.compose.ui.unit.sp
 import components.langSwitcher.getStringByName
 
 @Composable
-fun GetUserPersonalRecordBox(exercise: String, rm: Float) {
+fun GetUserPersonalRecordBox(exercise: String, rm: Float, listLevelRare: Map<String, Any>?) {
+
+    Log.d("lista de nivel", "$listLevelRare")
     val gradient = Brush.linearGradient(
         colors = listOf(Color(0xFFD78323), Color(0xFF27DD03)),
         start = Offset(25f, 25f),
@@ -110,9 +112,10 @@ fun GetUserPersonalRecordBox(exercise: String, rm: Float) {
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    val rareza = (listLevelRare?.get("rareza") ?: "100").toString()
                     InfoColumn(title = "Record", value = "${String.format("%.2f", rm)} KG")
-                    InfoColumn(title = "Nivel", value = "Élite")
-                    InfoColumn(title = "Rareza", value = "0.5%")
+                    InfoColumn(title = "Nivel", value = (listLevelRare?.get("nivel") ?: "Novato").toString())
+                    InfoColumn(title = "Rareza", value = "$rareza %")
                 }
             }
         }
