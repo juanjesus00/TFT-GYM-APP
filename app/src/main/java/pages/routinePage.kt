@@ -26,6 +26,7 @@ import androidx.navigation.NavController
 import components.buttons.GetOptionButton
 import components.langSwitcher.getStringByName
 import components.menu.GetSettingMenu
+import components.routineComponents.AddRoutineDialog
 import components.routineComponents.RutinaCard
 import routes.NavigationActions
 import viewModel.api.GymViewModel
@@ -83,6 +84,17 @@ fun GetRoutinePage(
                     }
                 )
             }
+
+
+            AddRoutineDialog(
+                isVisible = editableMenu,
+                onDismiss = {editableMenu = false},
+                tipo = routineType?:"",
+                ejercicio = "",
+                navigationActions = navigationActions,
+                navController = navController
+            )
+
         }else if(routineStrength.isNotEmpty()){
             /*routineStrength.forEachIndexed { index, rutina ->
                 RutinaCard(rutina = rutina, index = index, initiallyExpanded = rutina.activa, navController, navigationActions)

@@ -632,7 +632,40 @@ class AuthRepository : ViewModel(){
                 lastRm = currentRm
 
                 CoroutineScope(Dispatchers.IO).launch {
-                    val prompt = "Para un RM de $currentRm kg en $exercise con un peso corporal de $bodyWeight kg, indica la rareza en % comparado con levantadores de fuerza y que este porcentaje se situe en la cantidad de gente capaz no cuanto % eres superior. Responde solo con 'rareza: X%' . por ejemplo rareza: 2%"
+                    val prompt = "Actúa como un estadístico deportivo con acceso a la base de datos de estándares de fuerza de powerlifting 2025 (StrengthLevel, USPA, IPF o datos equivalentes).\n" +
+                            "\n" +
+                            "• Se te facilita una tabla de percentiles donde cada celda indica el peso (en kg) que alcanza el percentil P para un 1RM en un ejercicio concreto.  \n" +
+                            "• Tu tarea es calcular el % de levantadores que pueden igualar o superar un RM dado.  \n" +
+                            "• El % se define como: (número de levantadores con RM ≥ dato) / (total de levantadores) × 100.  \n" +
+                            "• Reporta solo una línea con el formato:  \n" +
+                            "rareza: X%  \n" +
+                            "donde X es el porcentaje redondeado a un decimal.\n" +
+                            "\n" +
+                            "Ejemplo de entrada:\n" +
+                            "- ejercicio: SENTADILLA\n" +
+                            "- peso corporal: 83kg\n" +
+                            "- RM: 210kg\n" +
+                            "\n" +
+                            "Ejemplo de tabla (extracto simplificado—usa esta tabla **y nada más**):\n" +
+                            "P99: 270kg  \n" +
+                            "P95: 240kg  \n" +
+                            "P90: 220kg  \n" +
+                            "P80: 200kg  \n" +
+                            "P70: 185kg  \n" +
+                            "P50: 160kg  \n" +
+                            "\n" +
+                            "### PASOS QUE DEBES SEGUIR\n" +
+                            "1. Localiza el intervalo de percentiles que encierra el RM (ej.: 210kg está entre P90 y P80).  \n" +
+                            "2. Interpola linealmente si el RM no coincide exactamente con un percentil.  \n" +
+                            "3. Calcula el porcentaje de levantadores con RM≥210kg = 100−percentilCorrespondiente.  \n" +
+                            "4. Devuélvelo como «rareza: X%» sin texto extra.\n" +
+                            "\n" +
+                            "---  \n" +
+                            "Datos reales a procesar:  \n" +
+                            "• ejercicio: $exercise  \n" +
+                            "• peso corporal: $bodyWeight kg  \n" +
+                            "• RM: $currentRm kg  \n" +
+                            "• Tabla de percentiles para $exercise y $bodyWeight kg (inclúyela aquí tal como la recuperes)."
                     val result = geminiApiService.sendPrompt(prompt)
                     result.onSuccess { textoLimpio ->
                         val updateMap = parsearRarezaNivel(textoLimpio, levelStrength)
@@ -836,7 +869,16 @@ class AuthRepository : ViewModel(){
         }
     }
 
-
+    suspend fun saveManualRoutine(ejercicio: String, tipo: String, contenido: List<Map<String, Any>>){
+        currentUser?.uid?.let { uid ->
+            val db = FirebaseFirestore.getInstance()
+            val userRef = db.collection("Usuarios").document(uid)
+            when (tipo.lowercase()) {
+                "hipertrofia", "hypertrophy" -> saveHypertrophyRoutine(userRef, contenido)
+                "fuerza", "strength" -> saveStrengthRoutine(userRef, ejercicio, contenido)
+            }
+        }
+    }
     private suspend fun saveHypertrophyRoutine(
         userRef: DocumentReference,
         contenido: List<Map<String, Any>>

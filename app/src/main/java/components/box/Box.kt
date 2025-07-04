@@ -15,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -61,13 +62,19 @@ fun Box(authRepository: AuthRepository = viewModel(), widget: Widget, viewModel:
     }
 
     var listExercise by remember { mutableStateOf(emptyMap<String, Float>()) }
-
+    var listLevelRare by remember { mutableStateOf(emptyMap<String, Map<String, Any>>()) }
     if(widget.type == "pr"){
         LaunchedEffect(Unit) {
             authRepository.getRMUser(onResult = { value ->
                 value?.let{ listExercise = it}
             })
             Log.d("Personal Records", "$listExercise")
+
+            authRepository.getLevelRare { value ->
+                value?.let{
+                    listLevelRare = it
+                }
+            }
         }
     }
 
@@ -124,7 +131,7 @@ fun Box(authRepository: AuthRepository = viewModel(), widget: Widget, viewModel:
                 SmallHistoryChart(history = history, exerciseName = widget.exercise)
             }
             "pr" -> {
-                GetPersonalRecordWidget(widget = widget, listExercise = listExercise)
+                GetPersonalRecordWidget(widget = widget, listExercise = listExercise, listLevelRare = listLevelRare)
             }
         }
 

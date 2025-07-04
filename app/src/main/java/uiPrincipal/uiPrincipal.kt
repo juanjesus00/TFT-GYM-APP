@@ -72,7 +72,7 @@ fun MyComposeApp(
     var bodyWeight by remember { mutableFloatStateOf(0f) }
     var levelStrength by remember {mutableStateOf("")}
     val exerciseList = listOf("Press de Banca", "Peso Muerto", "Sentadilla")
-
+    var listLevelRare by remember { mutableStateOf(emptyMap<String, Map<String, Any>>()) }
     val context = LocalContext.current
     LaunchedEffect(Unit) {
         systemUiController.setStatusBarColor(
@@ -88,21 +88,32 @@ fun MyComposeApp(
             user?.let {
                 bodyWeight = it["weight"]?.toString()?.toFloatOrNull() ?: 0f
                 Log.d("Peso corporal", "$bodyWeight")
-
+                viewModelRepository.getLevelRare { value ->
+                    value?.let{
+                        listLevelRare = it
+                    }
+                }
                 viewModelRepository.getRMUser { rmMap ->
                     listExercise = rmMap
 
                     exerciseList.forEach { exercise ->
                         val currentRm = rmMap[exercise] ?: 0f
-                        val previousRm = maxRmMap[exercise] ?: 0f
-
+                        val previousRm = maxRmMap[exercise] ?: null
+                        val currentExerciseRare = listLevelRare[exercise]?.get("rareza") ?: ""
                         // Si el valor anterior es 0 (o no existe), asumimos que aún no se ha inicializado: no hacemos nada
-                        if (previousRm == 0f || currentRm == 0f) {
+                        if (previousRm == 0f && currentRm > 0f) {
                             Log.d("Max RM", "$exercise - Se omite comparación por valor inicial 0 (actual: $currentRm, anterior: $previousRm)")
                             return@forEach
                         }
 
-                        Log.d("Max RM", "$exercise - Actual: $currentRm, Anterior: $previousRm")
+
+
+                        if(currentExerciseRare != "" && previousRm == null){
+                            viewModelRepository.setNewMaxRm(exercise, currentRm)
+                            return@forEach
+                        }
+
+                        Log.d("Max RM", "$exercise - Actual: $currentRm, Anterior: $previousRm, Rareza: $currentExerciseRare")
 
                         if (currentRm != previousRm) {
                             viewModelRmCalculator.getLevelStrength(

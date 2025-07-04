@@ -108,16 +108,6 @@ fun GetEditHistoryMenu(
                     )
                 }
 
-                /*CHANGE TO A SELECTOR OF WHAT TYPE OF CALCULATION OF RM THE USER WANT TO GET*/
-//                getStringByName(LocalContext.current, "rm")?.let{ label ->
-//                    GetInputLogin(
-//                        text = rm,
-//                        onValueChange = { rm = it },
-//                        label = label,
-//                        placeholder = label
-//                    )
-//                }
-
                 getStringByName(LocalContext.current, "accept")?.let{
                     GetOptionButton(
                         text = it,
@@ -128,20 +118,6 @@ fun GetEditHistoryMenu(
                                         rmCalculator.analyzeRepetition(weight = weight.toFloat(), reps = repetitions.toInt())
                                         val newHistory = history.toMutableList()
                                         newHistory.add(model.Registro(fecha = date, peso = weight.toFloat(), repeticiones = repetitions.toInt(), rm = rm?:0f))
-
-                                        /*CoroutineScope(Dispatchers.IO).launch {
-                                            try {
-                                                val result = geminiApiService.sendPrompt("Para un RM de $rm kg en $it con un peso corporal de $bodyWeight kg, considerando solo a levantadores de powerlifting, indica la rareza en % y el nivel [principiante, novato, intermedio, avanzado, elite]. Responde solo con 'rareza: X%, nivel: Y'.")
-                                                result.onSuccess { textoLimpio ->
-                                                    Log.d("newPr", "$textoLimpio")
-                                                    //authRepository.saveRoutine(selectedRoutine, selectedExercise, textoLimpio)
-                                                }.onFailure { e ->
-                                                    Log.e("routinePage", "Error capturado: $e")
-                                                }
-                                            } catch (e: Exception) {
-                                                Log.e("routinePage", "Error capturado: $e")
-                                            }
-                                        }*/
                                         authRepository.updateHistoryUser(history = newHistory, rm = rm?:0f, exercise = it, onSuccess = {navigationActions.navigateToHistory()}, context)
                                     }//authRepository.editUserFromVideo(exercise = it, date = date, weight = weight.toFloat(), repetitions = repetitions.toInt(), rm = rm.toFloat(), onSuccess = {navigationActions.navigateToHistory()})
                                     "edit" -> {
@@ -155,20 +131,6 @@ fun GetEditHistoryMenu(
                                                 item.rm = rm?:0f
                                             }
                                         }
-
-                                        /*CoroutineScope(Dispatchers.IO).launch {
-                                            try {
-                                                val result = geminiApiService.sendPrompt("Para un RM de $rm kg en $exercise con un peso corporal de $bodyWeight kg, considerando solo a levantadores que entrenan fuerza, indica la rareza en % y el nivel [principiante, novato, intermedio, avanzado, elite]. Responde solo con 'rareza: X%, nivel: Y nivel'.")
-                                                result.onSuccess { textoLimpio ->
-                                                    Log.d("newPr", "$textoLimpio")
-                                                    //authRepository.saveRoutine(selectedRoutine, selectedExercise, textoLimpio)
-                                                }.onFailure { e ->
-                                                    Log.e("routinePage", "Error capturado: $e")
-                                                }
-                                            } catch (e: Exception) {
-                                                Log.e("routinePage", "Error capturado: $e")
-                                            }
-                                        }*/
                                         authRepository.updateHistoryUser(
                                             history = history,
                                             rm = rm?:0f,

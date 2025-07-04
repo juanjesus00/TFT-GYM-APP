@@ -17,6 +17,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -46,7 +47,7 @@ import kotlin.math.log
 
 @Composable
 
-fun GetPersonalRecordWidget(widget: Widget, listExercise: Map<String, Float>, viewModelBox: ViewModelBox = viewModel(), authRepository: AuthRepository = viewModel()){
+fun GetPersonalRecordWidget(widget: Widget, listExercise: Map<String, Float>, listLevelRare: Map<String, Map<String, Any>>, viewModelBox: ViewModelBox = viewModel(), authRepository: AuthRepository = viewModel()){
 
     val gradient = Brush.linearGradient(
         colors = listOf(Color(0xFFD78323), Color(0xFF27DD03)),
@@ -56,17 +57,8 @@ fun GetPersonalRecordWidget(widget: Widget, listExercise: Map<String, Float>, vi
 
     val weight = listExercise[widget.exercise]
     val context = LocalContext.current
-    var listLevelRare by remember { mutableStateOf(emptyMap<String, Map<String, Any>>()) }
+    var levelRare = 100 - ((listLevelRare[widget.exercise]?.get("rareza") ?: "100").toString()).toFloat()
 
-    LaunchedEffect(Unit) {
-        authRepository.getLevelRare { value ->
-            value?.let{
-                listLevelRare = it
-            }
-        }
-
-    }
-    var levelRare = ((listLevelRare[widget.exercise]?.get("rareza") ?: "100").toString()).toInt() - 100
 
     //val rango = viewModelBox.rango.value // Aquí lo obtienes correctamente
     val rango = when (widget.exercise.lowercase()) {
@@ -204,7 +196,7 @@ fun GetPersonalRecordWidget(widget: Widget, listExercise: Map<String, Float>, vi
                 .fillMaxWidth()
                 .padding(bottom = 10.dp),
             textAlign = TextAlign.Center,
-            text = "Superior al ${levelRare}% de la población",
+            text = "Superior al ${levelRare}% de los levantadores",
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold
         )
