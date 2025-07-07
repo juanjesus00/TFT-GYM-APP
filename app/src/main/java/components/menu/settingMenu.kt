@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import components.langSwitcher.getStringByName
+import components.routineComponents.AddRoutineDialog
 import firebase.auth.AuthRepository
 import model.Registro
 import model.RutinaFirebase
@@ -42,6 +43,7 @@ fun GetSettingMenu(
 
     var isVisible by remember { mutableStateOf(false) }
     var editableMenu by remember { mutableStateOf(false) }
+    var editableRoutineMenu by remember { mutableStateOf(false) }
     var anchorBounds by remember { mutableStateOf<Rect?>(null) }
     val configuration = LocalConfiguration.current
     val screenWidthPx = with(LocalDensity.current) {
@@ -70,7 +72,12 @@ fun GetSettingMenu(
         onDismiss = {isVisible = false},
         onClickAction1 = {
             isVisible = false
-            editableMenu = true
+
+            if(!history.isNullOrEmpty()){
+                editableMenu = true
+            }else if(!routine.isNullOrEmpty()){
+                editableRoutineMenu = true
+            }
                          },
         actionText1 = "edit",
         onClickAction2 = {
@@ -115,6 +122,15 @@ fun GetSettingMenu(
         history = history,
         exercise = exercise
     )
-
+    AddRoutineDialog(
+        isVisible = editableRoutineMenu,
+        onDismiss = {editableRoutineMenu = false},
+        tipo = exercise?:"",
+        ejercicio = "",
+        index = index,
+        routine = routine,
+        navigationActions = navigationActions,
+        navController = navController
+    )
 
 }

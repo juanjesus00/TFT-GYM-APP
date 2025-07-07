@@ -44,6 +44,7 @@ import model.DiaRutinaUI
 import model.Ejercicio
 import model.EjercicioManual
 import model.EjercicioUI
+import model.RutinaFirebase
 import routes.NavigationActions
 
 @Composable
@@ -52,6 +53,8 @@ fun AddRoutineDialog(
     isVisible: Boolean,
     tipo: String,
     ejercicio: String,
+    index: Int = 0,
+    routine: List<RutinaFirebase> = listOf(),
     navigationActions: NavigationActions,
     navController: NavController,
     onDismiss: () -> Unit
@@ -62,10 +65,9 @@ fun AddRoutineDialog(
     if(isVisible){
         AlertDialog(
             onDismissRequest = onDismiss,
-            confirmButton = {                     // ------ BOTÓN GUARDAR ------
+            confirmButton = {
                 Button(
                     onClick = {
-                        // 1. Convertir UI -> data‑classes
                         val diaRutinaList = dias.map { diaUI ->
                             DiaRutinaManual(
                                 dia = diaUI.dia.value,
@@ -90,96 +92,183 @@ fun AddRoutineDialog(
                 ) { Text("Guardar") }
             },
             dismissButton = { Button(onClick = onDismiss) { Text("Cancelar") } },
-            title = { Text("Añadir rutina manual") },
+            title = { if (routine.isNotEmpty())  Text("Editar rutina") else Text("Añadir rutina manual")},
             text = {
                 Column(Modifier.verticalScroll(scrollState)) {
-                    dias.forEachIndexed { index, diaUI ->
-                        Card(
-                            Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp),
-                            elevation = CardDefaults.cardElevation(4.dp)
-                        ) {
-                            Column(Modifier.padding(8.dp)) {
-                                // ------ CABECERA DEL DÍA ------
-                                OutlinedTextField(
-                                    value = diaUI.dia.value,
-                                    onValueChange = { diaUI.dia.value = it },
-                                    label = { Text("Día ${index + 1}") },
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-
-                                Spacer(Modifier.height(8.dp))
-
-                                // ------ LISTA DE EJERCICIOS ------
-                                diaUI.ejercicios.forEachIndexed { exIdx, exUI ->
-                                    Text("Ejercicio ${exIdx + 1}", style = MaterialTheme.typography.labelMedium)
+                    if(routine.isNotEmpty()){
+                        val contenido = routine[index].contenido
+                        dias.forEachIndexed { i, diaUI ->
+                            Card(
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp),
+                                elevation = CardDefaults.cardElevation(4.dp)
+                            ) {
+                                Column(Modifier.padding(8.dp)) {
 
                                     OutlinedTextField(
-                                        value = exUI.nombre.value,
-                                        onValueChange = { exUI.nombre.value = it },
-                                        label = { Text("Nombre") },
+                                        value = contenido[i].dia,
+                                        onValueChange = { diaUI.dia.value = it },
+                                        label = { Text("Día ${i + 1}") },
                                         modifier = Modifier.fillMaxWidth()
                                     )
 
-                                    Row {
+                                    Spacer(Modifier.height(8.dp))
+
+                                    diaUI.ejercicios.forEachIndexed { exIdx, exUI ->
+                                        Text("Ejercicio ${exIdx + 1}", style = MaterialTheme.typography.labelMedium)
+                                        val ejerRef = contenido[i].ejercicios[exIdx]
                                         OutlinedTextField(
-                                            value = exUI.reps.value,
-                                            onValueChange = { exUI.reps.value = it },
-                                            label = { Text("Reps") },
-                                            keyboardOptions = KeyboardOptions.Default.copy(
-                                                keyboardType = KeyboardType.Number
-                                            ),
-                                            modifier = Modifier
-                                                .weight(1f)
-                                                .padding(end = 4.dp)
+                                            value = ejerRef.nombre,
+                                            onValueChange = { exUI.nombre.value = it },
+                                            label = { Text("Nombre") },
+                                            modifier = Modifier.fillMaxWidth()
                                         )
-                                        OutlinedTextField(
-                                            value = exUI.series.value,
-                                            onValueChange = { exUI.series.value = it },
-                                            label = { Text("Series") },
-                                            keyboardOptions = KeyboardOptions.Default.copy(
-                                                keyboardType = KeyboardType.Number
-                                            ),
-                                            modifier = Modifier.weight(1f)
-                                        )
+
+                                        Row {
+                                            OutlinedTextField(
+                                                value = ejerRef.reps,
+                                                onValueChange = { exUI.reps.value = it },
+                                                label = { Text("Reps") },
+                                                keyboardOptions = KeyboardOptions.Default.copy(
+                                                    keyboardType = KeyboardType.Number
+                                                ),
+                                                modifier = Modifier
+                                                    .weight(1f)
+                                                    .padding(end = 4.dp)
+                                            )
+                                            OutlinedTextField(
+                                                value = ejerRef.series.toString(),
+                                                onValueChange = { exUI.series.value = it },
+                                                label = { Text("Series") },
+                                                keyboardOptions = KeyboardOptions.Default.copy(
+                                                    keyboardType = KeyboardType.Number
+                                                ),
+                                                modifier = Modifier.weight(1f)
+                                            )
+                                        }
+
+                                        Spacer(Modifier.height(8.dp))
                                     }
 
-                                    Spacer(Modifier.height(8.dp))
+                                    Row(
+                                        Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.End
+                                    ) {
+                                        IconButton(
+                                            onClick = { diaUI.ejercicios.add(EjercicioUI()) }
+                                        ) { Icon(Icons.Default.Add, "Añadir ejercicio") }
+                                        IconButton(
+                                            onClick = { diaUI.ejercicios.removeAt(i) }
+                                        ) { Icon(Icons.Default.Delete, "Añadir ejercicio") }
+                                    }
                                 }
+                            }
+                        }
 
-                                // ------ BOTÓN + EJERCICIO ------
-                                Row(
-                                    Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.End
-                                ) {
-                                    IconButton(
-                                        onClick = { diaUI.ejercicios.add(EjercicioUI()) }
-                                    ) { Icon(Icons.Default.Add, "Añadir ejercicio") }
-                                    IconButton(
-                                        onClick = { diaUI.ejercicios.removeAt(index) }
-                                    ) { Icon(Icons.Default.Delete, "Añadir ejercicio") }
+                        Row(
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(top = 8.dp),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Button(
+
+                                onClick = { dias.add(DiaRutinaUI(mutableStateOf("Día ${dias.size + 1}"))) }
+                            ) {
+                                Icon(Icons.Default.Add, "Añadir día")
+                                Spacer(Modifier.width(4.dp))
+                                Text("Añadir día")
+                            }
+                        }
+                    }else{
+                        dias.forEachIndexed { i, diaUI ->
+                            Card(
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp),
+                                elevation = CardDefaults.cardElevation(4.dp)
+                            ) {
+                                Column(Modifier.padding(8.dp)) {
+
+                                    OutlinedTextField(
+                                        value = diaUI.dia.value,
+                                        onValueChange = { diaUI.dia.value = it },
+                                        label = { Text("Día ${i + 1}") },
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+
+                                    Spacer(Modifier.height(8.dp))
+
+                                    diaUI.ejercicios.forEachIndexed { exIdx, exUI ->
+                                        Text("Ejercicio ${exIdx + 1}", style = MaterialTheme.typography.labelMedium)
+
+                                        OutlinedTextField(
+                                            value = exUI.nombre.value,
+                                            onValueChange = { exUI.nombre.value = it },
+                                            label = { Text("Nombre") },
+                                            modifier = Modifier.fillMaxWidth()
+                                        )
+
+                                        Row {
+                                            OutlinedTextField(
+                                                value = exUI.reps.value,
+                                                onValueChange = { exUI.reps.value = it },
+                                                label = { Text("Reps") },
+                                                keyboardOptions = KeyboardOptions.Default.copy(
+                                                    keyboardType = KeyboardType.Number
+                                                ),
+                                                modifier = Modifier
+                                                    .weight(1f)
+                                                    .padding(end = 4.dp)
+                                            )
+                                            OutlinedTextField(
+                                                value = exUI.series.value,
+                                                onValueChange = { exUI.series.value = it },
+                                                label = { Text("Series") },
+                                                keyboardOptions = KeyboardOptions.Default.copy(
+                                                    keyboardType = KeyboardType.Number
+                                                ),
+                                                modifier = Modifier.weight(1f)
+                                            )
+                                        }
+
+                                        Spacer(Modifier.height(8.dp))
+                                    }
+
+                                    Row(
+                                        Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.End
+                                    ) {
+                                        IconButton(
+                                            onClick = { diaUI.ejercicios.add(EjercicioUI()) }
+                                        ) { Icon(Icons.Default.Add, "Añadir ejercicio") }
+                                        IconButton(
+                                            onClick = { diaUI.ejercicios.removeAt(i) }
+                                        ) { Icon(Icons.Default.Delete, "Añadir ejercicio") }
+                                    }
                                 }
+                            }
+                        }
+
+                        Row(
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(top = 8.dp),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Button(
+
+                                onClick = { dias.add(DiaRutinaUI(mutableStateOf("Día ${dias.size + 1}"))) }
+                            ) {
+                                Icon(Icons.Default.Add, "Añadir día")
+                                Spacer(Modifier.width(4.dp))
+                                Text("Añadir día")
                             }
                         }
                     }
 
-                    // ------ BOTÓN + DÍA ------
-                    Row(
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp),
-                    horizontalArrangement = Arrangement.Center
-                    ) {
-                        Button(
 
-                            onClick = { dias.add(DiaRutinaUI(mutableStateOf("Día ${dias.size + 1}"))) }
-                        ) {
-                            Icon(Icons.Default.Add, "Añadir día")
-                            Spacer(Modifier.width(4.dp))
-                            Text("Añadir día")
-                        }
-                    }
                 }
             }
         )
