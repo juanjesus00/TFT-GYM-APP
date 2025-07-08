@@ -19,6 +19,7 @@ import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
+import com.google.firestore.admin.v1.Index
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import components.newbox.ViewModelBox
@@ -869,19 +870,21 @@ class AuthRepository : ViewModel(){
         }
     }
 
-    suspend fun saveManualRoutine(ejercicio: String, tipo: String, contenido: List<Map<String, Any>>){
+    suspend fun saveManualRoutine(ejercicio: String, tipo: String, contenido: List<Map<String, Any>>, index: Int? = null){
         currentUser?.uid?.let { uid ->
             val db = FirebaseFirestore.getInstance()
             val userRef = db.collection("Usuarios").document(uid)
             when (tipo.lowercase()) {
-                "hipertrofia", "hypertrophy" -> saveHypertrophyRoutine(userRef, contenido)
+                "hipertrofia", "hypertrophy" -> saveHypertrophyRoutine(userRef, contenido, index)
                 "fuerza", "strength" -> saveStrengthRoutine(userRef, ejercicio, contenido)
             }
         }
     }
+
     private suspend fun saveHypertrophyRoutine(
         userRef: DocumentReference,
-        contenido: List<Map<String, Any>>
+        contenido: List<Map<String, Any>>,
+        editIndex: Int? = null
     ) {
         val hypertrophyRef = userRef.collection("Rutinas").document("Hipertrofia")
 
@@ -889,7 +892,7 @@ class AuthRepository : ViewModel(){
         val existingRoutines = docSnapshot.get("rutinas") as? List<Map<String, Any>> ?: emptyList()
 
         // Marcar todas como inactivas
-        val updatedRoutines = existingRoutines.map { it.toMutableMap().apply { this["activa"] = false } }
+        val updatedRoutines = existingRoutines.map { it.toMutableMap().apply { this["activa"] = false } }.toMutableList()
 
         val fechaActual = LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
 
@@ -899,9 +902,13 @@ class AuthRepository : ViewModel(){
             "fecha" to fechaActual,
             "activa" to true
         )
-        val allRoutines = updatedRoutines + newRoutine
+        if (editIndex != null && editIndex < updatedRoutines.size) {
+            updatedRoutines[editIndex] = newRoutine as MutableMap<String, Any>
+        } else {
+            updatedRoutines.add(newRoutine as MutableMap<String, Any>)
+        }
 
-        hypertrophyRef.set(mapOf("rutinas" to allRoutines), SetOptions.merge()).await()
+        hypertrophyRef.set(mapOf("rutinas" to updatedRoutines), SetOptions.merge()).await()
     }
 
 
