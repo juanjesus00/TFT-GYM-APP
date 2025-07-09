@@ -1,5 +1,7 @@
 package pages
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,6 +33,7 @@ import components.routineComponents.RutinaCard
 import routes.NavigationActions
 import viewModel.api.GymViewModel
 
+@RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
 @Composable
 fun GetRoutinePage(
     scrollState: ScrollState,
@@ -63,7 +66,7 @@ fun GetRoutinePage(
                     horizontalArrangement = Arrangement.spacedBy(20.dp),
 
                 ){
-                    RutinaCard(rutina = rutina, index = index, initiallyExpanded = rutina.activa, navController, navigationActions)
+                    RutinaCard(rutina = rutina, index = index, initiallyExpanded = rutina.activa, navController, navigationActions, routineType = routineType)
                     Box(
                         modifier = Modifier.fillMaxSize()
                             .padding(top = 8.dp),

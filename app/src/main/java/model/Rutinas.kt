@@ -13,7 +13,8 @@ data class RutinaFirebase(
 
 data class DiaRutina(
     var dia: String = "",
-    var ejercicios: List<Ejercicio> = emptyList()
+    var ejercicios: List<Ejercicio> = emptyList(),
+    var hecho: Boolean = false
 )
 
 data class Ejercicio(

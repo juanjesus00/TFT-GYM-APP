@@ -30,14 +30,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.tft_gym_app.ui.theme.darkDetailColor
-import components.buttons.GetOptionButton
 import components.langSwitcher.getStringByName
-import components.menu.GetEditHistoryMenu
+import firebase.auth.AuthRepository
 import model.DiaRutina
 import model.RutinaFirebase
 import routes.NavigationActions
+import viewModel.api.GymViewModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -48,14 +49,15 @@ fun RutinaCard(
     index: Int,
     initiallyExpanded: Boolean = false,
     navController: NavController,
-    navigationActions: NavigationActions
+    navigationActions: NavigationActions,
+    routineType: String?,
+    authRepository: AuthRepository = viewModel()
 ) {
     val parsedDate = LocalDate.parse(rutina.fecha, DateTimeFormatter.ofPattern("dd/MM/yyyy"))
     val formatter = DateTimeFormatter.ofPattern("d 'de' MMMM 'de' yyyy", Locale("es", "ES"))
-
     var expanded by remember { mutableStateOf(initiallyExpanded) }
     val titulo = if (rutina.activa) "Rutina activa" else "Rutina ${index + 1}: ${parsedDate.format(formatter)}"
-
+    val context = LocalContext.current
 
     Card(
         modifier = Modifier
@@ -92,7 +94,7 @@ fun RutinaCard(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 rutina.contenido.forEachIndexed { diaIndex, dia ->
-                    DiaRutinaItem(index = diaIndex, dia = dia)
+                    DiaRutinaItem(rutinaIndex = index, diaIndex = diaIndex, dia = dia, routineActive = rutina.activa, authRepository, getStringByName(context, routineType ?: ""), navigationActions)
                     Divider(color = Color.LightGray, thickness = 1.dp)
                 }
             }
@@ -103,16 +105,30 @@ fun RutinaCard(
 
 
 @Composable
-fun DiaRutinaItem(index: Int, dia: DiaRutina) {
-    var isChecked by remember { mutableStateOf(false) }
-
+fun DiaRutinaItem(
+    rutinaIndex: Int,
+    diaIndex: Int,
+    dia: DiaRutina,
+    routineActive: Boolean,
+    authRepository: AuthRepository,
+    routineType: String?,
+    navigationActions: NavigationActions
+) {
+    var isChecked  = dia.hecho //Cambiar sistema de tiempo real de cambio en el check, deberia de hacerse por medio de observers y no recargando la pagina de rutina
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 6.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Checkbox(checked = isChecked, onCheckedChange = { isChecked = it })
+            Checkbox(checked = isChecked,
+                onCheckedChange = { checked ->
+                    //isChecked = it
+                    authRepository.marcarDiaComoHecho(rutinaType = routineType?:"", rutinaIndex = rutinaIndex, diaIndex = diaIndex, hecho = checked)
+                    navigationActions.navigateToRoutinePage()
+                                  },
+                enabled = routineActive
+            )
             Text(text = dia.dia, fontWeight = FontWeight.SemiBold)
         }
 

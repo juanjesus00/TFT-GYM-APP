@@ -11,6 +11,7 @@ import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 import routes.NavigationActions
 import android.widget.Toast
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FieldValue
@@ -36,6 +37,7 @@ import model.RutinaFirebase
 import model.User
 import model.Widget
 import org.json.JSONObject
+import viewModel.api.GymViewModel
 import java.net.HttpURLConnection
 import java.net.URL
 import java.text.SimpleDateFormat
@@ -47,7 +49,6 @@ import kotlin.toString
 
 class AuthRepository : ViewModel(){
     private val auth = FirebaseAuth.getInstance()
-
     private var _loading = MutableLiveData(false)
     val currentUser = FirebaseAuth.getInstance().currentUser
 
@@ -881,27 +882,113 @@ class AuthRepository : ViewModel(){
         }
     }
 
+    fun marcarDiaComoHecho(rutinaType: String, rutinaIndex:Int, diaIndex: Int, hecho: Boolean) {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val db = FirebaseFirestore.getInstance()
+        val rutinaRef = db.collection("Usuarios").document(uid).collection("Rutinas").document(rutinaType)
+        viewModelScope.launch {
+            rutinaRef.get().addOnSuccessListener { doc ->
+                val rutinasRaw = doc["rutinas"] as? List<Map<String, Any>> ?: emptyList()
+                val gson = Gson()
+
+                val rutinas = rutinasRaw.mapNotNull { item ->
+                    try {
+                        val activa = item["activa"] as? Boolean ?: false
+                        val fecha = item["fecha"] as? String ?: ""
+                        val contenidoJson = gson.toJson(item["contenido"])
+                        val contenido = gson.fromJson(
+                            contenidoJson,
+                            object : TypeToken<List<DiaRutina>>() {}.type
+                        ) as List<DiaRutina>
+
+                        RutinaFirebase(activa, fecha, contenido)
+                    } catch (e: Exception) {
+                        Log.e("Firestore", "Error al parsear rutina: ${e.message}")
+                        null
+                    }
+                }.toMutableList()
+
+                if (rutinaIndex !in rutinas.indices || diaIndex !in rutinas[rutinaIndex].contenido.indices) {
+                    Log.e("Firestore", "Índice fuera de rango")
+                    return@addOnSuccessListener
+                }
+
+                // Actualizar el campo "hecho"
+                val rutina = rutinas[rutinaIndex]
+                val contenidoActualizado = rutina.contenido.toMutableList()
+                contenidoActualizado[diaIndex] = contenidoActualizado[diaIndex].copy(hecho = hecho)
+                rutinas[rutinaIndex] = rutina.copy(contenido = contenidoActualizado)
+
+                // Convertir de nuevo a List<Map<String, Any>>
+                val rutinasActualizadas = rutinas.map { rutina ->
+                    mapOf(
+                        "activa" to rutina.activa,
+                        "fecha" to rutina.fecha,
+                        "contenido" to rutina.contenido.map { dia ->
+                            mapOf(
+                                "dia" to dia.dia,
+                                "ejercicios" to dia.ejercicios,
+                                "hecho" to dia.hecho
+                            )
+                        }
+                    )
+                }
+
+                rutinaRef.update("rutinas", rutinasActualizadas)
+                    .addOnSuccessListener {
+                        Log.d("Firestore", "Día actualizado correctamente")
+                    }
+                    .addOnFailureListener {
+                        Log.e("Firestore", "Error al actualizar día", it)
+                    }
+
+            }.addOnFailureListener {
+                Log.e("Firestore", "Error al leer rutina", it)
+            }
+        }
+    }
+
     private suspend fun saveHypertrophyRoutine(
         userRef: DocumentReference,
         contenido: List<Map<String, Any>>,
         editIndex: Int? = null
     ) {
         val hypertrophyRef = userRef.collection("Rutinas").document("Hipertrofia")
-
         val docSnapshot = hypertrophyRef.get().await()
         val existingRoutines = docSnapshot.get("rutinas") as? List<Map<String, Any>> ?: emptyList()
 
-        // Marcar todas como inactivas
-        val updatedRoutines = existingRoutines.map { it.toMutableMap().apply { this["activa"] = false } }.toMutableList()
+        val updatedRoutines = existingRoutines.map { rutina ->
+            val mutableRutina = rutina.toMutableMap()
+            mutableRutina["activa"] = false
+
+            // Reseteamos el campo "hecho" de cada día si lo tiene
+            val contenidoReseteado = (mutableRutina["contenido"] as? List<Map<String, Any>>)?.map { dia ->
+                dia.toMutableMap().apply {
+                    this["hecho"] = false
+                }
+            } ?: emptyList()
+
+            mutableRutina["contenido"] = contenidoReseteado
+            mutableRutina
+        }.toMutableList()
 
         val fechaActual = LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
 
-        // Agregar nueva rutina activa
+        // Nos aseguramos de que todos los días del contenido nuevo tengan el campo "hecho"
+        val contenidoConHecho = contenido.map { dia ->
+            dia.toMutableMap().apply {
+                if (!this.containsKey("hecho")) {
+                    this["hecho"] = false
+                }
+            }
+        }
+
         val newRoutine = mapOf(
-            "contenido" to contenido,
+            "contenido" to contenidoConHecho,
             "fecha" to fechaActual,
             "activa" to true
         )
+
         if (editIndex != null && editIndex < updatedRoutines.size) {
             updatedRoutines[editIndex] = newRoutine as MutableMap<String, Any>
         } else {
@@ -917,9 +1004,11 @@ class AuthRepository : ViewModel(){
         ejercicio: String?,
         contenido: List<Map<String, Any>>
     ) {
+        if (ejercicio == null) return
+
         val strengthRef = userRef.collection("Rutinas").document("Fuerza")
 
-        val exerciseKey = when (ejercicio?.lowercase()) {
+        val exerciseKey = when (ejercicio.lowercase()) {
             "press de banca", "bench press" -> "Press de Banca"
             "peso muerto", "deadlift" -> "Peso Muerto"
             "sentadilla", "squad" -> "Sentadilla"
@@ -929,19 +1018,42 @@ class AuthRepository : ViewModel(){
         val docSnapshot = strengthRef.get().await()
         val existingRoutines = docSnapshot.get(exerciseKey) as? List<Map<String, Any>> ?: emptyList()
 
-        val updatedRoutines = existingRoutines.map { it.toMutableMap().apply { this["activa"] = false } }
+        // Marcar todas las rutinas como inactivas y resetear el campo "hecho" de cada día
+        val updatedRoutines = existingRoutines.map { rutina ->
+            val mutableRutina = rutina.toMutableMap()
+            mutableRutina["activa"] = false
+
+            val contenidoReseteado = (mutableRutina["contenido"] as? List<Map<String, Any>>)?.map { dia ->
+                dia.toMutableMap().apply {
+                    this["hecho"] = false
+                }
+            } ?: emptyList()
+
+            mutableRutina["contenido"] = contenidoReseteado
+            mutableRutina
+        }.toMutableList()
 
         val fechaActual = LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
 
+        // Nos aseguramos de que todos los días del contenido nuevo tengan el campo "hecho"
+        val contenidoConHecho = contenido.map { dia ->
+            dia.toMutableMap().apply {
+                if (!this.containsKey("hecho")) {
+                    this["hecho"] = false
+                }
+            }
+        }
+
         val newRoutine = mapOf(
-            "contenido" to contenido,
+            "contenido" to contenidoConHecho,
             "fecha" to fechaActual,
             "activa" to true
         )
 
-        val allRoutines = updatedRoutines + newRoutine
+        // Añadir la nueva rutina activa al final de la lista
+        updatedRoutines.add(newRoutine as MutableMap<String, Any>)
 
-        strengthRef.set(mapOf(exerciseKey to allRoutines), SetOptions.merge()).await()
+        strengthRef.set(mapOf(exerciseKey to updatedRoutines), SetOptions.merge()).await()
     }
 
 

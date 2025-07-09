@@ -1,6 +1,8 @@
 package components.menu
 
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Icon
@@ -29,6 +31,7 @@ import model.RutinaFirebase
 import routes.NavigationActions
 import viewModel.api.GymViewModel
 
+@RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
 @Composable
 fun GetSettingMenu(
     navigationActions: NavigationActions,
