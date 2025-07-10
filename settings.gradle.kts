@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "TFT-GYM-APP"
+rootProject.name = "TFT-Gym-App"
 include(":app")
  

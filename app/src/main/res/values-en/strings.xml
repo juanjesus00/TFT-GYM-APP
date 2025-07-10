@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_name">TFT-Gym-App</string>
+    <string name="my_data">My Data</string>
+    <string name="favoriote_videos">Favourite Videos</string>
+    <string name="routines">Routines</string>
+    <string name="record">Activity History</string>
+    <string name="language">English</string>
+    <string name="analyze_new_video">Analyze new video</string>
+    <string name="new_routine">New routine</string>
+    <string name="login_welcome_text" translatable="false">Welcome back</string>
+    <string name="register_welcome_text" translatable="false">Create an Account</string>
+    <string name="login_button">Login</string>
+    <string name="register_button">Register</string>
+    <string name="separator"> or </string>
+    <string name="register_suggest">Don`t have an account yet?</string>
+    <string name="register_link" translatable="false">Register</string>
+    <string name="login_suggest" translatable="false">Already have an account?</string>
+    <string name="login_link" translatable="false">Login</string>
+    <string name="log_out" translatable="false">Log out</string>
+    <string name="delete_user" translatable="false">Delete User</string>
+    <string name="upload_video" translatable="false">Upload a Video</string>
+    <string name="dead_lift" translatable="false">Dead Lift</string>
+    <string name="bench_press" translatable="false">Bench Press</string>
+    <string name="squad" translatable="false">Squad</string>
+    <string name="user_name" translatable="false">User Name</string>
+    <string name="weight" translatable="false">Weight</string>
+    <string name="height" translatable="false">Height</string>
+    <string name="password" translatable="false">Password</string>
+    <string name="repeat_password" translatable="false">Repeat Password</string>
+    <string name="save_changes" translatable="false">Save Changes</string>
+    <string name="email" translatable="false">E-mail</string>
+    <string name="terms_of_use" translatable="false">By continuing you accept our Privacy Policy and Term of Use</string>
+    <string name="next" translatable="false">Continue</string>
+    <string name="cancel" translatable="false">Cancel</string>
+    <string name="accept" translatable="false">Accept</string>
+    <string name="gender" translatable="false">Gender</string>
+    <string name="male" translatable="false">Male</string>
+    <string name="female" translatable="false">Female</string>
+    <string name="birthdate" translatable="false">Birthdate</string>
+    <string name="analyze" translatable="false">Analyze</string>
+    <string name="edit" translatable="false">Edit</string>
+    <string name="delete" translatable="false">Delete</string>
+    <string name="date" translatable="false">Date</string>
+    <string name="repetitions" translatable="false">Repetitions</string>
+    <string name="rm" translatable="false">Maximum Repetition</string>
+    <string name="add" translatable="false">Add On</string>
+    <string name="CompletePrifile" translatable="false">Complete your profile to view more information</string>
+    <string name="personalRecords" translatable="false">Personal Records</string>
+    <string name="hypertrophy" translatable="false">Hypertrophy</string>
+    <string name="strength" translatable="false">Strength</string>
+    <string name="weeks" translatable="false">Weeks</string>
+    <string name="beginner" translatable="false">Beginner</string>
+    <string name="intermediate" translatable="false">Intermediate</string>
+    <string name="advanced" translatable="false">Advance</string>
+    <string name="days" translatable="false">Days</string>
+    <string name="filteredBy" translatable="false">Filtered by</string>
+    <string name="LAST_7_DAYS" translatable="false">Last_7_Days</string>
+    <string name="LAST_MONTH" translatable="false">Last_Month</string>
+    <string name="LAST_YEAR" translatable="false">Last_Year</string>
+    <string name="ALL" translatable="false">All</string>
+    <string name="time" translatable="false">Time</string>
+    <string name="routine" translatable="false">Routine</string>
+    <string name="exercise" translatable="false">Exercise</string>
+    <string name="userLevel" translatable="false">User level</string>
+    <string name="generateRoutine" translatable="false">Generate routine</string>
+    <string name="generatingRoutine" translatable="false">Generating routine</string>
+    <string name="activateRoutine" translatable="false">Activate Routine</string>
+</resources>
