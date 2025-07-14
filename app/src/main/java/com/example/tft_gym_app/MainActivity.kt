@@ -33,9 +33,20 @@ import uiPrincipal.MyComposeApp
 import viewModel.api.GymViewModel
 import viewModel.rm.RmCalculator
 import android.Manifest.permission.POST_NOTIFICATIONS
+import android.R.attr.id
+import android.app.PendingIntent
+import android.content.Intent
+import android.os.Environment
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.core.content.FileProvider
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import okhttp3.Dispatcher
+import java.io.File
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -89,6 +100,21 @@ class MainActivity : ComponentActivity() {
                                 )
                                 gymViewModel.actualizarWeight("")
                                 gymViewModel.actualizarSelectedText("")
+
+
+                                gymViewModel.downloadProcessedVideo(
+                                    context = this@MainActivity,
+                                    analysisId = gymViewModel.analyzeResponse.value,
+                                    onSuccess = {
+                                        Log.d("MainActivity", "Video descargado correctamente.")
+                                        showDownloadNotification(context = this@MainActivity)
+                                         // Puedes mostrar una notificación aquí
+                                    },
+                                    onError = { e ->
+                                        Log.e("MainActivity", "Error al descargar el video: ${e.message}")
+                                    }
+                                )
+
                                 gymViewModel.clearResponses()
 
                             } catch (e: Exception) {
@@ -171,6 +197,25 @@ class MainActivity : ComponentActivity() {
 
             }
         }
+        createNotificationChannel(this@MainActivity)
+
+
+    }
+    private fun createNotificationChannel(context: Context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channelId = "download_channel"
+            val channelName = "Descargas de videos"
+            val channelDescription = "Notificaciones para descargas completadas"
+            val importance = NotificationManager.IMPORTANCE_HIGH
+
+            val channel = NotificationChannel(channelId, channelName, importance).apply {
+                description = channelDescription
+            }
+
+            val notificationManager: NotificationManager =
+                context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
     }
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -193,6 +238,29 @@ class MainActivity : ComponentActivity() {
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
 
         with(NotificationManagerCompat.from(this)) {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+                ContextCompat.checkSelfPermission(context, POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+            ) {
+                with(NotificationManagerCompat.from(context)) {
+                    notify(1001, builder.build())
+                }
+            } else {
+                Log.w("Notificación", "Permiso POST_NOTIFICATIONS denegado. No se puede mostrar la notificación.")
+            }
+        }
+    }
+
+    private fun showDownloadNotification(context: Context) {
+
+
+        val builder = NotificationCompat.Builder(context, "download_channel")
+            .setSmallIcon(R.drawable.video)
+            .setContentTitle ("Video descargado")
+            .setContentText("El video ha sido descargado correctamente")
+            .setAutoCancel(true)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+
+        with(NotificationManagerCompat.from(context)) {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
                 ContextCompat.checkSelfPermission(context, POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
             ) {

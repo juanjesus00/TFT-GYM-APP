@@ -1,7 +1,14 @@
 package viewModel.api
 
+import android.annotation.SuppressLint
+import android.content.ContentValues
+import android.content.Context
 import android.net.Uri
+import android.os.Build
+import android.os.Environment
+import android.provider.MediaStore
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -13,11 +20,13 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import api.AnalyzeResponse
 import api.ResultResponse
 import firebase.auth.AuthRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import model.RutinaFirebase
 import network.ApiClient
 import okhttp3.MediaType.Companion.toMediaType
@@ -25,6 +34,9 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.Response
 import viewModel.rm.RepetitionAnalyzer
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
 import java.time.LocalDate
 import javax.inject.Inject
 
@@ -198,6 +210,66 @@ class GymViewModel: ViewModel(){
             }
         }
     }
+
+    @SuppressLint("ObsoleteSdkInt")
+    @RequiresApi(Build.VERSION_CODES.Q)
+    fun downloadProcessedVideo(
+        context: Context,
+        analysisId: String,
+        onSuccess: () -> Unit,
+        onError: (Exception) -> Unit
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val response = ApiClient.apiService.downloadProcessedVideo(id = analysisId)
+                if (response.isSuccessful) {
+                    response.body()?.let { body ->
+
+                        val fileName = "processed_$analysisId.mp4"
+                        val videoBytes = body.bytes()
+
+                        val values = ContentValues().apply {
+                            put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
+                            put(MediaStore.MediaColumns.MIME_TYPE, "video/mp4")
+                            put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
+                            put(MediaStore.MediaColumns.IS_PENDING, 1)
+                        }
+
+                        val resolver = context.contentResolver
+                        val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values)
+
+                        if (uri != null) {
+                            resolver.openOutputStream(uri)?.use { outputStream ->
+                                outputStream.write(videoBytes)
+                                outputStream.flush()
+                            }
+
+                            // Marcar como no pendiente para que sea visible
+                            values.clear()
+                            values.put(MediaStore.MediaColumns.IS_PENDING, 0)
+                            resolver.update(uri, values, null, null)
+
+                            Log.d("Download", "Video guardado correctamente en: $uri")
+                            withContext(Dispatchers.Main) {
+                                onSuccess()
+                            }
+                        } else {
+                            throw IOException("No se pudo crear el archivo en MediaStore")
+                        }
+
+                    } ?: throw IOException("El cuerpo de la respuesta está vacío")
+                } else {
+                    throw IOException("Fallo al descargar el video: ${response.code()}")
+                }
+            } catch (e: Exception) {
+                Log.e("Download", "Error al descargar el video: ${e.message}")
+                withContext(Dispatchers.Main) {
+                    onError(e)
+                }
+            }
+        }
+    }
+
 
     private fun stopPolling() {
         pollingJob?.cancel()
