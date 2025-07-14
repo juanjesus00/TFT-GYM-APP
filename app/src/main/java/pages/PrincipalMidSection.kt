@@ -71,7 +71,7 @@ fun GetPrincipalMidSection(
             verticalArrangement = Arrangement.spacedBy(30.dp)
         ){
             widgetList.forEach { widget ->
-                Box(widget = widget)
+                Box(widget = widget, navigationActions =  navigationActions)
             }
 
             if(FirebaseAuth.getInstance().currentUser != null) GetBox(onIconClick = {selectedIndex ->

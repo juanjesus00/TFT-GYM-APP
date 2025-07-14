@@ -29,6 +29,7 @@ fun GetOptionBoxMenu(
     viewModelBox: ViewModelBox = viewModel()
 ){
     val exerciseList = listOf("bench_press", "dead_lift", "squad")
+    val routineList = listOf("strength", "hypertrophy")
     if(isMenuVisible){
         Dialog(onDismissRequest = onDismiss) {
             Column(
@@ -55,9 +56,15 @@ fun GetOptionBoxMenu(
 
                     }
                     1 -> {
-                        Text(text = "Elige un ejercicio")
-                        exerciseList.forEach { exercise ->
-                            getStringByName(LocalContext.current, exercise)?.let{
+                        Text(text = "Elige el tipo de rutina")
+                        routineList.forEach { routine ->
+                            getStringByName(LocalContext.current, routine)?.let{
+//                                when(routine){
+//                                    "strength" -> {onDismiss.invoke()}
+//                                    "hypertrophy" -> {
+//
+//                                    }
+//                                }
                                 GetOptionButton(
                                     text = it,
                                     onClick = {

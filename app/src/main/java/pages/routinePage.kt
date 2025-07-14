@@ -99,8 +99,25 @@ fun GetRoutinePage(
             )
 
         }else if(routineStrength.isNotEmpty()){
-            /*routineStrength.forEachIndexed { index, rutina ->
-                RutinaCard(rutina = rutina, index = index, initiallyExpanded = rutina.activa, navController, navigationActions)
+            routineStrength.forEachIndexed { index, rutina ->
+                Row (
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(20.dp),
+
+                    ){
+                    RutinaCard(rutina = rutina, index = index, initiallyExpanded = rutina.activa, navController, navigationActions, routineType = routineType)
+                    Box(
+                        modifier = Modifier.fillMaxSize()
+                            .padding(top = 8.dp),
+                        contentAlignment = Alignment.Center,
+                    )
+                    {
+                        GetSettingMenu(navigationActions, navController, index, routine = routineHypertrophy, exercise = routineType)
+                    }
+
+                }
+
             }
             getStringByName(context, "add")?.let{
                 GetOptionButton(
@@ -109,7 +126,17 @@ fun GetRoutinePage(
                         editableMenu = !editableMenu
                     }
                 )
-            }*/
+            }
+
+
+            AddRoutineDialog(
+                isVisible = editableMenu,
+                onDismiss = {editableMenu = false},
+                tipo = routineType?:"",
+                ejercicio = "",
+                navigationActions = navigationActions,
+                navController = navController
+            )
         }
 
     }

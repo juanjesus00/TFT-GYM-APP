@@ -917,6 +917,14 @@ class AuthRepository : ViewModel(){
                 val rutina = rutinas[rutinaIndex]
                 val contenidoActualizado = rutina.contenido.toMutableList()
                 contenidoActualizado[diaIndex] = contenidoActualizado[diaIndex].copy(hecho = hecho)
+
+                val todosHechos = contenidoActualizado.all { it.hecho }
+
+                if (todosHechos) {
+                    for (i in contenidoActualizado.indices) {
+                        contenidoActualizado[i] = contenidoActualizado[i].copy(hecho = false)
+                    }
+                }
                 rutinas[rutinaIndex] = rutina.copy(contenido = contenidoActualizado)
 
                 // Convertir de nuevo a List<Map<String, Any>>
@@ -1098,7 +1106,7 @@ class AuthRepository : ViewModel(){
     }
 
     fun getRutinasFuerza(
-        onResult: (Map<String, List<RutinaFirebase>>) -> Unit
+        onResult: (List<RutinaFirebase>) -> Unit
     ) {
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
 
@@ -1106,38 +1114,34 @@ class AuthRepository : ViewModel(){
             .collection("Usuarios")
             .document(userId)
             .collection("Rutinas")
-            .document("fuerza")
+            .document("Fuerza")
             .get()
             .addOnSuccessListener { doc ->
+                val rutinasRaw = doc["rutinas"] as? List<Map<String, Any>> ?: emptyList()
                 val gson = Gson()
-                val claves = listOf("Press de banca", "Peso Muerto", "Sentadilla")
-                val resultado = mutableMapOf<String, List<RutinaFirebase>>()
 
-                claves.forEach { clave ->
-                    val rutinasRaw = doc[clave] as? List<Map<String, Any>> ?: return@forEach
-                    val rutinas = rutinasRaw.mapNotNull { item ->
-                        try {
-                            val activa = item["activa"] as? Boolean ?: false
-                            val fecha = item["fecha"] as? String ?: ""
-                            val contenidoJson = gson.toJson(item["contenido"])
-                            val contenido = gson.fromJson(
-                                contenidoJson,
-                                object : TypeToken<List<DiaRutina>>() {}.type
-                            ) as List<DiaRutina>
-                            RutinaFirebase(activa, fecha, contenido)
-                        } catch (e: Exception) {
-                            Log.e("Firebase", "Error parseando $clave: ${e.message}")
-                            null
-                        }
+                val rutinas = rutinasRaw.mapNotNull { item ->
+                    try {
+                        val activa = item["activa"] as? Boolean ?: false
+                        val fecha = item["fecha"] as? String ?: ""
+                        val contenidoJson = gson.toJson(item["contenido"])
+                        val contenido = gson.fromJson(
+                            contenidoJson,
+                            object : TypeToken<List<DiaRutina>>() {}.type
+                        ) as List<DiaRutina>
+
+                        RutinaFirebase(activa, fecha, contenido)
+                    } catch (e: Exception) {
+                        Log.e("Firebase", "Error al parsear rutina: ${e.message}")
+                        null
                     }
-                    resultado[clave] = rutinas
                 }
 
-                onResult(resultado)
+                onResult(rutinas)
             }
             .addOnFailureListener {
-                Log.e("Firebase", "Error al obtener rutinas de fuerza: ${it.message}")
-                onResult(emptyMap())
+                Log.e("Firebase", "Error al obtener rutinas de hipertrofia: ${it.message}")
+                onResult(emptyList())
             }
     }
 

@@ -53,7 +53,7 @@ class GymViewModel: ViewModel(){
         private set
 
     var rutinasHipertrofia by mutableStateOf<List<RutinaFirebase>>(emptyList())
-    var rutinasFuerza by mutableStateOf<Map<String, List<RutinaFirebase>>>(emptyMap())
+    var rutinasFuerza by mutableStateOf<List<RutinaFirebase>>(emptyList())
 
     private val _weight = MutableLiveData<String>()
     val observeWeight: LiveData<String> = _weight

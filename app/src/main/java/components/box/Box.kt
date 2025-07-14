@@ -3,6 +3,7 @@ package components.box
 import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
@@ -15,7 +16,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -35,14 +35,17 @@ import components.chart.SmallHistoryChart
 import components.menu.GetOptionMenu
 import components.newbox.ViewModelBox
 import components.personalRecord.GetPersonalRecordWidget
+import components.routineComponents.GetHroutineActiveWidget
 import firebase.auth.AuthRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import model.Widget
+import routes.NavigationActions
+import viewModel.api.GymViewModel
 
 
 @Composable
-fun Box(authRepository: AuthRepository = viewModel(), widget: Widget, viewModel: ViewModelBox = viewModel()){
+fun Box(authRepository: AuthRepository = viewModel(), widget: Widget, navigationActions: NavigationActions,viewModel: ViewModelBox = viewModel(), gymViewModel: GymViewModel = viewModel()){
     val gradient = Brush.linearGradient(
         colors = listOf(darkDetailColor, darkDetailColor),
         start = Offset(20f, 10f),
@@ -63,10 +66,11 @@ fun Box(authRepository: AuthRepository = viewModel(), widget: Widget, viewModel:
 
     var listExercise by remember { mutableStateOf(emptyMap<String, Float>()) }
     var listLevelRare by remember { mutableStateOf(emptyMap<String, Map<String, Any>>()) }
+    var listRoutineHypertrophy = gymViewModel.rutinasHipertrofia
     if(widget.type == "pr"){
         LaunchedEffect(Unit) {
             authRepository.getRMUser(onResult = { value ->
-                value?.let{ listExercise = it}
+                value?.let{listExercise = it}
             })
             Log.d("Personal Records", "$listExercise")
 
@@ -76,6 +80,13 @@ fun Box(authRepository: AuthRepository = viewModel(), widget: Widget, viewModel:
                 }
             }
         }
+    }
+
+    if(widget.type == "calendario"){
+        LaunchedEffect(Unit) {
+            gymViewModel.cargarRutinas(tipo = "Hipertrofia")
+        }
+
     }
 
 
@@ -132,6 +143,9 @@ fun Box(authRepository: AuthRepository = viewModel(), widget: Widget, viewModel:
             }
             "pr" -> {
                 GetPersonalRecordWidget(widget = widget, listExercise = listExercise, listLevelRare = listLevelRare)
+            }
+            "calendario" ->{
+                GetHroutineActiveWidget(widget = widget, hipertrophyRoutineList = listRoutineHypertrophy, authRepository, navigationActions)
             }
         }
 

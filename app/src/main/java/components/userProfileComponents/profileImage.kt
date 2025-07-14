@@ -38,6 +38,13 @@ import android.Manifest.permission.READ_EXTERNAL_STORAGE
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import firebase.auth.AuthRepository
@@ -47,18 +54,24 @@ fun GetProfileImage(selectImageUri: Uri?, onEditClick: ()-> Unit, imageSize: Int
     val context = LocalContext.current
     val currentUser = authViewModel.currentUser
     val isVerified by authViewModel.isEmailVerified.observeAsState(false)
-
+    val gradient = Brush.linearGradient(
+        colors = listOf(Color(0xFFD78323), Color(0xFF27DD03)),
+        start = Offset(25f, 25f),
+        end = Offset(100f, 100f)
+    )
 
     var profileImageUrl by remember { mutableStateOf<String?>(null) }
-
+    var userName by remember { mutableStateOf("") }
     LaunchedEffect(Unit) {
         authViewModel.checkIfEmailVerified()
+
 
     }
     LaunchedEffect(currentUser, isVerified) {
         if (currentUser != null && isVerified) {
             authViewModel.getInfoUser { url ->
                 profileImageUrl = url?.get("profileImageUrl") as? String
+                userName = url?.get("userName") as String
             }
         }
     }
@@ -120,6 +133,12 @@ fun GetProfileImage(selectImageUri: Uri?, onEditClick: ()-> Unit, imageSize: Int
                     }
             )
         }
-        Text(text = "example text")
+        Text(
+            buildAnnotatedString {
+                withStyle(style = SpanStyle(brush = gradient, fontSize = 30.sp, fontWeight = FontWeight.Bold)) {
+                    append(userName)
+                }
+            }
+        )
     }
 }

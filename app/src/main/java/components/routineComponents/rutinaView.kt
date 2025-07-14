@@ -94,7 +94,7 @@ fun RutinaCard(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 rutina.contenido.forEachIndexed { diaIndex, dia ->
-                    DiaRutinaItem(rutinaIndex = index, diaIndex = diaIndex, dia = dia, routineActive = rutina.activa, authRepository, getStringByName(context, routineType ?: ""), navigationActions)
+                    DiaRutinaItem(rutinaIndex = index, diaIndex = diaIndex, dia = dia, routineActive = rutina.activa, authRepository, getStringByName(context, routineType ?: ""), onAction = {navigationActions.navigateToRoutinePage()})
                     Divider(color = Color.LightGray, thickness = 1.dp)
                 }
             }
@@ -112,7 +112,7 @@ fun DiaRutinaItem(
     routineActive: Boolean,
     authRepository: AuthRepository,
     routineType: String?,
-    navigationActions: NavigationActions
+    onAction:() -> Unit
 ) {
     var isChecked  = dia.hecho //Cambiar sistema de tiempo real de cambio en el check, deberia de hacerse por medio de observers y no recargando la pagina de rutina
     Column(
@@ -125,7 +125,7 @@ fun DiaRutinaItem(
                 onCheckedChange = { checked ->
                     //isChecked = it
                     authRepository.marcarDiaComoHecho(rutinaType = routineType?:"", rutinaIndex = rutinaIndex, diaIndex = diaIndex, hecho = checked)
-                    navigationActions.navigateToRoutinePage()
+                    onAction.invoke()
                                   },
                 enabled = routineActive
             )
