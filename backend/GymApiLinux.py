@@ -113,6 +113,11 @@ def analyze_video():
     if not allowed_file(file.filename):
         return jsonify({"error": "Invalid file type"}), 415
 
+    exercise = request.form.get("exercise")
+    
+    if not exercise:
+        return jsonify({"error" : "Exercise not provided"}), 400
+    
     analysis_id = str(uuid.uuid4())
     filename = secure_filename(f"{analysis_id}_{file.filename}")
     save_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
@@ -120,13 +125,15 @@ def analyze_video():
 
     task = {
         "analysis_id": analysis_id,
-        "filename": filename
+        "filename": filename,
+        "exercise": exercise
     }
 
     save_task_to_queue(task)
 
     return jsonify({
         "analysis_id": analysis_id,
+        "exercise": exercise,
         "status": "queued",
         "message": "Video recibido. En espera de análisis."
     }), 202

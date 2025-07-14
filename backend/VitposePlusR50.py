@@ -260,7 +260,7 @@ def pose_results_to_coco(image, pose_results, image_id=1, annotation_id=1):
     return coco_data
  
             
-def process_video(input_path, output_path=None, target_fps=30, display_scale=100, progress_path = None):
+def process_video(input_path, output_path=None, target_fps=30, display_scale=100, progress_path = None, exercise = None):
     
     total_reps = 0
     reps_duration = []
@@ -381,11 +381,27 @@ def process_video(input_path, output_path=None, target_fps=30, display_scale=100
             smoothed_right_elbow = right_elbow_tracker.update(right_elbow_angle)
             
             # calculate reps
-            if smoothed_left_elbow is not None and smoothed_right_elbow is not None:
+            if exercise == 'Sentadilla':
+                joint_angles = [smoothed_left_knee, smoothed_right_knee]
+                extension_angle = 165
+                contraction_angle = 85
+            elif exercise == 'Peso Muerto':
+                joint_angles = [smoothed_left_knee, smoothed_right_knee]
+                extension_angle = 165
+                contraction_angle = 135
+            elif exercise == 'Press de Banca':
+                joint_angles = [smoothed_left_elbow, smoothed_right_elbow]
+                extension_angle = 135
+                contraction_angle = 50
+
+            # Verificar que ambos ángulos existen
+            if all(a is not None for a in joint_angles):
                 repsCounter.calculate_repetition(
-                np.array([smoothed_left_elbow, smoothed_right_elbow]),
-                135, 50, current_frame
-            )
+                    np.array(joint_angles),
+                    extension_angle,
+                    contraction_angle,
+                    current_frame
+                )
             
             # Dibujar texto con los ángulos
             font = cv2.FONT_HERSHEY_SIMPLEX

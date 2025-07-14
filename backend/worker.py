@@ -52,9 +52,10 @@ while True:
 
         task = tasks[0]                        # procesa una por vuelta
         aid  = task["analysis_id"]
-        fname= task["filename"]
+        fname = task["filename"]
+        exercise = task["exercise"]
 
-        print(f"[WORKER] Procesando {aid}")
+        print(f"[WORKER] Procesando {aid}, para ejercicio {exercise}")
 
         # descarga vídeo original
         in_path = os.path.join(TMP_DIR, fname)
@@ -75,7 +76,7 @@ while True:
 
         def run_vitpose():
             result_holder['data'] = process_video(
-                in_path, out_path, 30, 100, progress_txt
+                in_path, out_path, 30, 100, progress_txt, exercise
             )
 
         t = threading.Thread(target=run_vitpose, daemon=True)
