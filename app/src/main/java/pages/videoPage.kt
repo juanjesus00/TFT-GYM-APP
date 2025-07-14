@@ -71,7 +71,7 @@ fun GetVideoPage(
         getStringByName(context, name)
     }
     var expanded by remember { mutableStateOf(false) }
-    val selectedText = gymViewModel.selectedText //by remember { mutableStateOf("") }
+    val selectedText = gymViewModel.selectedText
     val weight = gymViewModel.weight
     val selectVideoUri = gymViewModel.selectVideoUri
 
@@ -185,7 +185,7 @@ fun GetVideoPage(
         getStringByName(LocalContext.current, "analyze")?.let{
             GetDefaultButton(text = it, onClick = {
                 videoBody?.let {
-                    gymViewModel.uploadVideo(it)
+                    gymViewModel.uploadVideo(videoPart = it, exercise = selectedText)
                     videoBody = null
                     gymViewModel.actualizarSelectedVideoUri(null)
                     alreadySaved = false

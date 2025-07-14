@@ -20,7 +20,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import model.RutinaFirebase
 import network.ApiClient
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.Response
 import viewModel.rm.RepetitionAnalyzer
 import java.time.LocalDate
@@ -92,12 +94,13 @@ class GymViewModel: ViewModel(){
     }
 
     fun uploadVideo(
-        videoPart: MultipartBody.Part
+        videoPart: MultipartBody.Part,
+        exercise: String
     ) {
         viewModelScope.launch {
             try {
                 _loading.value = true
-                val response: Response<AnalyzeResponse> = ApiClient.apiService.analyzeVideo(videoPart)
+                val response: Response<AnalyzeResponse> = ApiClient.apiService.analyzeVideo(videoPart, exercise = exercise.toRequestBody("text/plain".toMediaType()))
                 if (response.isSuccessful) {
                     val body = response.body()
                     response.body()?.let {

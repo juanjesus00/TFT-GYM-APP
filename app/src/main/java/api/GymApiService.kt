@@ -1,6 +1,8 @@
 package api
 
 import okhttp3.MultipartBody
+import okhttp3.Request
+import okhttp3.RequestBody
 import retrofit2.Response
 
 import retrofit2.http.GET
@@ -13,7 +15,8 @@ interface GymApiService {
     @Multipart
     @POST("analyze")
     suspend fun analyzeVideo(
-        @Part video: MultipartBody.Part
+        @Part video: MultipartBody.Part,
+        @Part("exercise") exercise: RequestBody
     ): Response<AnalyzeResponse>
 
     @GET("results/{id}")
